@@ -2,11 +2,8 @@
 =            Configuration            =
 =====================================*/
 
-var config = {
-	file: './config',
-	serverPort: 8080,
-	database: './db'
-};
+var fs = require('fs');
+var config = ini.parse(fs.readFileSync('./config', 'utf-8'));
 
 /*-----  End of Configuration  ------*/
 
@@ -18,13 +15,12 @@ var express = require('express');
 var app = express();
 var exec = require('child_process').exec;
 var md5 = require('MD5');
-var fs = require('fs');
 var ini = require('ini');
 var bodyParser = require('body-parser');
 var marked = require('marked');
-var subscriptions = require('./lib/subscriptions')(config.database);
-var globalConfig = ini.parse(fs.readFileSync(config.file, 'utf-8'));
-var mailman = require('./lib/mailman')(globalConfig.MAILGUN_KEY, globalConfig.MAILGUN_DOMAIN, globalConfig.MAILGUN_FROM);
+var subscriptions = require('./lib/subscriptions')(config.SUBSCRIPTIONS_DATABASE);
+
+var mailman = require('./lib/mailman')(config.MAILGUN_KEY, config.MAILGUN_DOMAIN, config.MAILGUN_FROM);
 var helpers = require('./lib/helpers');
 
 /*-----  End of Module loading  ------*/
@@ -181,7 +177,7 @@ app.get('/unsubscribe/:id', function (req, res) {
 *
 **/
 
-var server = app.listen(config.serverPort, function () {
+var server = app.listen(config.SERVER_PORT, function () {
 	var host = server.address().address;
 	var port = server.address().port;
 
