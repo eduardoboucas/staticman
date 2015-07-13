@@ -3,7 +3,7 @@
 =====================================*/
 
 var fs = require('fs');
-var config = ini.parse(fs.readFileSync('./config', 'utf-8'));
+var config = require('ini').parse(fs.readFileSync('./config', 'utf-8'));
 
 /*-----  End of Configuration  ------*/
 
@@ -15,11 +15,9 @@ var express = require('express');
 var app = express();
 var exec = require('child_process').exec;
 var md5 = require('MD5');
-var ini = require('ini');
 var bodyParser = require('body-parser');
 var marked = require('marked');
 var subscriptions = require('./lib/subscriptions')(config.SUBSCRIPTIONS_DATABASE);
-
 var mailman = require('./lib/mailman')(config.MAILGUN_KEY, config.MAILGUN_DOMAIN, config.MAILGUN_FROM);
 var helpers = require('./lib/helpers');
 
