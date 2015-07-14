@@ -139,10 +139,26 @@ app.post('/comments', function (req, res) {
 				}
 			});
 		});
+
+		// Notifying admin if that entry exists in the config and the admin is not the commenter
+		if (('SUBSCRIPTIONS_NOTIFY_ALL' in config) && (config.SUBSCRIPTIONS_NOTIFY_ALL !== parsedData['email'])) {
+			var data = {
+				title: parsedData['post-title'],
+				link: parsedData['post-url'],
+				commenter: parsedData['name']
+			};
+
+			mailman.send('admin-new-comment', config.SUBSCRIPTIONS_NOTIFY_ALL, data, function (body, error) {
+				if (error) {
+					console.log('[!] Error sending email: ' + error);
+				}
+			});			
+		}
 	}, [parsedData['email']]);
 
 	// Subscribe the commenter if necessary
-	if (req.body['subscribe'] === 'subscribe') {
+	if ((req.body['subscribe'] === 'subscribe') && 
+		!(('SUBSCRIPTIONS_NOTIFY_ALL' in config) && (config.SUBSCRIPTIONS_NOTIFY_ALL === parsedData['email']))) {
 		var newSubscriber = {
 			name: parsedData['name'],
 			email: parsedData['email'],
