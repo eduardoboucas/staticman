@@ -3,7 +3,8 @@
 =====================================*/
 
 var fs = require('fs');
-var config = require('ini').parse(fs.readFileSync('./config', 'utf-8'));
+var configFilePath = './config';
+var config = require('ini').parse(fs.readFileSync(configFilePath, 'utf-8'));
 
 /*-----  End of Configuration  ------*/
 
@@ -97,12 +98,12 @@ app.post('/comments', function (req, res) {
 
 	// Prepare shell command
 	var shellCommand = './new-comment.sh';
-	shellCommand += ' --config \'' + config.file + '\'';
+	shellCommand += ' --config \'' + configFilePath + '\'';
 	shellCommand += ' --name \'' + parsedData['name'] + '\'';
 	shellCommand += ' --date \'' + helpers.sanitize(date) + '\'';
 	shellCommand += ' --hash \'' + emailHash + '\'';
 	shellCommand += ' --post \'' + parsedData['post'] + '\'';
-	shellCommand += ' --message \'' + helpers.sanitize(message) + '\'';	
+	shellCommand += ' --message \'' + parsedData['message'] + '\'';	
 	shellCommand += ' --commit-message \'' + config.GIT_COMMIT_MESSAGE + '\'';
 
 	exec(shellCommand, function (error, stdout, stderr) { 
