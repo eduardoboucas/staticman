@@ -103,6 +103,7 @@ app.post('/comments', function (req, res) {
 	shellCommand += ' --hash \'' + emailHash + '\'';
 	shellCommand += ' --post \'' + parsedData['post'] + '\'';
 	shellCommand += ' --message \'' + helpers.sanitize(message) + '\'';	
+	shellCommand += ' --commit-message \'' + config.GIT_COMMIT_MESSAGE + '\'';
 
 	exec(shellCommand, function (error, stdout, stderr) { 
 		if (error) {
