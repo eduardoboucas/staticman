@@ -20,6 +20,10 @@ Other approaches include the actual comments with the rest of the data, but requ
 
 There was [a previous iteration of this project](https://github.com/eduardoboucas/jekyll-discuss-php) written in PHP, which I'll no longer maintain.
 
+### Disclaimer
+
+This project is still pretty much at a point where it's made to solve my specific needs — a commenting system to use with Jekyll, GitHub Pages and Mailgun. I'm always happy to make it as generic and flexible as possible, so please feel free to change it in any way you see fit and submit a pull request.
+
 ## Installation
 
 1. Install via NPM
@@ -105,4 +109,41 @@ On the Jekyll side, showing comments for a post can be done simply by iterating 
 		</div>
 	{% endfor %}
 {% endif %}
+```
+
+## Email notifications
+
+**Jekyll Discuss** can be used with [Mailgun](http://www.mailgun.com/) to send email notifications, allowing commenters to subscribe to new comments on any post. To do this, fill in the Mailgun related fields in the configuration file and edit the email templates that ship with the repo.
+
+Here's an example (`email-templates/new-comment.template.html`):
+
+```html
+<!-- New comment on Eduardo saying things -->
+Hi {{ subscriber }},<br><br>
+
+{{ commenter }} just commented on the post titled "{{ title }}" you subscribed to on <a href="https://eduardoboucas.com/blog">Eduardo saying things</a>.<br><br>
+
+Click <a href="https://eduardoboucas.com{{ link }}">here</a> to see the comment or <a href="https://aws.bouc.as/jekyll-discuss/unsubscribe/{{ unsubscribe }}">unsubscribe</a> from future notifications.<br><br>
+
+Best,<br>
+Eduardo
+```
+
+The first line of the file, wrapped inside HTML comments, will be used as the subject of the email messages that use this template. The `{{ subscriber }}`, `{{ commenter }}`, `{{ link }}` and `{{ unsubscribe }}` placeholders will be automatically replaced by the values passed by the `subscriptions` module:
+
+```javascript
+var data = {
+	title: parsedData['post-title'],
+	slug: parsedData['post-slug'],
+	link: parsedData['post-url'],
+	subscriber: subscription.name,
+	commenter: parsedData['name'],
+	unsubscribe: subscription._id
+};
+
+mailman.send('new-comment', subscription.email, data, function (body, error) {
+	if (error) {
+		console.log('[!] Error sending email: ' + error);
+	}
+});
 ```
