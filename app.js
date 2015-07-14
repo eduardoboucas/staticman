@@ -13,6 +13,8 @@ var config = require('ini').parse(fs.readFileSync('./config', 'utf-8'));
 
 var express = require('express');
 var app = express();
+var http = require('http');
+var https = require('https');
 var exec = require('child_process').exec;
 var md5 = require('MD5');
 var bodyParser = require('body-parser');
@@ -175,9 +177,29 @@ app.get('/unsubscribe/:id', function (req, res) {
 *
 **/
 
-var server = app.listen(config.SERVER_PORT, function () {
+/*var server = app.listen(config.SERVER_PORT, function () {
 	var host = server.address().address;
 	var port = server.address().port;
 
 	console.log('[*] jekyll-discuss listening at http://%s:%s', host, port);
+});*/
+
+var httpServer = http.createServer(app).listen(config.SERVER_HTTP_PORT, function () {
+	var host = server.address().address;
+	var port = server.address().port;
+
+	console.log('[*] jekyll-discuss listening at http://%s:%s', host, port);	
 });
+
+if (('SERVER_HTTPS_KEY' in config) && ('SERVER_HTTPS_CRT' in config)) {
+	var credentials = {
+		key: fs.readFileSync(config.SERVER_HTTPS_KEY, 'utf8'),
+		cert: fs.readFileSync(config.SERVER_HTTPS_CRT, 'utf8')
+	};
+	var httpsServer = https.createServer(credentials, app).listen(config.SERVER_HTTPS_PORT, function () {
+		var host = server.address().address;
+		var port = server.address().port;
+
+		console.log('[*] jekyll-discuss listening at http://%s:%s', host, port);		
+	});
+}
