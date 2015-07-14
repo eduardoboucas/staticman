@@ -1,13 +1,17 @@
 {
-  "name": "expressjs",
+  "name": "jekyll-discuss",
   "version": "1.0.0",
-  "description": "test",
+  "description": "A commenting system for Jekyll",
   "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "author": {
+    "name": "Eduardo Boucas",
+    "email": "mail@eduardoboucas.com"
   },
-  "author": "",
-  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eduardoboucas/jekyll-discuss.git"
+  },  
+  "license": "MIT",
   "dependencies": {
     "MD5": "^1.2.2",
     "body-parser": "^1.13.2",
