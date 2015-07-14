@@ -185,8 +185,8 @@ app.get('/unsubscribe/:id', function (req, res) {
 });*/
 
 var httpServer = http.createServer(app).listen(config.SERVER_HTTP_PORT, function () {
-	var host = server.address().address;
-	var port = server.address().port;
+	var host = httpServer.address().address;
+	var port = httpServer.address().port;
 
 	console.log('[*] jekyll-discuss listening at http://%s:%s', host, port);	
 });
@@ -200,10 +200,10 @@ if (('SERVER_HTTPS_KEY' in config) && ('SERVER_HTTPS_CRT' in config)) {
 	if ('SERVER_HTTPS_PASSPHRASE' in config) {
 		credentials.passphrase = config.SERVER_HTTPS_PASSPHRASE;
 	}
-	
+
 	var httpsServer = https.createServer(credentials, app).listen(config.SERVER_HTTPS_PORT, function () {
-		var host = server.address().address;
-		var port = server.address().port;
+		var host = httpsServer.address().address;
+		var port = httpsServer.address().port;
 
 		console.log('[*] jekyll-discuss listening at http://%s:%s', host, port);		
 	});
