@@ -48,7 +48,6 @@ marked.setOptions({
 
 /*-----  End of Module configuration  ------*/
 
-
 /**
 *
 * Endpoint: new comment
@@ -102,8 +101,8 @@ app.post('/comments', function (req, res) {
 	shellCommand += ' --name \'' + parsedData['name'] + '\'';
 	shellCommand += ' --date \'' + helpers.sanitize(date) + '\'';
 	shellCommand += ' --hash \'' + emailHash + '\'';
-	shellCommand += ' --post \'' + parsedData['post'] + '\'';
-	shellCommand += ' --message \'' + parsedData['message'] + '\'';	
+	shellCommand += ' --post \'' + parsedData['post-slug'] + '\'';
+	shellCommand += ' --message \'' + helpers.parseParameter(message, helpers.sanitize) + '\'';	
 	shellCommand += ' --commit-message \'' + config.GIT_COMMIT_MESSAGE + '\'';
 
 	exec(shellCommand, function (error, stdout, stderr) { 
@@ -184,7 +183,7 @@ var httpServer = http.createServer(app).listen(config.SERVER_HTTP_PORT, function
 	var host = httpServer.address().address;
 	var port = httpServer.address().port;
 
-	console.log('[*] jekyll-discuss listening at http://%s:%s', host, port);	
+	console.log('[*] jekyll-discuss HTTP listening at http://%s:%s', host, port);	
 });
 
 if (('SERVER_HTTPS_KEY' in config) && ('SERVER_HTTPS_CRT' in config)) {
@@ -201,6 +200,6 @@ if (('SERVER_HTTPS_KEY' in config) && ('SERVER_HTTPS_CRT' in config)) {
 		var host = httpsServer.address().address;
 		var port = httpsServer.address().port;
 
-		console.log('[*] jekyll-discuss listening at http://%s:%s', host, port);		
+		console.log('[*] jekyll-discuss HTTPS listening at http://%s:%s', host, port);		
 	});
 }
