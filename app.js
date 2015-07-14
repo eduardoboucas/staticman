@@ -196,6 +196,11 @@ if (('SERVER_HTTPS_KEY' in config) && ('SERVER_HTTPS_CRT' in config)) {
 		key: fs.readFileSync(config.SERVER_HTTPS_KEY, 'utf8'),
 		cert: fs.readFileSync(config.SERVER_HTTPS_CRT, 'utf8')
 	};
+
+	if ('SERVER_HTTPS_PASSPHRASE' in config) {
+		credentials.passphrase = config.SERVER_HTTPS_PASSPHRASE;
+	}
+	
 	var httpsServer = https.createServer(credentials, app).listen(config.SERVER_HTTPS_PORT, function () {
 		var host = server.address().address;
 		var port = server.address().port;
