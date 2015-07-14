@@ -106,6 +106,7 @@ app.post('/comments', function (req, res) {
 
 	exec(shellCommand, function (error, stdout, stderr) { 
 		if (error) {
+			console.log('[!] Error running shell script: ' + error);
 			res.status(500).send('Failed to add comment.');
 		} else {
 			var response = {
@@ -176,13 +177,6 @@ app.get('/unsubscribe/:id', function (req, res) {
 * Server initialization
 *
 **/
-
-/*var server = app.listen(config.SERVER_PORT, function () {
-	var host = server.address().address;
-	var port = server.address().port;
-
-	console.log('[*] jekyll-discuss listening at http://%s:%s', host, port);
-});*/
 
 var httpServer = http.createServer(app).listen(config.SERVER_HTTP_PORT, function () {
 	var host = httpServer.address().address;
