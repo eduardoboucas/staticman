@@ -69,7 +69,7 @@ COMMENTS_DIR=${COMMENTS_DIR_FORMAT//@post-slug/$POST_SLUG}
 
 # Create directory if does not exist
 if [ ! -d "$COMMENTS_DIR" ]; then
-  mkdir ${COMMENTS_DIR}
+  mkdir -p ${COMMENTS_DIR}
 fi
 
 COMMENT_TIMESTAMP=`date +%Y%m%d%H%M%S`
