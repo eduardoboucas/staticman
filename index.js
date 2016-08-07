@@ -15,6 +15,7 @@ try {
 } catch(e) {}
 
 config.port = config.port || process.env.PORT
+config.githubToken = config.githubToken || process.env.GITHUB_TOKEN
 config.akismetSite = config.akismetSite || process.env.AKISMET_SITE
 config.akismetApiKey = config.akismetApiKey || process.env.AKISMET_API_KEY
 
@@ -56,11 +57,7 @@ var requireParams = (params) => {
 server.get('/v1/connect/:username/:repository', bruteforce.prevent, require('./routes/connect')(config))
 
 // Route: process
-server.post('/v1/entry', bruteforce.prevent, requireParams([
-  'fields',
-  'options.username',
-  'options.repo'
-]), require('./routes/process')(config))
+server.post('/v1/entry/:username/:repository/:branch', bruteforce.prevent, requireParams(['fields']), require('./routes/process')(config))
 
 server.listen(config.port, function () {
   console.log('[Staticman] Server listening on port', config.port)
