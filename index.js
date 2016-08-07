@@ -31,6 +31,14 @@ server.use(bodyParser.urlencoded({extended: true}))
 var store = new ExpressBrute.MemoryStore()
 var bruteforce = new ExpressBrute(store)
 
+// Enable CORS
+server.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+  
+  next()
+})
+
 var requireParams = (params) => {
   return function (req, res, next) {
     var missingParams = []
