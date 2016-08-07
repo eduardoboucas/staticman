@@ -1,4 +1,4 @@
-![Staticman logo](logo.png)
+![Staticman logo](logo.png?v2)
 
 # Staticman
 
