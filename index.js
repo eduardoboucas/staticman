@@ -1,8 +1,8 @@
 var bodyParser = require('body-parser')
 var express = require('express')
-var GitHubApi = require('github')
+var ExpressBrute = require('express-brute')
 var objectPath = require('object-path')
-var Staticman = require('./lib/Staticman')
+
 
 // ------------------------------------
 // Config
@@ -26,6 +26,10 @@ var server = express()
 server.use(bodyParser.json())
 server.use(bodyParser.urlencoded({extended: true}))
 
+// Brute force protection
+var store = new ExpressBrute.MemoryStore()
+var bruteforce = new ExpressBrute(store)
+
 var requireParams = (params) => {
   return function (req, res, next) {
     var missingParams = []
@@ -48,27 +52,15 @@ var requireParams = (params) => {
   }
 }
 
-server.post('/v1/entry', requireParams([
+// Route: connect
+server.get('/v1/connect/:username/:repository', bruteforce.prevent, require('./routes/connect')(config))
+
+// Route: process
+server.post('/v1/entry', bruteforce.prevent, requireParams([
   'fields',
   'options.username',
   'options.repo'
-]), (req, res) => {
-  var fields = req.query.fields || req.body.fields
-  var options = req.query.options || req.body.options
-
-  var staticman = new Staticman(options, config)
-
-  staticman.setIp(req.headers['x-forwarded-for'] || req.connection.remoteAddress)
-
-  staticman.process(fields, options).then((fields) => {
-    res.send({
-      success: true,
-      fields: fields
-    })
-  }).catch((err) => {
-    res.status(500).send(err)
-  })
-})
+]), require('./routes/process')(config))
 
 server.listen(config.port, function () {
   console.log('[Staticman] Server listening on port', config.port)
