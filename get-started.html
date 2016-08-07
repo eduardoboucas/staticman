@@ -34,7 +34,7 @@ permalink: /get-started
 
 <p>The following markup shows how the form for a simple commenting system would look like:</p>
 
-{% highlight html %}
+{% highlight html %}{% raw %}
 <form method="POST" action="https://api.staticman.net/v1/entry/eduardoboucas/staticman/gh-pages">
   <!-- e.g. "2016-01-02-this-is-a-post" -->
   <input name="options[slug]" type="hidden" value="{{ page.slug }}">
@@ -45,7 +45,7 @@ permalink: /get-started
 
   <button type="submit">Go!</button>
 </form>
-{% endhighlight %}
+{% endraw %}{% endhighlight %}
 
 <h2 class="heading heading--room heading--2">Step 4. Approve entries (optional)</h2>
 
