@@ -3,7 +3,9 @@ var Staticman = require('../lib/Staticman')
 module.exports = (config) => {
   return ((req, res) => {
     var fields = req.query.fields || req.body.fields
-    var options = req.query.options || req.body.options
+    var options = req.query.options || req.body.options || {}
+
+    Object.assign(options, req.params)
 
     var staticman = new Staticman(options, config)
 
