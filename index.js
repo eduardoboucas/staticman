@@ -5,7 +5,7 @@ var objectPath = require('object-path')
 var Staticman = require('./lib/Staticman')
 
 // ------------------------------------
-// Local config (optional)
+// Config
 // ------------------------------------
 
 var config = {}
@@ -13,6 +13,10 @@ var config = {}
 try {
   config = require(__dirname + '/config.json')
 } catch(e) {}
+
+config.port = config.port || process.env.PORT
+config.akismetSite = config.akismetSite || process.env.AKISMET_SITE
+config.akismetApiKey = config.akismetApiKey || process.env.AKISMET_API_KEY
 
 // ------------------------------------
 // Server
@@ -22,7 +26,6 @@ var server = express()
 server.use(bodyParser.json())
 server.use(bodyParser.urlencoded({extended: true}))
 
-var port = process.env.PORT || config.port
 var requireParams = (params) => {
   return function (req, res, next) {
     var missingParams = []
@@ -53,15 +56,20 @@ server.post('/v1/entry', requireParams([
   var fields = req.query.fields || req.body.fields
   var options = req.query.options || req.body.options
 
-  var staticman = new Staticman(options, config.github.token)
+  var staticman = new Staticman(options, config)
 
-  staticman.process(fields, options).then((res) => {
-    res.send(res)
+  staticman.setIp(req.headers['x-forwarded-for'] || req.connection.remoteAddress)
+
+  staticman.process(fields, options).then((fields) => {
+    res.send({
+      success: true,
+      fields: fields
+    })
   }).catch((err) => {
     res.status(500).send(err)
   })
 })
 
-server.listen(port, function () {
-  console.log('[Staticman] Server listening on port', port)
+server.listen(config.port, function () {
+  console.log('[Staticman] Server listening on port', config.port)
 })

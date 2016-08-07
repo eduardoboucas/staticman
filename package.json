@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/eduardoboucas/staticman#readme",
   "dependencies": {
+    "akismet": "^1.0.0",
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
     "github": "^2.4.0",
