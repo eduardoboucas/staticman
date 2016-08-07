@@ -1,0 +1,14 @@
+.form-group {
+    margin-bottom: 20px;
+    max-width: 650px;
+
+    &--right-align {
+    	text-align: right;
+    }
+
+    &--horizontal-space {
+    	* + * {
+    		margin-left: 20px;
+    	}
+    }
+}

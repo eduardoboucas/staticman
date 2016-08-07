@@ -1,0 +1,45 @@
+{
+  "title": "include-media-columns",
+  "name": "include-media-columns",
+  "version": "1.3.0",
+  "description": "An include-media plugin for generating grid classes based on the BEMIT naming convention",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eduardoboucas/include-media-columns.git"
+  },
+  "main": "_include-media-columns.scss",
+  "author": {
+    "name": "Eduardo Boucas",
+    "email": "mail@eduardoboucas.com"
+  },
+  "bugs": {
+    "url": "https://github.com/eduardoboucas/include-media-columns/issues"
+  },
+  "homepage": "https://github.com/eduardoboucas/include-media-columns",
+  "license": "MIT",
+  "devDependencies": {},
+  "gitHead": "585d7f3fed2593da71e6d8d42da49acc140f37fa",
+  "_id": "include-media-columns@1.3.0",
+  "scripts": {},
+  "_shasum": "526a94f0adc9edcabc683dd808633ce3ccf03774",
+  "_from": "include-media-columns@*",
+  "_npmVersion": "2.14.3",
+  "_nodeVersion": "4.1.0",
+  "_npmUser": {
+    "name": "eduardoboucas",
+    "email": "mail@eduardoboucas.com"
+  },
+  "maintainers": [
+    {
+      "name": "eduardoboucas",
+      "email": "mail@eduardoboucas.com"
+    }
+  ],
+  "dist": {
+    "shasum": "526a94f0adc9edcabc683dd808633ce3ccf03774",
+    "tarball": "https://registry.npmjs.org/include-media-columns/-/include-media-columns-1.3.0.tgz"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/include-media-columns/-/include-media-columns-1.3.0.tgz",
+  "readme": "ERROR: No README data found!"
+}

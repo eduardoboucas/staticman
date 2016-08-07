@@ -1,0 +1,77 @@
+$collapsible-transition: max-height transform;
+$collapsible-padding: 20px;
+
+.collapsible {
+    border: 1px solid $color-background-shade-4;
+
+    & + & {
+        margin-top: 20px;
+    }
+}
+
+.collapsible__toggle {
+    position: absolute;
+    opacity: 0;    
+}
+
+.collapsible__title {
+    position: relative;
+    display: block;
+    cursor: pointer;
+    outline: 0;
+    background-color: $color-background-shade-1;
+    padding: $collapsible-padding;
+    padding-left: 35px;
+
+    &::-webkit-details-marker {
+        display: none;
+    }
+
+    &:before,
+    &:after {
+        content: ' ';
+        background-color: $color-secondary;
+        position: absolute;
+        top: 50%;
+        left: 10px;
+        width: 0.8em;
+        height: 3px;
+        transform: translateY(-50%);
+        margin-right: 20px;
+    }
+
+    &:after {
+        @include transition($collapsible-transition);
+
+        transform: translateY(-50%) rotate(90deg);
+    }
+
+    .collapsible__toggle:checked + &:after {
+        @include transition($collapsible-transition);
+
+        transform: translateY(-50%);
+    }
+}
+
+.collapsible__body {
+    @include transition($collapsible-transition, 0.5s);
+
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 $collapsible-padding;
+
+    .collapsible__toggle:checked ~ & {
+        @include transition($collapsible-transition, 1s);
+
+        max-height: 800px;
+        max-height: 100vh;
+    }
+
+    >:first-child {
+        margin-top: $collapsible-padding;
+    }
+
+    >:last-child {
+        margin-bottom: $collapsible-padding;
+    }
+}

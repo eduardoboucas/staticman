@@ -1,0 +1,9 @@
+@mixin transition($properties, $duration: 0.3s, $curve: ease-out) {
+    $transitions: ();
+
+    @each $property in $properties {
+      $transitions: append($transitions, $property $duration $curve, comma);
+    }
+
+    transition: $transitions;
+}

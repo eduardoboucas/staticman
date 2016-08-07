@@ -1,0 +1,32 @@
+.badge {
+    $size: 22px;
+
+    position: relative;
+    padding-right: $size;
+
+    &:before,
+    &:after {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: $size;
+        height: $size;        
+    }
+
+    &:before {
+        content: '';
+        
+        border-radius: 50%;
+        background-color: $color-secondary;
+    }
+
+    &:after {
+        @include font-size(11);
+
+        color: $color-background;
+        content: attr(data-badge);
+        font-weight: $font-weight-bold;
+        text-align: center;
+        line-height: $size;
+    }
+}

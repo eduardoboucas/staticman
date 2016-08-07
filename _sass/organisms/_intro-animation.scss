@@ -1,0 +1,382 @@
+$anim-window-border-radius: 10px;
+
+$anim-color-background: #F8F8F8;
+$anim-color-very-dark-grey: #787878;
+$anim-color-darker-grey: #B3B3B3;
+$anim-color-dark-grey: #C3C3C3;
+$anim-color-mid-grey: #D3D3D3;
+$anim-color-light-grey: #E3E3E3;
+$anim-color-button-close: #E96E4C;
+$anim-color-button-min: #E6A935;
+$anim-color-button-max: #85C33D;
+$anim-color-staticman-blue: #019edb;
+$anim-color-success: #eaffea;
+$anim-color-light-amber: #FFC200;
+$anim-color-light-green: #9dcf63;
+
+$anim-panels-distance: 150px;
+$anim-panel-middleman-height: 122px;
+$anim-panel-middleman-package-size: 45px;
+
+$anim-animation-duration: 4s;
+
+.anim {
+  max-width: 660px;
+  margin: 0 auto;
+  font-size: 16px;
+  overflow: hidden;
+  background-color: $anim-color-background;
+  padding-top: 20px;
+}
+
+// ----------------------
+// Browser
+// ----------------------
+
+.anim-browser {
+  position: relative;
+  width: 85%;
+  margin: 0 auto;
+  border-radius: $anim-window-border-radius;
+  border: 1px solid $anim-color-mid-grey;
+  font-family: $font-family-primary;
+  font-weight: 300;
+}
+
+.anim-browser__content {
+  padding: 25px;
+  text-align: center;
+  color: $anim-color-dark-grey;
+  
+  h1,
+  h2,
+  h3 {
+    font-family: $font-family-secondary;
+  }
+  
+  h1 {
+    font-size: 25px;
+    text-transform: uppercase;
+    margin-bottom: 25px;
+  }
+}
+
+// ----------------------
+// Title bar
+// ----------------------
+
+.anim-title-bar {
+  background-color: $anim-color-mid-grey;
+  padding: 8px 12px;
+  border-top-left-radius: $anim-window-border-radius;
+  border-top-right-radius: $anim-window-border-radius;
+}
+
+.anim-title-bar__button {
+  $anim-size: 12px;
+  
+  display: inline-block;
+  width: $anim-size;
+  height: $anim-size;
+  border-radius: 50%;
+  margin-right: 2px;
+  
+  &--close {
+    background-color: $anim-color-button-close;
+  }
+  
+  &--min {
+    background-color: $anim-color-button-min;
+  }
+  
+  &--max {
+    background-color: $anim-color-button-max;
+  }
+}
+
+.anim-title-bar__address {
+  display: inline-block;
+  background-color: $anim-color-dark-grey;
+  color: #888;
+  width: 70%;
+  vertical-align: middle;
+  margin-left: 7%;
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.anim-label {
+  width: 15%;
+  height: 10px;
+  margin: 15px 0 0 0;
+  background-color: $anim-color-light-grey;
+  
+  &--small {
+    width: 10%;
+  }
+  
+  &--large {
+    width: 30%;
+  }
+}
+
+.anim-text-field {
+  box-sizing: border-box;
+  width: 100%;
+  height: 30px;
+  margin: 5px 0 0 0;
+  border: 1px solid $anim-color-light-grey;
+  padding: 2px 0 0 5px;
+  text-align: left;
+  color: black;
+  
+  &--large {
+    height: 90px;
+  }
+  
+  span {
+    width: 100%;
+  }
+}
+
+// ----------------------
+// Button
+// ----------------------
+
+.anim-button {
+  $anim-transition: top 0.2s ease-out, box-shadow 0.2s ease-out;
+  
+  position: relative;
+  top: 0;
+  display: inline-block;
+  margin-top: 30px;
+  border-radius: 15px;
+  background-color: $color-secondary;
+  color: white;
+  padding: 25px;
+  font-weight: 500;
+  font-size: 0.8em;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  box-shadow: 0 8px 0 darken($color-secondary, 6);
+  transition: $anim-transition;
+  
+  &--pressed {
+    transition: $anim-transition;    
+    top: 4px;
+    box-shadow: 0 4px 0 darken($color-secondary, 6);
+  }
+}
+
+// ----------------------
+// Cursor
+// ----------------------
+
+.anim-cursor {
+  font-weight: 100;
+  animation: 1s blink step-end infinite;
+}
+
+@keyframes blink {
+  from, to {
+    color: transparent;
+  }
+  
+  50% {
+    color: black;
+  }
+}
+
+
+// ----------------------
+// Middleman
+// ----------------------
+
+.anim-middleman {
+  position: relative;
+  overflow: hidden;
+  width: 83%;
+  height: (2 * $anim-panels-distance) + $anim-panel-middleman-height - $anim-panel-middleman-package-size;
+  margin: 0 auto;
+
+  &:before {
+    $anim-line-height: (2 * $anim-panels-distance) + $anim-panel-middleman-height;
+    
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 0;    
+    width: 1px;
+    border-left: 1px dashed $anim-color-mid-grey;
+    height: $anim-line-height;    
+  }
+}
+
+.anim-middleman__box {
+  $anim-border-inset-width: 8px;
+  
+  position: relative;
+  top: $anim-panels-distance * 0.8;
+  height: $anim-panel-middleman-height;
+  margin: 0 (2 * $anim-border-inset-width);
+  box-shadow: 0 0 0 $anim-border-inset-width $anim-color-mid-grey;
+  border: 1px dashed white;
+  border-radius: 10px;  
+  background-color: $anim-color-mid-grey;
+  z-index: 3;
+}
+
+.anim-middleman__logo {
+    width: 150px;
+    height: 100px;
+    margin: 0 auto;
+    display: block;
+    margin-top: 10px;  
+}
+
+.anim-middleman__title {
+  font-family: $font-family-secondary;
+  color: $anim-color-staticman-blue;
+  text-align: center;
+  font-size: 2.2em;
+  padding: 1em;
+  letter-spacing: 0.08em;
+}
+
+.anim-middleman__fan {
+  $anim-size: 70px;
+  
+  display: block;
+  position: absolute;
+  top: 20%;
+  left: 25px;
+  width: $anim-size;
+  height: $anim-size;
+  animation: anim-middleman-fan-rotate 2.5s linear infinite;
+  fill: $anim-color-very-dark-grey;
+  background-size: 100%;
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IiB3aWR0aD0iNTEycHgiIGhlaWdodD0iNTEycHgiIHZpZXdCb3g9IjAgMCA1MTIgNTEyIiB4bWw6c3BhY2U9InByZXNlcnZlIj48cGF0aCBmaWxsPSIjRjc2QzVFIiBpZD0iZ2Vhci1pY29uIiBkPSJNNDYyLDI4My43NDJ2LTU1LjQ4NWwtMjkuOTgxLTEwLjY2MmMtMTEuNDMxLTQuMDY1LTIwLjYyOC0xMi43OTQtMjUuMjc0LTI0LjAwMSBjLTAuMDAyLTAuMDA0LTAuMDA0LTAuMDA5LTAuMDA2LTAuMDEzYy00LjY1OS0xMS4yMzUtNC4zMzMtMjMuOTE4LDAuODg5LTM0LjkwM2wxMy42NTMtMjguNzI0bC0zOS4yMzQtMzkuMjM0bC0yOC43MiwxMy42NTIgYy0xMC45NzksNS4yMTktMjMuNjgsNS41NDYtMzQuOTA4LDAuODg5Yy0wLjAwNS0wLjAwMi0wLjAxLTAuMDAzLTAuMDE0LTAuMDA1Yy0xMS4yMTUtNC42NS0xOS45MzMtMTMuODM0LTI0LTI1LjI3M0wyODMuNzQxLDUwIGgtNTUuNDg0bC0xMC42NjIsMjkuOTgxYy00LjA2NSwxMS40MzEtMTIuNzk0LDIwLjYyNy0yNC4wMDEsMjUuMjc0Yy0wLjAwNSwwLjAwMi0wLjAwOSwwLjAwNC0wLjAxNCwwLjAwNSBjLTExLjIzNSw0LjY2LTIzLjkxOSw0LjMzMy0zNC45MDUtMC44ODlsLTI4LjcyMy0xMy42NTNsLTM5LjIzNCwzOS4yMzRsMTMuNjUzLDI4LjcyMWM1LjIxOSwxMC45NzksNS41NDUsMjMuNjgxLDAuODg5LDM0LjkxIGMtMC4wMDIsMC4wMDQtMC4wMDQsMC4wMDktMC4wMDYsMC4wMTNjLTQuNjQ5LDExLjIxNC0xMy44MzQsMTkuOTMxLTI1LjI3MSwyMy45OThMNTAsMjI4LjI1N3Y1NS40ODVsMjkuOTgsMTAuNjYxIGMxMS40MzEsNC4wNjUsMjAuNjI3LDEyLjc5NCwyNS4yNzQsMjRjMC4wMDIsMC4wMDUsMC4wMDMsMC4wMSwwLjAwNSwwLjAxNGM0LjY2LDExLjIzNiw0LjMzNCwyMy45MjEtMC44ODgsMzQuOTA2bC0xMy42NTQsMjguNzIzIGwzOS4yMzQsMzkuMjM0bDI4LjcyMS0xMy42NTJjMTAuOTc5LTUuMjE5LDIzLjY4MS01LjU0NiwzNC45MDktMC44ODljMC4wMDUsMC4wMDIsMC4wMSwwLjAwNCwwLjAxNCwwLjAwNiBjMTEuMjE0LDQuNjQ5LDE5LjkzLDEzLjgzMywyMy45OTgsMjUuMjcxTDIyOC4yNTcsNDYyaDU1LjQ4NGwxMC41OTUtMjkuNzljNC4xMDMtMTEuNTM4LDEyLjkwOC0yMC44MjQsMjQuMjE2LTI1LjUyNSBjMC4wMDUtMC4wMDIsMC4wMDktMC4wMDQsMC4wMTQtMC4wMDZjMTEuMTI3LTQuNjI4LDIzLjY5NC00LjMxMSwzNC41NzgsMC44NjNsMjguOTAyLDEzLjczOGwzOS4yMzQtMzkuMjM0bC0xMy42Ni0yOC43MzcgYy01LjIxNC0xMC45NjktNS41MzktMjMuNjU5LTAuODg2LTM0Ljg3N2MwLjAwMi0wLjAwNSwwLjAwNC0wLjAwOSwwLjAwNi0wLjAxNGM0LjY1NC0xMS4yMjUsMTMuODQ4LTE5Ljk0OSwyNS4yOTctMjQuMDIxIEw0NjIsMjgzLjc0MnogTTI1NiwzMzEuNTQ2Yy00MS43MjQsMC03NS41NDgtMzMuODIzLTc1LjU0OC03NS41NDZzMzMuODI0LTc1LjU0Nyw3NS41NDgtNzUuNTQ3IGM0MS43MjMsMCw3NS41NDYsMzMuODI0LDc1LjU0Niw3NS41NDdTMjk3LjcyMywzMzEuNTQ2LDI1NiwzMzEuNTQ2eiIvPjwvc3ZnPg==);
+  
+  &--right {
+    left: auto;
+    right: 25px;
+  }
+
+  @include media('<440px') {
+    display: none;
+  }
+}
+
+@keyframes anim-middleman-fan-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.anim-middleman__package {
+  position: absolute;
+  top: -$anim-panels-distance;
+  left: 50%;
+  transform: translateX(-50%);
+  width: $anim-panel-middleman-package-size;
+  height: $anim-panel-middleman-package-size;
+  animation: anim-middleman-package-move $anim-animation-duration infinite forwards;
+  border: 2px solid $color-secondary;
+  background-color: white;
+  border-radius: 5px;
+  z-index: 2;
+}
+
+@keyframes anim-middleman-package-move {
+  0% {
+    top: 0;
+  }
+  
+  29% {
+    background-color: white;
+  }
+  
+  30% {
+    background-color: $color-secondary;
+  }
+  
+  100% {
+    top: (2 * $anim-panels-distance) + ($anim-panel-middleman-height - $anim-panel-middleman-package-size);
+    background-color: $color-secondary;
+  }
+}
+
+.anim-middleman__package-text {
+  display: block;
+  font-family: $font-family-primary;
+  font-size: 0.75em;
+  font-weight: 700;
+  text-align: center;
+  width: 100%;
+  
+  &--light {
+    color: white;
+  }
+  
+  &--dark {
+    color: $color-secondary;
+  }
+}
+
+// ----------------------
+// GitHub
+// ----------------------
+
+.anim-github {
+  $anim-size: 200px;
+  
+  position: relative;
+  width: $anim-size;
+  height: $anim-size;
+  text-align: center;
+  margin-top: -18px;
+  left: 50%;
+  transform: translateX(-35%);
+  animation: anim-github-move $anim-animation-duration ease infinite;
+}
+
+@keyframes anim-github-move {
+  0% {
+    left: -100%;
+  }
+  
+  49% {
+    left: 50%;
+  }
+  
+  97% {
+    left: 50%;
+  }
+  
+  100% {
+    left: 100%;
+  }
+}
+
+.anim-github__logo {
+  position: absolute;
+  top: 20%;
+  left: 18%;
+  width: 30%;
+  height: 30%;
+  fill: black;
+}
+
+.anim-github__truck {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  fill: black;
+}

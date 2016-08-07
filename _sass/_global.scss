@@ -1,0 +1,98 @@
+@import 'atoms/typography';
+@import 'atoms/colors';
+
+$layout-max-width: 1024px;
+$layout-side-padding: 10px;
+
+$svg-sizes: (
+  'brand-staticman': 225px 168px,
+  'brand-type': 259px 39px
+);
+
+@mixin constrain($max-width: $layout-max-width) {
+    max-width: $layout-max-width + (2 * $layout-side-padding);
+    padding-left: $layout-side-padding;
+    padding-right: $layout-side-padding;
+    margin: 0 auto;
+
+    @include media('>=tablet') {
+      padding-left: $layout-side-padding * 2;
+      padding-right: $layout-side-padding * 2;
+    }
+}
+
+.content {
+    @include constrain();
+}
+
+body {
+    @include font-size($font-size-normal);
+    
+    font-family: $font-family-primary;
+    font-weight: $font-weight-light;
+    line-height: $line-height-normal;
+}
+
+// --------------------------------------------------------------
+// THIS SHOULDN'T BE HERE. MOVE TO THE APPROPRIATE PLACE ASAP
+// --------------------------------------------------------------
+
+svg {
+  fill: currentColor;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit; 
+}
+
+p {
+    margin-bottom: 20px;
+}
+
+a {
+  text-decoration: none;
+}
+
+.highlight pre {
+  background-color: black;
+  padding: 15px;
+  margin-top: 30px;
+  overflow: scroll;
+  color: $color-background;
+
+  code {
+    background: none;
+  }
+}
+
+strong {
+  font-weight: $font-weight-normal;
+}
+
+code {
+  background-color: $color-background-shade-1;
+  font-family: monospace;
+  padding: 5px;
+}
+
+::selection {
+  background: $color-secondary;
+  color: $color-background;
+}
+
+::-moz-selection {
+  background: $color-secondary;
+  color: $color-background;
+}

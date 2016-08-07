@@ -1,0 +1,9 @@
+.tile {
+    background-color: $color-background-shade-1;
+    padding: 20px;
+    border-left: 2px solid $color-secondary;
+
+    & + & {
+        margin-top: 20px;
+    }
+}

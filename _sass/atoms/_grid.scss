@@ -1,0 +1,13 @@
+@include im-columns(2, 3);
+
+.col-container {
+	@extend .cf;
+}
+
+.col {
+    float: left;
+}
+
+.col--padded {
+	padding: 30px;
+}

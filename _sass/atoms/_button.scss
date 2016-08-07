@@ -1,0 +1,46 @@
+.button {
+    //@extend .undercover-button;
+
+    @include font-size($font-size-normal);
+    @include transition(background-color);
+
+    font-family: $font-family-primary;
+    font-weight: $font-weight-normal;
+    display: inline-block;
+    padding: 20px 40px;
+    border-radius: 10px;
+    border: 2px solid $color-secondary;
+    background-color: $color-secondary;
+    color: $color-background;
+    text-decoration: none;
+
+    &:hover {
+        @include transition(background-color);
+
+        background-color: $color-background;
+        color: $color-secondary;
+    }
+
+    &:active,
+    &:focus {
+        box-shadow: 0 0 30px $color-background-shade-4;
+    }
+}
+
+.button--inverted {
+    background-color: $color-background;
+    color: $color-secondary;
+
+    &:hover {
+        @include transition(background-color);
+
+        background-color: $color-secondary;
+        color: $color-background;
+    }
+}
+
+.button--plain {
+    background-color: transparent;
+    border-color: $color-background;
+    color: $color-background;
+}

@@ -1,0 +1,43 @@
+.login-button {
+    @include font-size(15);
+
+    border: 0;
+    background: none;
+    padding: 3px 10px;
+    margin: 5px 0;
+    position: relative;
+    border-radius: 5px;
+    font-weight: $font-weight-light;
+    cursor: pointer;
+
+    &--github {
+        $background-color: #333333;
+
+        font-family: Helvetica;
+        background-color: $background-color;
+        color: white;
+
+        .login-button__icon {
+            fill: white;
+        }
+
+        &:hover {
+            background-color: lighten($background-color, 5);
+        }
+    }
+}
+
+.login-button__icon {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+    width: 30px;
+    height: 30px;
+    margin-right: 10px;
+}
+
+.login-button__text {
+    display: inline-block;
+    line-height: 40px;
+    padding-left: 40px;
+}

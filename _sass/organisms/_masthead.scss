@@ -1,0 +1,57 @@
+.masthead {
+    position: relative;
+    background-color: $color-secondary;
+    background-image: url("/assets/images/overlay2.png"), url("/assets/images/overlay3.svg"), linear-gradient(45deg, #F5DD90 5%, #F68E5F 30%, #F76C5E);
+    background-size: auto, cover, cover;
+    background-position: top left, center center, center center;
+    background-attachment: scroll;
+    color: $color-background;
+    padding: 10px 0 40px 0;
+    margin-bottom: 20px;
+    text-align: center;
+
+    &--short {
+        padding: 10px 0;
+    }
+
+    @include media('>=tablet') {
+        background-attachment: fixed, fixed, fixed;
+    }
+}
+
+.masthead__container {
+    position: relative;
+}
+
+.masthead__breadcrumbs {
+    @include font-size(14);
+
+    display: inline;
+}
+
+.masthead__breadcrumbs-link {
+    color: $color-background;
+}
+
+.masthead__breadcrumbs-separator {
+    margin: 0 7px;
+}
+
+.masthead__title {
+    margin-top: 0.3em;
+}
+
+.masthead__logo-big {
+    @include svg-size('brand-staticman', 250px);
+
+    display: block;
+    margin: 0 auto;
+}
+
+.masthead__type-big {
+    @include svg-size('brand-type', 300px);
+
+    display: block;
+    margin: 2em auto;
+    color: $color-primary;
+}

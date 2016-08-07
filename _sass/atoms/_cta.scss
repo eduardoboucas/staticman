@@ -1,0 +1,40 @@
+.cta {
+	@include transition(border-color);
+
+    display: inline-block;
+    font-weight: $font-weight-normal;
+    color: $color-secondary;
+	border-bottom: 2px solid currentColor;
+    white-space: nowrap;
+
+	&:hover {
+		@include transition(border-color);
+
+		border-color: transparent;
+    }
+
+    &:focus,
+    &:active {
+    	border-style: dotted;
+    }
+
+    &--delete {
+		color: $color-error;
+    }
+
+    &[class*="cta--icon-"] {
+	    padding-right: 1em;
+	    background-position: right center;
+	    background-repeat: no-repeat;
+	    background-origin: border-box;
+	    background-size: 0.75em;    	
+    }
+
+    &--icon-go {
+		background-image: url(data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IiB3aWR0aD0iMjRweCIgaGVpZ2h0PSIyNHB4IiB2aWV3Qm94PSIwIDAgMTAyNCAxMDI0Ij48cGF0aCBmaWxsPSIjRjc2QzVFIiBkPSJNOTg3LjQyOSA1MTAuMjg2cTAgOC01LjcxNCAxMy43MTRsLTIxOS40MjkgMjAyLjI4NnEtOS4xNDMgOC0yMCAzLjQyOS0xMC44NTctNS4xNDMtMTAuODU3LTE2LjU3MXYtMTI4aC03MTMuMTQzcS04IDAtMTMuMTQzLTUuMTQzdC01LjE0My0xMy4xNDN2LTEwOS43MTRxMC04IDUuMTQzLTEzLjE0M3QxMy4xNDMtNS4xNDNoNzEzLjE0M3YtMTI4cTAtMTIgMTAuODU3LTE2LjU3MXQyMCAyLjg1N2wyMTkuNDI5IDIwMHE1LjcxNCA1LjcxNCA1LjcxNCAxMy4xNDN6Ij48L3BhdGg+PC9zdmc+);
+    }
+
+    &--icon-delete {
+    	background-image: url(data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4IiB3aWR0aD0iMjRweCIgaGVpZ2h0PSIyNHB4IiB2aWV3Qm94PSIwIDAgMTAyNCAxMDI0IiBlbmFibGUtYmFja2dyb3VuZD0ibmV3IDAgMCA1MTIgNTEyIiB4bWw6c3BhY2U9InByZXNlcnZlIj48cGF0aCBjbGFzcz0icGF0aDEiIGZpbGw9IiNGRjYzNDciIGQ9Ik0xMjggMzIwdjY0MGMwIDM1LjIgMjguOCA2NCA2NCA2NGg1NzZjMzUuMiAwIDY0LTI4LjggNjQtNjR2LTY0MGgtNzA0ek0zMjAgODk2aC02NHYtNDQ4aDY0djQ0OHpNNDQ4IDg5NmgtNjR2LTQ0OGg2NHY0NDh6TTU3NiA4OTZoLTY0di00NDhoNjR2NDQ4ek03MDQgODk2aC02NHYtNDQ4aDY0djQ0OHoiPjwvcGF0aD48cGF0aCBmaWxsPSIjRkY2MzQ3IiBjbGFzcz0icGF0aDIiIGQ9Ik04NDggMTI4aC0yMDh2LTgwYzAtMjYuNC0yMS42LTQ4LTQ4LTQ4aC0yMjRjLTI2LjQgMC00OCAyMS42LTQ4IDQ4djgwaC0yMDhjLTI2LjQgMC00OCAyMS42LTQ4IDQ4djgwaDgzMnYtODBjMC0yNi40LTIxLjYtNDgtNDgtNDh6TTU3NiAxMjhoLTE5MnYtNjMuMTk4aDE5MnY2My4xOTh6Ij48L3BhdGg+PC9zdmc+);
+    }
+}

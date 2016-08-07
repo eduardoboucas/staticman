@@ -1,0 +1,97 @@
+$header-height: 50px;
+
+.header__container {
+    color: black;
+
+    @include media('>=tablet') {
+        @include constrain();
+
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+}
+
+// --------------------------------------------------------------
+// Brand
+// --------------------------------------------------------------
+
+.header__brand {
+    .header--home & {
+        visibility: hidden;
+    }
+}
+
+.header__brand-logo {
+    @include svg-size('brand-staticman', 80px);
+
+    display: block;
+    margin: 0 auto;
+
+    @include media('>=tablet') {
+        display: inline-block;
+        vertical-align: middle;        
+    }
+}
+
+.header__brand-type {
+    @include svg-size('brand-type', 120px);
+
+    display: none;
+    vertical-align: middle;
+    margin-left: 10px;
+
+    @include media('>=tablet') {
+        display: inline-block;
+    }
+}
+
+// --------------------------------------------------------------
+// Menu
+// --------------------------------------------------------------
+
+.header__nav {
+    @include media('<tablet') {
+        margin: 15px 0;
+        background-color: $color-background-shade-6;
+        color: white;
+    }
+}
+
+.header__nav-item {
+    @include transition(border-top-color);
+
+    display: block;
+    line-height: 65px;
+    padding: 0 15px;
+    font-weight: $font-weight-bold;
+
+    &:hover {
+        text-decoration: underline;
+    }
+
+    @include media('>=tablet') {
+        display: inline-block;
+        line-height: 1;
+        font-size: 0.825em;
+    }
+}
+
+.header__nav-icon {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 13px 13px 0 0;
+
+    @include media('>=tablet') {
+        display: none;
+    }
+}
+
+.header__login-container {
+    margin-bottom: 20px;
+
+    @include media('>=tablet') {
+        text-align: right;    
+    }
+}

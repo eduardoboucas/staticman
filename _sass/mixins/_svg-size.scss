@@ -1,0 +1,9 @@
+@mixin svg-size($key, $width) {
+  @if (map-has-key($svg-sizes, $key)) {
+    $original-width: nth(map-get($svg-sizes, $key), 1);
+    $original-height: nth(map-get($svg-sizes, $key), 2);
+    
+    width: $width;
+    height: $width * $original-height / $original-width;
+  }
+}

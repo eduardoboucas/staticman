@@ -1,0 +1,42 @@
+$text-field-transition: (box-shadow border background-color);
+
+.text-field {
+    @include font-size($font-size-normal);
+    @include transition($text-field-transition);
+
+    position: relative;
+    max-width: 100%;
+    width: 100%;
+    outline: 0;
+    border: 1px solid $color-background-shade-3;
+    border-radius: 0;
+    padding: 15px;
+    background-color: transparent;
+    font-family: $font-family-primary;
+    font-weight: $font-weight-light;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
+    &--focus,
+    &:focus {
+        @include transition($text-field-transition);
+
+        border: 1px solid $color-background-shade-5;
+        box-shadow: 0 0 30px $color-background-shade-3;
+    }
+
+    &:disabled {
+        background-color: $color-background-shade-2;
+        color: $color-background-shade-5;
+    }
+}
+
+.text-field:invalid,
+.text-field--invalid {
+    background-color: lighten($color-error, 32);
+    border: 1px solid $color-error;
+}
+
+.text-field__label {
+    margin-bottom: 10px;
+}

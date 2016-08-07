@@ -1,0 +1,10 @@
+.label {
+    @include font-size($font-size-normal);
+
+    display: block;
+    color: $color-background-shade-5;
+
+    &--spaced {
+        margin-bottom: 10px;
+    }
+}

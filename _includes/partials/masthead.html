@@ -1,0 +1,22 @@
+<div class="masthead">
+    <div class="masthead__container">
+        {% include partials/header.html %}
+
+        {% if page.url == '/' %}
+            <svg class="masthead__logo-big brand-staticman">
+                <use xlink:href="#brand-staticman" />
+            </svg>
+            <svg class="masthead__type-big brand-type">
+                <use xlink:href="#brand-type" />
+            </svg>
+            <h2 class="heading heading--2">Static sites with superpowers</h2>
+        {% else %}
+            <p class="masthead__breadcrumbs">
+                <a class="cta masthead__breadcrumbs-link" href="/">Home</a>
+                <span class="masthead__breadcrumbs-separator">/</span>
+            </p>
+                        
+            <h1 class="masthead__title heading heading--1">{{ page.title }}<h1>
+        {% endif %}
+    </div>
+</div>

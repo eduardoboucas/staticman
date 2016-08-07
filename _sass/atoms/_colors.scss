@@ -1,0 +1,46 @@
+$color-background: #fff;
+$color-background-shade-1: #f0f0f0;
+$color-background-shade-2: #e8e8e8;
+$color-background-shade-3: #ddd;
+$color-background-shade-4: #ccc;
+$color-background-shade-5: #999;
+$color-background-shade-6: #444;
+$color-primary: #000;
+$color-secondary: #F76C5E;
+$color-error: tomato;
+
+.color-background {
+    color: $color-background;
+}
+
+.color-primary {
+    color: $color-primary;
+}
+
+.color-background-shade-5 {
+    color: $color-background-shade-5;
+}
+
+.color-background-shade-4 {
+    color: $color-background-shade-4;
+}
+
+.color-background-shade-3 {
+    color: $color-background-shade-3;
+}
+
+.color-background-shade-2 {
+    color: $color-background-shade-2;
+}
+
+.color-background-shade-1 {
+    color: $color-background-shade-1;
+}
+
+.color-secondary {
+    color: $color-secondary;
+}
+
+.color-error {
+    color: $color-error;
+}

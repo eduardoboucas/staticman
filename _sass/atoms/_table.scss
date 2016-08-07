@@ -1,0 +1,18 @@
+.table {
+    th, td {
+        border: 2px solid $color-background-shade-4;
+        padding: 10px;
+    }
+
+    th {
+        background-color: $color-background-shade-3;
+        color: $color-primary;
+        font-weight: $font-weight-normal;
+    }
+
+    tr {
+        &:nth-of-type(even) {
+            background-color: $color-background-shade-1;
+        }
+    }
+}

@@ -1,0 +1,12 @@
+.cta-box {
+    margin-top: 30px;
+    
+    .cta:not(:last-of-type) {
+    	margin-right: 20px;
+    }
+
+    &--edges {
+    	display: flex;
+    	justify-content: space-between;	
+    }
+}
