@@ -6,7 +6,7 @@ permalink: /get-started
 
 <p>This page shows you how to use the free hosted version of Staticman. If you wish to run the service on your own platform, see the <a class="cta" href="https://github.com/eduardoboucas/staticman">GitHub repository</a>.</p>
 
-<h2 class="heading heading--2">Step 1. Add Staticman to your repository</h2>
+<h2 class="heading heading--room heading--2">Step 1. Add Staticman to your repository</h2>
 
 <p>I will need push access to the repositories you want me to commit the files to. In GitHub, go to your repository <strong>Settings</strong> page, navigate to the <strong>Collaborators</strong> tab and add the username <strong>staticmanapp</strong>.</p>
 
@@ -18,13 +18,13 @@ permalink: /get-started
 
 <p>If all goes well, you should receive a message saying <strong>OK!</strong> and we're good to go.</p>
 
-<h2 class="heading heading--2">Step 2. Add Staticman to your Jekyll config file</h2>
+<h2 class="heading heading--room heading--2">Step 2. Add Staticman to your Jekyll config file</h2>
 
 <p>I will look for a <code>_config.yml</code> file in the root of the repository. Inside, I will read certain settings from a <code>staticman</code> object — things like whether to enable content moderation, spam protection, the format or the path of the data files.</p>
 
 <p><a class="cta" href="https://github.com/eduardoboucas/staticman#jekyll-configuration">This list</a> contains a list of all configurable parameters.</p>
 
-<h2 class="heading heading--2">Step 3. Hook up your forms</h2>
+<h2 class="heading heading--room heading--2">Step 3. Hook up your forms</h2>
 
 <p>Forms should <code>POST</code> to:</p>
 
@@ -47,7 +47,7 @@ permalink: /get-started
 </form>
 {% endhighlight %}
 
-<h2 class="heading heading--2">Step 4. Approve entries (optional)</h2>
+<h2 class="heading heading--room heading--2">Step 4. Approve entries (optional)</h2>
 
 <p>If you enable content moderation (by setting <code>moderation: true</code> in the config), I will send a pull request whenever a new entry is submitted. Merge the pull request to approve it, or close to discard.</p>
 
@@ -55,4 +55,4 @@ permalink: /get-started
 
 <p>Please note that this step will be skipped if you disable moderation, as entries will be pushed to the main branch immediately.</p>
 
-<h2 class="heading heading--2">Step 5. Profit!</h2>
+<h2 class="heading heading--room heading--2">Step 5. Profit!</h2>
