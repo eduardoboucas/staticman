@@ -1,149 +1,138 @@
-# Jekyll Discuss
+<img src="logo.png" width="300">
 
-> A commenting system for Jekyll
+# Staticman
+
+> Static sites with superpowers
 
 ## Introduction
 
-[Jekyll](http://jekyllrb.com/) is a powerful blog-aware static site generator. Due to the nature of static sites, including dynamic content — in particular, user-generated content — on a page can be quite challenging. A typical example of that is a blog's commenting system. How to serve that content with an application that consists of pure static HTML files?
+Staticman is a Node.js application that receives user-generated content and uploads it as data files to a GitHub repository. In practice, this allows you to have dynamic content (e.g. blog post comments) as part of a fully static Jekyll site running on GitHub Pages.
 
-As I described in [this post](http://davidwalsh.name/introduction-static-site-generators) and, more in depth, in [this post](https://eduardoboucas.com/blog/2015/05/11/rethinking-the-commenting-system-for-my-jekyll-site.html), there are several options to address this limitation. Third-party commenting platforms like [Disqus](https://disqus.com/) are quite popular and easy to implement.
+It consists of a small web server that handles the `POST` requests from your forms, runs various forms of validation and then pushes them to your repository as data files. You can choose to enable moderation, which means files will be pushed to a separate branch and a pull request will be created for your approval, or disable it completely, meaning that files will be pushed to the main branch automatically.
 
-However, as explained by Tom Preston-Werner [in this talk](https://www.youtube.com/watch?v=BMve1OCKj6M), that comes with the huge caveat of not hosting the comments data, taking away one of the great selling points of Jekyll — the fact that the entire data is hosted together in a repository, not scattered through a myriad of databases and servers.
+## Prerequisites
 
-Other approaches include the actual comments with the rest of the data, but require either a manual build or a complex Continuous Integration process. That makes the integration with GitHub Pages much more difficult.
+Staticman runs as a GitHub bot, so it needs a GitHub account and a [personal access token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/).
 
-### So what is this?
+The bot needs push permission on the repositories it works with, so you'll need to add him as a collaborator. In order for him to accept the invitation, fire a `GET` request to:
 
-**Jekyll Discuss** is a Node.js server-side middleman that handles comments as POST requests from a form, creates data files with its contents and pushes them to a GitHub repository. When using GitHub Pages, that will automatically trigger a build and the new data files will be part of the generated site.
+```
+http://your-staticman-url/v1/connect/{GitHub username}/{GitHub repository}
+```
 
-![Jekyll Discuss diagram](https://eduardoboucas.com/assets/posts/2015-05-11-rethinking-the-commenting-system-for-my-jekyll-site/jekyll-discuss-diagram.png)
+## Adding an entry
 
-There was [a previous iteration of this project](https://github.com/eduardoboucas/jekyll-discuss-php) written in PHP, which I'll no longer maintain.
+Entries are added via `POST` to the `entry` endpoint. An entry is made up of two objects:
 
-### Disclaimer
+- `fields` The data fields to be created
+- `options`: Various parameters to configure the request (optional)
 
-This project is still pretty much at a point where it's made to solve my specific needs — a commenting system to use with Jekyll, GitHub Pages and Mailgun. I'm always happy to make it as generic and flexible as possible, so please feel free to change it in any way you see fit and submit a pull request.
+A simple data file with `name`, `email` and `comment` could be created using the following HTML markup:
 
-## Installation
+```html
+<form method="POST" action="http://your-staticman-url/v1/entry/eduardoboucas/my-site-repo/gh-pages">
+  <input name="fields[name]" type="text">
+  <input name="fields[email]" type="email">
+  <textarea name="fields[comment]"></textarea>
+  
+  <button type="submit">Send</button>
+</form>
+```
 
-1. Install via NPM
-   
-   ```
-   npm install jekyll-discuss
-   cd jekyll-discuss
-   ```
+## Middleman configuration
 
-1. Edit and rename template config file
+These parameters configure the Staticman Node.js application. They can be supplied as part of a local config file (`config.json`) or environment variables.
 
-   ```
-   vi config.template
-   mv config.template config
-   ```
-   
-1. Start server
+| Config file key | Environment variable | Description | Required |
+|-----------------|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
+| `port` | `PORT` | The port used by the server | **yes** |
+| `githubToken` | `GITHUB_TOKEN` | [Personal access token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/) for the GitHub account being used by the bot | **yes** |
+| `akismetSite` | `AKISMET_SITE` | URL of the site to be used with Akismet | no |
+| `akismetApiKey` | `AKISMET_API_KEY` | API key to be used with Akismet | no |
 
-   ```
-   node app.js
-   ```
+## Jekyll configuration
 
-## Configuration
+These parameters will be looked for in a `_config.yml` file in the repository. They all live inside a `staticman` property.
 
-**Jekyll Discuss** consists essentially of an Express server that handles requests, and a Bash script that pushes files to GitHub. Both of these components read information from a shared config file, which contains the following entries.
+### `allowedFields` (required)
 
-| Key | Mandatory | Description |
-|-----|-----------|-------------|
-| `SERVER_HTTP_PORT` | **YES** | Port to be used by the HTTP version of the Express server |
-| `SERVER_HTTPS_PORT` | No | Port to be used by the HTTPS version of the Express server |
-| `SERVER_HTTPS_KEY` | No | Path to the certificate key to be used by the HTTPS server |
-| `SERVER_HTTPS_CRT` | No | Path to the certificate file to be used by the HTTPS server |
-| `SERVER_HTTPS_PASSPHRASE` | No | Passphrase to be used with the HTTPS certificate |
-| `COMMENTS_DIR_FORMAT` | **YES** | Path and format of the comments directory (e.g. `_data/comments/@post-slug`) |
-| `COMMENTS_FILE_FORMAT` | **YES** | Path and format of the comment files (e.g. `@timestamp-@hash.yml`) |
-| `GIT_USERNAME` | **YES** | Username to use when pushing comments to GitHub |
-| `GIT_TOKEN` | **YES** | GitHub personal access token ([info](https://help.github.com/articles/creating-an-access-token-for-command-line-use/)) |
-| `GIT_USER` | **YES** | GitHub user name |
-| `GIT_EMAIL` | **YES** | GitHub user email |
-| `GIT_REPO` | **YES** | Path to the local copy of the repository |
-| `GIT_REPO_REMOTE` | **YES** | Repository URL (.git) |
-| `GIT_COMMIT_MESSAGE` | **YES** | Message to be used on commits |
-| `SUBSCRIPTIONS_DATABASE` | No | Path to the file-based database used to manage subscriptions |
-| `SUBSCRIPTIONS_NOTIFY_ALL` | No | Email address to where notifications for all posts are sent |
-| `MAILGUN_DOMAIN` | No | [Mailgun](http://www.mailgun.com/) domain from where to send subscription notifications |
-| `MAILGUN_KEY` | No | [Mailgun](http://www.mailgun.com/) key |
-| `MAILGUN_FROM` | No | Sender name and email address for subscription notifications |
+An array with the names of the allowed fields. If any of the fields sent is not part of this list, the insert operation will be aborted and an error will be thrown.
 
-## Usage
+*Example:*
 
-### Submitting comments
+```yml
+allowedFields: ['name', 'email', 'comment']
+```
 
-**Jekyll Discuss** will be expecting POST requests containing the following fields:
+### `branch` (required)
 
-| Field |  Description |
-|-------|--------------|
-| `name` | Commenter's name |
-| `email` | Commenter's email address |
-| `url` | Commenter's URL (optional) |
-| `message` | Comment body |
-| `company` | Honeypot field for basic spam detection ([info](https://solutionfactor.net/blog/2014/02/01/honeypot-technique-fast-easy-spam-prevention/)) |
-| `subscribe` | Whether to notify the commenter of future comments by email (must equal `subscribe`) |
-| `post-slug` | Post slug |
-| `post-title` | Post title |
-| `post-url` | Post URL |
+The name of the branch to upload files to. If it doesn't match the branch sent as `options[branch]` in the request, the insert operation will be aborted and an error will be thrown.
 
-### Displaying comments
+*Example:*
 
-On the Jekyll side, showing comments for a post can be done simply by iterating through a set of data files. 
+```yml
+branch: 'gh-pages'
+```
+
+### `format` (required)
+
+The format of the output data files. Currently `json` and `yaml` are supported.
+
+*Example:*
+
+```yml
+format: 'json'
+```
+
+### `moderation` (required)
+
+Whether comments need to be approved before being uploaded to `branch`. If set to `true`, Staticman will create a separate branch and send a pull request to `branch`, allowing you to approve the comment by merging the pull request, or discard it by closing the pull request.
+
+*Example:*
+
+```yml
+moderation: true
+````
+
+### `path` (required)
+
+The path within the repository where data files should be stored. 
+
+It supports placeholders, allowing you to use any of the elements sent in `options` or `fields` in the request to build the path.
 
 *Example:*
 
 ```html
-{% if site.data.comments[post_slug] %}
-	{% assign comments = site.data.comments[post_slug] | sort %}
-	
-	{% for comment in comments %}
-		<div class="comment">
-		  <h3 class="comment__author"><a href="{{ comment[1].url }}">{{ comment[1].name }}</a></h3
-		  <p class="comment__date">{{ comment[1].date }}</p>
-		  <img class="comment__avatar" src="https://www.gravatar.com/avatar/{{ comment[1].hash }}?d=mm&s=180">
-		  {{ comment[1].message }}
-		</div>
-	{% endfor %}
-{% endif %}
+<input type="hidden" name="options[post-slug]" value="this-is-a-post">
 ```
 
-## Email notifications
+```yml
+path: _data/posts/{options.post-slug}
 
-**Jekyll Discuss** can be used with [Mailgun](http://www.mailgun.com/) to send email notifications, allowing commenters to subscribe to new comments on any post. To do this, fill in the Mailgun related fields in the configuration file and edit the email templates that ship with the repo.
-
-Here's an example (`email-templates/new-comment.template.html`):
-
-```html
-<!-- New comment on Eduardo saying things -->
-Hi {{ subscriber }},<br><br>
-
-{{ commenter }} just commented on the post titled "{{ title }}" you subscribed to on <a href="https://eduardoboucas.com/blog">Eduardo saying things</a>.<br><br>
-
-Click <a href="https://eduardoboucas.com{{ link }}">here</a> to see the comment or <a href="https://aws.bouc.as/jekyll-discuss/unsubscribe/{{ unsubscribe }}">unsubscribe</a> from future notifications.<br><br>
-
-Best,<br>
-Eduardo
+# The resolved path will be _data/posts/this-is-a-post
 ```
 
-The first line of the file, wrapped inside HTML comments, will be used as the subject of the email messages that use this template. The `{{ subscriber }}`, `{{ commenter }}`, `{{ link }}` and `{{ unsubscribe }}` placeholders will be automatically replaced by the values passed by the `subscriptions` module:
+### `requiredFields`
 
-```javascript
-var data = {
-	title: parsedData['post-title'],
-	slug: parsedData['post-slug'],
-	link: parsedData['post-url'],
-	subscriber: subscription.name,
-	commenter: parsedData['name'],
-	unsubscribe: subscription._id
-};
+An array with the names of fields that must exist in a request. If any of these is not present, the insert operation is aborted and an error will be thrown.
 
-mailman.send('new-comment', subscription.email, data, function (body, error) {
-	if (error) {
-		console.log('[!] Error sending email: ' + error);
-	}
-});
+*Example:*
+
+```yml
+requiredFields: ['name', 'comment']
 ```
+
+### `transforms`
+
+Transforms allow you to run server-side logic to modify the content of certain fields.
+
+*Example:*
+
+You could use a transform to encode the `email` field using MD5 in order to use [Gravatar](https://en.gravatar.com/site/implement/hash/).
+
+```yml
+transforms:
+  email: 'md5'
+```
+
+Currently, only `md5` is supported.
