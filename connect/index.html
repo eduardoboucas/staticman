@@ -1,0 +1,30 @@
+---
+layout: default
+title: Connect a repository
+---
+<form method="post" action="/account/new">
+	  
+	<input type="hidden" name="_csrf" value="{_csrf}">
+
+	<h2 class="heading heading--2">Almost there!</h2>
+	<p>I just need you to confirm a few details so I can create your account.</p>
+
+	<div class="form-group">
+		<label class="label" for="account-name">GitHub username</label>
+		<input class="text-field  
+			   id="account-name" 
+			   name="name" 
+			   type="text" 
+			   placeholder="e.g. eduardoboucas"
+			   required>
+	</div>
+
+	<div class="form-group">
+		<label class="label" for="account-email">Repository</label>
+		<input class="text-field" name="email" type="text" placeholder="e.g. staticman" required>
+	</div>
+
+	<div class="form-group">
+		<button type="submit" class="button">Save</button>
+	</div>
+</form>

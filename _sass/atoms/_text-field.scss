@@ -31,7 +31,7 @@ $text-field-transition: (box-shadow border background-color);
     }
 }
 
-.text-field:invalid,
+.text-field:focus:required:invalid,
 .text-field--invalid {
     background-color: lighten($color-error, 32);
     border: 1px solid $color-error;
