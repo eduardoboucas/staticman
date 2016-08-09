@@ -17,6 +17,7 @@ module.exports = (config) => {
         fields: fields
       })
     }).catch((err) => {
+      console.log('** ERR:', err);
       res.status(500).send(err)
     })
   })
