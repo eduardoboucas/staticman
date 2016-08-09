@@ -82,7 +82,7 @@ The name of the file, within `path`, where the data will be saved. Defaults to a
 
 It supports placeholders, allowing you to use any of the elements sent in `options` or `fields` in the request to build the path, as well as:
 
-- `{@timestamp}: Gets replaced by the current Unix timestamp
+- `{@timestamp}`: Gets replaced by the current Unix timestamp
 
 *Example:*
 
@@ -118,7 +118,7 @@ The path within the repository where data files should be stored.
 
 It supports placeholders, allowing you to use any of the elements sent in `options` or `fields` in the request to build the path, as well as:
 
-- `{@timestamp}: Gets replaced by the current Unix timestamp
+- `{@timestamp}`: Gets replaced by the current Unix timestamp
 
 *Example:*
 
