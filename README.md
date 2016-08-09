@@ -76,6 +76,22 @@ The name of the branch to upload files to. If it doesn't match the branch sent a
 branch: 'gh-pages'
 ```
 
+### `filename`
+
+The name of the file, within `path`, where the data will be saved. Defaults to a hash computed with the name of the repo and the current timestamp.
+
+It supports placeholders, allowing you to use any of the elements sent in `options` or `fields` in the request to build the path, as well as:
+
+- `{@timestamp}: Gets replaced by the current Unix timestamp
+
+*Example:*
+
+```yml
+filename: entry{@timestamp}
+
+# The resolved path will be _data/posts/entry1470750784949.json
+```
+
 ### `format` (required)
 
 The format of the output data files. Currently `json` and `yaml` are supported.
@@ -100,7 +116,9 @@ moderation: true
 
 The path within the repository where data files should be stored. 
 
-It supports placeholders, allowing you to use any of the elements sent in `options` or `fields` in the request to build the path.
+It supports placeholders, allowing you to use any of the elements sent in `options` or `fields` in the request to build the path, as well as:
+
+- `{@timestamp}: Gets replaced by the current Unix timestamp
 
 *Example:*
 
