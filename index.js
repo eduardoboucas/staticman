@@ -1,8 +1,8 @@
 var bodyParser = require('body-parser')
 var express = require('express')
 var ExpressBrute = require('express-brute')
+var GithubWebHook = require('express-github-webhook')
 var objectPath = require('object-path')
-
 
 // ------------------------------------
 // Config
@@ -26,6 +26,12 @@ config.akismetApiKey = config.akismetApiKey || process.env.AKISMET_API_KEY
 var server = express()
 server.use(bodyParser.json())
 server.use(bodyParser.urlencoded({extended: true}))
+
+// GitHub webhook middleware
+var webhookHandler = GithubWebHook({
+  path: '/v1/webhook'
+})
+server.use(webhookHandler)
 
 // Brute force protection
 var store = new ExpressBrute.MemoryStore()
@@ -62,10 +68,13 @@ var requireParams = (params) => {
 }
 
 // Route: connect
-server.get('/v1/connect/:username/:repository', bruteforce.prevent, require('./routes/connect')(config))
+server.get('/v1/connect/:username/:repository', bruteforce.prevent, require('./controllers/connect')(config))
 
 // Route: process
-server.post('/v1/entry/:username/:repository/:branch', bruteforce.prevent, requireParams(['fields']), require('./routes/process')(config))
+server.post('/v1/entry/:username/:repository/:branch', bruteforce.prevent, requireParams(['fields']), require('./controllers/process')(config))
+
+// GitHub webhook route
+webhookHandler.on('pull_request', require('./controllers/handlePR')(config))
 
 server.listen(config.port, function () {
   console.log('[Staticman] Server listening on port', config.port)
