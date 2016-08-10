@@ -68,15 +68,13 @@ var requireParams = (params) => {
 }
 
 // Route: connect
-server.get('/v1/connect/:username/:repository', bruteforce.prevent, require('./routes/connect')(config))
+server.get('/v1/connect/:username/:repository', bruteforce.prevent, require('./controllers/connect')(config))
 
 // Route: process
-server.post('/v1/entry/:username/:repository/:branch', bruteforce.prevent, requireParams(['fields']), require('./routes/process')(config))
+server.post('/v1/entry/:username/:repository/:branch', bruteforce.prevent, requireParams(['fields']), require('./controllers/process')(config))
 
 // GitHub webhook route
-webhookHandler.on('pull_request', (repo, data) => {
-  console.log(data)
-})
+webhookHandler.on('pull_request', require('./controllers/handlePR')(config))
 
 server.listen(config.port, function () {
   console.log('[Staticman] Server listening on port', config.port)
