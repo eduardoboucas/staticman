@@ -11,13 +11,17 @@ module.exports = (config) => {
 
     staticman.setIp(req.headers['x-forwarded-for'] || req.connection.remoteAddress)
 
-    staticman.process(fields, options).then((fields) => {
-      res.send({
-        success: true,
-        fields: fields
-      })
+    staticman.process(fields, options).then((data) => {
+      if (data.redirect) {
+        res.redirect(data.redirect)
+      } else {
+        res.send({
+          success: true,
+          fields: data.fields
+        })
+      }
     }).catch((err) => {
-      console.log('** ERR:', err.stack);
+      console.log('** ERR:', err.stack || err);
       res.status(500).send(err)
     })
   })
