@@ -2,6 +2,8 @@ var GitHubApi = require('github')
 
 module.exports = (config) => {
   return ((req, res) => {
+    var ua = config.uaTrackingId ? require('universal-analytics')(config.uaTrackingId) : null
+
     var github = new GitHubApi({
       debug: false,
       protocol: 'https',
@@ -38,8 +40,16 @@ module.exports = (config) => {
       }
     }).then((response) => {
       res.send('OK!')
+
+      if (ua) {
+        ua.event('Repositories', 'Connect').send()
+      }
     }).catch((err) => {
       res.status(500).send('Error')
+
+      if (ua) {
+        ua.event('Repositories', 'Connect error').send()
+      }
     })
   })
 }
