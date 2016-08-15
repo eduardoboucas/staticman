@@ -18,6 +18,7 @@ config.port = config.port || process.env.PORT
 config.githubToken = config.githubToken || process.env.GITHUB_TOKEN
 config.akismetSite = config.akismetSite || process.env.AKISMET_SITE
 config.akismetApiKey = config.akismetApiKey || process.env.AKISMET_API_KEY
+config.uaTrackingId = config.uaTrackingId || process.env.UA_TRACKING_ID
 
 // ------------------------------------
 // Server

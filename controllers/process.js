@@ -2,6 +2,7 @@ var Staticman = require('../lib/Staticman')
 
 module.exports = (config) => {
   return ((req, res) => {
+    var ua = config.uaTrackingId ? require('universal-analytics')(config.uaTrackingId) : null
     var fields = req.query.fields || req.body.fields
     var options = req.query.options || req.body.options || {}
 
@@ -20,9 +21,17 @@ module.exports = (config) => {
           fields: data.fields
         })
       }
+
+      if (ua) {
+        ua.event('Entries', 'New entry').send()
+      }
     }).catch((err) => {
       console.log('** ERR:', err.stack || err);
       res.status(500).send(err)
+
+      if (ua) {
+        ua.event('Entries', 'New entry error').send()
+      }
     })
   })
 }

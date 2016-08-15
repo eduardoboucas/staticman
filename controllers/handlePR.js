@@ -2,6 +2,8 @@ var GitHubApi = require('github')
 
 module.exports = (config) => {
   return (repo, data) => {
+    var ua = config.uaTrackingId ? require('universal-analytics')(config.uaTrackingId) : null
+
     if (data.number) {
       var github = new GitHubApi({
         debug: false,
@@ -32,8 +34,16 @@ module.exports = (config) => {
             ref: 'heads/' + response.head.ref
           })
         }
+      }).then((response) => {
+        if (ua) {
+          ua.event('Hooks', 'Delete branch').send()
+        }
       }).catch((err) => {
-        console.log(err.stack)
+        console.log(err.stack || err)
+
+        if (ua) {
+          ua.event('Hooks', 'Delete branch error').send()
+        }
       })
     }
   }
