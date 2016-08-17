@@ -5,7 +5,13 @@ url: "https://staticman.net"
 
 markdown: kramdown
 
+exclude:
+  - node_modules
+
 # Serving
 detach:  false
 port:    4400
 host:    0.0.0.0
+
+gems:
+  - jekyll-redirect-from

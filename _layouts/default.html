@@ -8,7 +8,7 @@
   	{% include partials/masthead.html %}
     
 
-    <main class="content cf">
+    <main class="content {{ layout.bodyClass }} {{ page.bodyClass }} cf">
         {{ content }}
     </main>
 

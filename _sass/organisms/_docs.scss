@@ -1,0 +1,22 @@
+$nav-width: 320px;
+
+.docs {
+	position: relative;
+}
+
+.docs__nav {
+	padding: 15px;
+	margin-bottom: 30px;
+
+	@include media('>=tablet') {
+		position: absolute;
+		margin-bottom: 0;
+		width: $nav-width;		
+	}
+}
+
+.docs__content {
+	@include media('>=tablet') {
+		padding-left: $nav-width + 20px;	
+	}
+}

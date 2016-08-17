@@ -1,0 +1,21 @@
+---
+layout: docs
+title: Webhooks
+permalink: /docs/webhooks
+weight: 1
+---
+<p>When using moderation, Staticman will push content to a new branch and create a PR for your approval. The branches created by Staticman are just like any other branch in the repository, and it's up to you to manage it, including deleting it after the PR has been merged or closed.</p>
+
+<p>To avoid inactive branches from piling up, Staticman can automatically delete these branches for you after a PR has been merged or closed. Here's how.</p>
+
+<h2 class="heading heading--room heading--2">Setting up a webhook</h2>
+
+<p>Go to the <strong>Settings</strong> page of your GitHub repository, then select <strong>Webhooks &amp; services</strong>. Click on <strong>Add webhook</strong> and use the following options:</p>
+
+<ul class="list list--unordered">
+	<li class="list__item"><strong>Payload URL</strong>: <code>https://api.staticman.net/v1/webhook</code></li>
+	<li class="list__item"><strong>Content type</strong>: <code>application/json</code></li>
+	<li class="list__item"><strong>Secret</strong>: (empty)</li>
+	<li class="list__item"><strong>Which events would you like to trigger this webhook?</strong>: "Let me select individual events" and then select the "Pull request" event</li>
+	<li class="list__item"><strong>Active</strong>: Checked.</li>
+</ul>

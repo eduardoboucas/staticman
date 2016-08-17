@@ -1,0 +1,27 @@
+---
+layout: default
+bodyClass: docs
+breadcrumbs:
+  - link: /docs
+    label: Documentation
+---
+<aside class="docs__nav side-nav">
+	<ul>
+	{% assign sitePages = site.pages | sort: 'weight' %}
+	{% for sitePage in sitePages %}
+		{% if sitePage.layout == 'docs' %}
+			<li class="side-nav__item">
+				{% if sitePage.url == page.url %}
+					{{ sitePage.title }}
+				{% else %}
+					<a class="cta" href="{{ sitePage.url }}">{{ sitePage.title }}</a>
+				{% endif %}
+			</li>
+		{% endif %}
+	{% endfor %}
+	</ul>
+</aside>
+
+<div class="docs__content">
+	{{ content }}
+</div>

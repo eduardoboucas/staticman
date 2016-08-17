@@ -1,0 +1,16 @@
+.demo {
+	
+}
+
+.demo__cta {
+	text-align: center;
+	margin: 40px 0;
+
+	* + * {
+		margin-left: 20px;
+	}
+}
+
+.demo__video {
+	text-align: center;
+}

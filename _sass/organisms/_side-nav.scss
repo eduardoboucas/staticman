@@ -1,0 +1,7 @@
+.side-nav {
+	background-color: $color-background-shade-1;
+}
+
+.side-nav__item + .side-nav__item {
+	margin-top: 10px;
+}

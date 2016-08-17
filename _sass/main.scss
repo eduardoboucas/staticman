@@ -41,9 +41,10 @@
 @import 'molecules/tile';
 
 // Import organisms
-@import 'organisms/edit-site';
+@import 'organisms/demo';
+@import 'organisms/docs';
 @import 'organisms/footer';
 @import 'organisms/header';
 @import 'organisms/intro-animation';
 @import 'organisms/masthead';
-@import 'organisms/site';
+@import 'organisms/side-nav';
