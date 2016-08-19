@@ -16,6 +16,28 @@ $nav-width: 320px;
 }
 
 .docs__content {
+	h2 {
+		@extend .heading;
+		@extend .heading--room;
+		@extend .heading--2;
+	}
+
+	img {
+		@extend .standalone-image;	
+	}
+
+	a {
+		@extend .cta;
+	}
+
+	ul {
+		@extend .list--unordered;
+	}
+
+	li {
+		@extend .list__item;
+	}
+
 	@include media('>=tablet') {
 		padding-left: $nav-width + 20px;	
 	}
