@@ -1,5 +1,19 @@
 var Staticman = require('../lib/Staticman')
 
+function createConfigObject(apiVersion) {
+  var remoteConfig = {}
+
+  if (apiVersion === '1') {
+    remoteConfig.file = '_config.yml'
+    remoteConfig.path = 'staticman'
+  } else {
+    remoteConfig.file = 'staticman.yml'
+    remoteConfig.path = ''
+  }
+
+  return remoteConfig
+}
+
 module.exports = (config) => {
   return ((req, res) => {
     var ua = config.uaTrackingId ? require('universal-analytics')(config.uaTrackingId) : null
@@ -10,6 +24,7 @@ module.exports = (config) => {
 
     var staticman = new Staticman(options, config)
 
+    staticman.setConfig(createConfigObject(res.locals.apiVersion))
     staticman.setIp(req.headers['x-forwarded-for'] || req.connection.remoteAddress)
 
     staticman.process(fields, options).then((data) => {

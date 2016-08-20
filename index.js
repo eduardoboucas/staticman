@@ -9,6 +9,7 @@ var objectPath = require('object-path')
 // ------------------------------------
 
 var config = {}
+var versions = ['1', '2']
 
 try {
   config = require(__dirname + '/config.json')
@@ -46,6 +47,20 @@ server.use((req, res, next) => {
   next()
 })
 
+var checkApiVersion = (req, res, next) => {
+  if (versions.indexOf(req.params.version) === -1) {
+    return res.status(500).send({
+      success: false,
+      errorCode: 'INVALID_VERSION'
+    })
+  }
+
+  res.locals.apiVersion = req.params.version
+  delete req.params.version
+
+  return next()
+}
+
 var requireParams = (params) => {
   return function (req, res, next) {
     var missingParams = []
@@ -69,10 +84,17 @@ var requireParams = (params) => {
 }
 
 // Route: connect
-server.get('/v1/connect/:username/:repository', bruteforce.prevent, require('./controllers/connect')(config))
+server.get('/v:version/connect/:username/:repository',
+           checkApiVersion,
+           bruteforce.prevent,
+           require('./controllers/connect')(config))
 
 // Route: process
-server.post('/v1/entry/:username/:repository/:branch', bruteforce.prevent, requireParams(['fields']), require('./controllers/process')(config))
+server.post('/v:version/entry/:username/:repository/:branch',
+            checkApiVersion,
+            bruteforce.prevent,
+            requireParams(['fields']),
+            require('./controllers/process')(config))
 
 // GitHub webhook route
 webhookHandler.on('pull_request', require('./controllers/handlePR')(config))
