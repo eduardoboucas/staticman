@@ -32,10 +32,20 @@ $nav-width: 320px;
 
 	ul {
 		@extend .list--unordered;
+
+		margin-bottom: 30px;
 	}
 
 	li {
 		@extend .list__item;
+	}
+
+	em {
+		font-style: italic;
+	}
+
+	.highlight {
+		margin-bottom: 40px;
 	}
 
 	@include media('>=tablet') {

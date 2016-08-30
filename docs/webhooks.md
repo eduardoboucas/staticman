@@ -2,7 +2,7 @@
 layout: docs
 title: Webhooks
 permalink: /docs/webhooks
-weight: 1
+weight: 2
 ---
 When using moderation, Staticman will push content to a new branch and create a PR for your approval. The branches created by Staticman are just like any other branch in the repository, and it's up to you to manage it, including deleting it after the PR has been merged or closed.
 
