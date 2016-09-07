@@ -43,9 +43,13 @@ The following markup shows how the form for a simple commenting system would loo
   <!-- e.g. "2016-01-02-this-is-a-post" -->
   <input name="options[slug]" type="hidden" value="{{ page.slug }}">
 
-  <input name="fields[name]" type="text">
-  <input name="fields[email]" type="email">
-  <textarea name="fields[message]"></textarea>
+  <label for="messageName">Name</label>
+  <input id="messageName" name="fields[name]" type="text">
+  <label for="messageEmail">e-mail</label>
+  <input id="messageEmail" name="fields[email]" type="email">
+  <label for="messageMessage">Message</label>
+  <textarea id="messageMessage" name="fields[message]"></textarea>
+  
 
   <button type="submit">Go!</button>
 </form>
