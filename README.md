@@ -33,9 +33,9 @@ A simple data file with `name`, `email` and `comment` could be created using the
 
 ```html
 <form method="POST" action="http://your-staticman-url/v1/entry/eduardoboucas/my-site-repo/gh-pages">
-  <input name="fields[name]" type="text">
-  <input name="fields[email]" type="email">
-  <textarea name="fields[comment]"></textarea>
+  <label><input name="fields[name]" type="text">Name</label>
+  <label><input name="fields[email]" type="email">E-mail</label>
+  <label><textarea name="fields[comment]"></textarea>Comment</label>
   
   <button type="submit">Send</button>
 </form>
