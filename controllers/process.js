@@ -26,6 +26,7 @@ module.exports = (config) => {
 
     staticman.setConfig(createConfigObject(res.locals.apiVersion))
     staticman.setIp(req.headers['x-forwarded-for'] || req.connection.remoteAddress)
+    staticman.setUserAgent(req.headers['user-agent'])
 
     staticman.process(fields, options).then((data) => {
       if (data.redirect) {
