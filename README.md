@@ -4,6 +4,17 @@
 
 > Static sites with superpowers
 
+## Table of contents
+
+1. [Introduction](#introduction)
+1. [Prerequisites](#prerequisites)
+1. [Adding an entry](#adding-an-entry)
+1. [API configuration](#api-configuration)
+1. [Jekyll configuration](#jekyll-configuration)
+1. [Sites using Staticman](#sites-using-staticman)
+
+---
+
 ## Introduction
 
 Staticman is a Node.js application that receives user-generated content and uploads it as data files to a GitHub repository. In practice, this allows you to have dynamic content (e.g. blog post comments) as part of a fully static Jekyll site running on GitHub Pages.
@@ -41,9 +52,9 @@ A simple data file with `name`, `email` and `comment` could be created using the
 </form>
 ```
 
-## Middleman configuration
+## API configuration
 
-These parameters configure the Staticman Node.js application. They can be supplied as part of a local config file (`config.json`) or environment variables.
+These parameters configure the Staticman Node.js API. They can be supplied as part of a local config file (`config.json`) or environment variables.
 
 | Config file key | Environment variable | Description | Required |
 |-----------------|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
@@ -55,3 +66,10 @@ These parameters configure the Staticman Node.js application. They can be suppli
 ## Jekyll configuration
 
 Parameters used to configure Jekyll can be found [here](https://staticman.net/docs/configuration).
+
+## Sites using Staticman
+
+- [Popcorn](http://popcorn.staticman.net) — [Source](https://github.com/eduardoboucas/popcorn)
+- [eduardoboucas.com](https://eduardoboucas.com) — [Source](https://github.com/eduardoboucas/eduardoboucas.github.io)
+- [Made Mistakes](https://mademistakes.com/) — [Source](https://github.com/mmistakes/made-mistakes-jekyll)
+- [Minimal Mistakes theme](https://mmistakes.github.io/minimal-mistakes/) — [Source](https://github.com/mmistakes/minimal-mistakes)
