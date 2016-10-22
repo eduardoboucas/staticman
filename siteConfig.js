@@ -20,12 +20,12 @@ const schema = convict({
     author: {
       doc: 'Name of the field to be used as the comment author',
       format: String,
-      default: null
+      default: ""
     },
     content: {
       doc: 'Name of the field to be used as the comment body',
       format: String,
-      default: null
+      default: ""
     }
   },
   branch: {
@@ -61,7 +61,7 @@ const schema = convict({
   name: {
     doc: 'Human-friendly name for the site/property',
     format: String,
-    default: null
+    default: ""
   },
   notifications: {
     enabled: {
