@@ -4,6 +4,7 @@
   "description": "Static sites with superpowers",
   "main": "index.js",
   "scripts": {
+    "prestart": "if [ ! -d node_modules ]; then npm install; fi",
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

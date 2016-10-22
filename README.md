@@ -41,11 +41,12 @@ To start the service:
 In development mode the source code is mounted from the host.
 You can see any changes you made in the sources by simply restarting the container.
 
-If you have not done before, to install `npm` dependencies run:  
-`docker-compose -f docker-compose.development.yml run staticman npm install`
-
 To start the service:  
 `docker-compose -f docker-compose.development.yml up`
+
+### Usage
+
+Simply use your IP address or `localhost` as the Staticman API address.
 
 ## Adding an entry
 
