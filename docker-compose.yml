@@ -1,0 +1,8 @@
+version: '2'
+services:
+  staticman:
+    build: .
+    env_file: .env
+    environment:
+      - NODE_ENV=production
+    network_mode: "host"
