@@ -4,6 +4,18 @@
 
 > Static sites with superpowers
 
+## Table of contents
+
+1. [Introduction](#introduction)
+1. [Prerequisites](#prerequisites)
+1. [Running on Docker](#running-on-docker)
+1. [Adding an entry](#adding-an-entry)
+1. [API configuration](#api-configuration)
+1. [Jekyll configuration](#jekyll-configuration)
+1. [Sites using Staticman](#sites-using-staticman)
+
+---
+
 ## Introduction
 
 Staticman is a Node.js application that receives user-generated content and uploads it as data files to a GitHub repository. In practice, this allows you to have dynamic content (e.g. blog post comments) as part of a fully static Jekyll site running on GitHub Pages.
@@ -24,29 +36,33 @@ http://your-staticman-url/v1/connect/{GitHub username}/{GitHub repository}
 
 ## Running on Docker
 
-With Docker it is easy to run Staticman on any environment without downloading, configuring or installing anything 
-manually on your host other than Docker and Docker Compose.
+With Docker, it's easy to run Staticman on any environment without downloading, configuring or installing anything manually on your host other than Docker and Docker Compose.
 
-First, you need to install [Docker](https://docs.docker.com/engine/installation/) and [Docker Compose](https://docs.docker.com/compose/install/) and you are ready to go.
+First, you need to install [Docker](https://docs.docker.com/engine/installation/) and [Docker Compose](https://docs.docker.com/compose/install/).
 
 ### Production
 
-In production mode the project source is imported and dependencies installed to the container.
+In production mode, the project source is imported and dependencies installed to the container.
 
 To start the service:  
-`docker-compose up`
+
+```shell
+docker-compose up
+```
 
 ### Development
 
-In development mode the source code is mounted from the host.
-You can see any changes you made in the sources by simply restarting the container.
+In development mode, the source code is mounted from the host. You can see any changes you made in the sources by simply restarting the container.
 
-To start the service:  
-`docker-compose -f docker-compose.development.yml up`
+To start the service: 
+
+```shell 
+docker-compose -f docker-compose.development.yml up
+```
 
 ### Usage
 
-Simply use your IP address or `localhost` as the Staticman API address.
+Use your IP address or `localhost` as the Staticman API address.
 
 ## Adding an entry
 
@@ -67,9 +83,9 @@ A simple data file with `name`, `email` and `comment` could be created using the
 </form>
 ```
 
-## Middleman configuration
+## API configuration
 
-These parameters configure the Staticman Node.js application. They can be supplied as part of a local config file (`config.json`) or environment variables.
+These parameters configure the Staticman Node.js API. They can be supplied as part of a local config file (`config.json`) or environment variables.
 
 | Config file key | Environment variable | Description | Required |
 |-----------------|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
@@ -81,3 +97,11 @@ These parameters configure the Staticman Node.js application. They can be suppli
 ## Jekyll configuration
 
 Parameters used to configure Jekyll can be found [here](https://staticman.net/docs/configuration).
+
+## Sites using Staticman
+
+- [Popcorn](http://popcorn.staticman.net) — [Source](https://github.com/eduardoboucas/popcorn)
+- [eduardoboucas.com](https://eduardoboucas.com) — [Source](https://github.com/eduardoboucas/eduardoboucas.github.io)
+- [Made Mistakes](https://mademistakes.com/) — [Source](https://github.com/mmistakes/made-mistakes-jekyll)
+- [Minimal Mistakes theme](https://mmistakes.github.io/minimal-mistakes/) — [Source](https://github.com/mmistakes/minimal-mistakes)
+
