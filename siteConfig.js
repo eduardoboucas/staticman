@@ -31,10 +31,25 @@ module.exports = (data, rsa) => {
         format: String,
         default: ""
       },
+      authorEmail: {
+        doc: 'Name of the field to be used as the comment author\'s email',
+        format: String,
+        default: ""
+      },
+      authorUrl: {
+        doc: 'Name of the field to be used as the comment author\'s URL',
+        format: String,
+        default: ""
+      },
       content: {
         doc: 'Name of the field to be used as the comment body',
         format: String,
         default: ""
+      },
+      type: {
+        doc: 'Type of comment to be sent to Akismet',
+        format: String,
+        default: "comment"
       }
     },
     branch: {

@@ -104,4 +104,3 @@ Parameters used to configure Jekyll can be found [here](https://staticman.net/do
 - [eduardoboucas.com](https://eduardoboucas.com) — [Source](https://github.com/eduardoboucas/eduardoboucas.github.io)
 - [Made Mistakes](https://mademistakes.com/) — [Source](https://github.com/mmistakes/made-mistakes-jekyll)
 - [Minimal Mistakes theme](https://mmistakes.github.io/minimal-mistakes/) — [Source](https://github.com/mmistakes/minimal-mistakes)
-
