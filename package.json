@@ -26,6 +26,7 @@
     "express-github-webhook": "^1.0.5",
     "github": "^3.0.0",
     "js-yaml": "^3.6.1",
+    "markdown-table": "^1.0.0",
     "md5": "^2.1.0",
     "node-rsa": "^0.4.2",
     "node-uuid": "^1.4.7",
