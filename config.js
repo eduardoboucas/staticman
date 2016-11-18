@@ -48,11 +48,17 @@ const schema = convict({
     env: 'RSA_PRIVATE_KEY'
   },
   email: {
-    sparkpostApiKey: {
-      doc: 'SparkPost API key',
+    apiKey: {
+      doc: 'Email service API key',
       format: String,
       default: null,
-      env: 'SPARKPOST_API_KEY'
+      env: 'EMAIL_API_KEY'
+    },
+    domain: {
+      doc: 'Email service domain',
+      format: String,
+      default: 'staticman.net',
+      env: 'EMAIL_DOMAIN'
     },
     fromAddress: {
       doc: 'Email address to send notifications as',

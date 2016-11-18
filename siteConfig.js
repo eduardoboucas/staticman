@@ -92,6 +92,16 @@ module.exports = (data, rsa) => {
         doc: 'Whether to enable reply notifications',
         format: Boolean,
         default: false
+      },
+      apiKey: {
+        doc: 'Mailgun API key',
+        format: 'EncryptedString',
+        default: null
+      },
+      domain: {
+        doc: 'Mailgun domain',
+        format: 'EncryptedString',
+        default: null
       }
     },
     path: {
