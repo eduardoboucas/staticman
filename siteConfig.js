@@ -18,7 +18,7 @@ module.exports = (data, rsa) => {
     allowedOrigins: {
       doc: 'Domains to be allowed as origins',
       format: Array,
-      default: null
+      default: []
     },
     akismet: {
       enabled: {
@@ -75,7 +75,7 @@ module.exports = (data, rsa) => {
     generatedFields: {
       doc: 'List of fields to be appended to entries automatically',
       format: Object,
-      default: null
+      default: {}
     },
     moderation: {
       doc: 'Whether entries need to be approved before being submitted to the main branch',
