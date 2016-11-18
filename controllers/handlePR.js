@@ -1,50 +1,51 @@
-var GitHubApi = require('github')
+'use strict'
 
-module.exports = (config) => {
-  return (repo, data) => {
-    var ua = config.uaTrackingId ? require('universal-analytics')(config.uaTrackingId) : null
+const config = require(__dirname + '/../config')
+const GitHubApi = require('github')
 
-    if (data.number) {
-      var github = new GitHubApi({
-        debug: false,
-        protocol: 'https',
-        host: 'api.github.com',
-        pathPrefix: '',
-        headers: {
-          'user-agent': 'Staticman agent'
-        },
-        timeout: 5000,
-        Promise: Promise
-      })
+module.exports = (repo, data) => {
+  const ua = config.get('analytics.uaTrackingId') ? require('universal-analytics')(config.get('analytics.uaTrackingId')) : null
 
-      github.authenticate({
-        type: 'oauth',
-        token: config.githubToken
-      })
+  if (data.number) {
+    const github = new GitHubApi({
+      debug: false,
+      protocol: 'https',
+      host: 'api.github.com',
+      pathPrefix: '',
+      headers: {
+        'user-agent': 'Staticman agent'
+      },
+      timeout: 5000,
+      Promise: Promise
+    })
 
-      github.pullRequests.get({
-        user: data.repository.owner.login,
-        repo: data.repository.name,
-        number: data.number
-      }).then((response) => {
-        if ((response.state === 'closed') && (response.head.ref.indexOf('staticman_') === 0)) {
-          return github.gitdata.deleteReference({
-            user: data.repository.owner.login,
-            repo: data.repository.name,
-            ref: 'heads/' + response.head.ref
-          })
-        }
-      }).then((response) => {
-        if (ua) {
-          ua.event('Hooks', 'Delete branch').send()
-        }
-      }).catch((err) => {
-        console.log(err.stack || err)
+    github.authenticate({
+      type: 'oauth',
+      token: config.get('githubToken')
+    })
 
-        if (ua) {
-          ua.event('Hooks', 'Delete branch error').send()
-        }
-      })
-    }
+    github.pullRequests.get({
+      user: data.repository.owner.login,
+      repo: data.repository.name,
+      number: data.number
+    }).then((response) => {
+      if ((response.state === 'closed') && (response.head.ref.indexOf('staticman_') === 0)) {
+        return github.gitdata.deleteReference({
+          user: data.repository.owner.login,
+          repo: data.repository.name,
+          ref: 'heads/' + response.head.ref
+        })
+      }
+    }).then((response) => {
+      if (ua) {
+        ua.event('Hooks', 'Delete branch').send()
+      }
+    }).catch((err) => {
+      console.log(err.stack || err)
+
+      if (ua) {
+        ua.event('Hooks', 'Delete branch error').send()
+      }
+    })
   }
 }

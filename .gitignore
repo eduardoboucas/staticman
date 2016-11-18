@@ -1,2 +1,5 @@
 config.json
+config.*.json
+!config.example.json
 node_modules/
+staticman_key
