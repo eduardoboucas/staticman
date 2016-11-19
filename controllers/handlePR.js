@@ -42,7 +42,7 @@ module.exports = (repo, data) => {
       }
 
       if (response.merged) {
-        const bodyMatch = response.body.match(/(?:.*?)<!--staticman_notification(.+?)-->(?:.*?)/i)
+        const bodyMatch = response.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
 
         if (bodyMatch.length === 2) {
           console.log('*** PR BODY:', bodyMatch[1])
