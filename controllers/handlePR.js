@@ -29,6 +29,8 @@ module.exports = (repo, data) => {
       repo: data.repository.name,
       number: data.number
     }).then(response => {
+      console.log('** PR:', response)
+
       if ((response.state === 'closed') && (response.head.ref.indexOf('staticman_') === 0)) {
         return github.gitdata.deleteReference({
           user: data.repository.owner.login,
