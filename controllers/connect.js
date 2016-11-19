@@ -12,7 +12,8 @@ module.exports = ((req, res) => {
     host: 'api.github.com',
     pathPrefix: '',
     headers: {
-      'user-agent': 'Staticman agent'
+      'user-agent': 'Staticman agent',
+      'Accept': 'application/vnd.github.swamp-thing-preview+json'
     },
     timeout: 5000,
     Promise: Promise
@@ -23,10 +24,10 @@ module.exports = ((req, res) => {
     token: config.get('githubToken')
   })
 
-  github.users.getRepoInvites({}).then((response) => {
+  github.users.getRepoInvites({}).then(response => {
     let invitationId
 
-    const invitation = response.some((invitation) => {
+    const invitation = response.some(invitation => {
       if (invitation.repository.full_name === (req.params.username + '/' + req.params.repository)) {
         invitationId = invitation.id
 
@@ -41,13 +42,15 @@ module.exports = ((req, res) => {
     } else {
       return Promise.reject()
     }
-  }).then((response) => {
+  }).then(response => {
     res.send('OK!')
 
     if (ua) {
       ua.event('Repositories', 'Connect').send()
     }
-  }).catch((err) => {
+  }).catch(err => {
+    console.log(err.stack || err)
+
     res.status(500).send('Error')
 
     if (ua) {
