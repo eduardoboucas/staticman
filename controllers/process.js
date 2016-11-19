@@ -22,13 +22,13 @@ module.exports = ((req, res) => {
   const fields = req.query.fields || req.body.fields
   const options = req.query.options || req.body.options || {}
 
-  var staticman = new Staticman(Object.assign({}, options, req.params))
+  var staticman = new Staticman(req.params)
 
   staticman.setConfig(createConfigObject(res.locals.apiVersion, req.params.property))
   staticman.setIp(req.headers['x-forwarded-for'] || req.connection.remoteAddress)
   staticman.setUserAgent(req.headers['user-agent'])
 
-  staticman.process(fields, options).then((data) => {
+  staticman.processEntry(fields, options).then(data => {
     if (data.redirect) {
       res.redirect(data.redirect)
     } else {
@@ -41,7 +41,7 @@ module.exports = ((req, res) => {
     if (ua) {
       ua.event('Entries', 'New entry').send()
     }
-  }).catch((err) => {
+  }).catch(err => {
     console.log('** ERR:', err.stack || err);
     res.status(500).send(err)
 

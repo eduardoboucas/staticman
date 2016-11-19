@@ -29,14 +29,24 @@ module.exports = (repo, data) => {
       repo: data.repository.name,
       number: data.number
     }).then(response => {
-      console.log('** PR:', response)
+      if (response.head.ref.indexOf('staticman_')) {
+        return null
+      }
 
-      if ((response.state === 'closed') && (response.head.ref.indexOf('staticman_') === 0)) {
+      if (response.state === 'closed') {
         return github.gitdata.deleteReference({
           user: data.repository.owner.login,
           repo: data.repository.name,
           ref: 'heads/' + response.head.ref
         })
+      }
+
+      if (response.merged) {
+        const bodyMatch = response.body.match(/(?:.*?)<!--staticman_notification(.+?)-->(?:.*?)/i)
+
+        if (bodyMatch.length === 2) {
+          console.log('*** PR BODY:', bodyMatch[1])
+        }
       }
     }).then(response => {
       if (ua) {
