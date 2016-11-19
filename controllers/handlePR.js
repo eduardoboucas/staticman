@@ -28,7 +28,7 @@ module.exports = (repo, data) => {
       user: data.repository.owner.login,
       repo: data.repository.name,
       number: data.number
-    }).then((response) => {
+    }).then(response => {
       if ((response.state === 'closed') && (response.head.ref.indexOf('staticman_') === 0)) {
         return github.gitdata.deleteReference({
           user: data.repository.owner.login,
@@ -36,11 +36,11 @@ module.exports = (repo, data) => {
           ref: 'heads/' + response.head.ref
         })
       }
-    }).then((response) => {
+    }).then(response => {
       if (ua) {
         ua.event('Hooks', 'Delete branch').send()
       }
-    }).catch((err) => {
+    }).catch(err => {
       console.log(err.stack || err)
 
       if (ua) {

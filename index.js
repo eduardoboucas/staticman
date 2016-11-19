@@ -57,7 +57,7 @@ const requireParams = (params) => {
   return function (req, res, next) {
     let missingParams = []
 
-    params.forEach((param) => {
+    params.forEach(param => {
       if ((objectPath.get(req.query, param) === undefined) && (objectPath.get(req.body, param) === undefined)) {
         missingParams.push(param)
       }
@@ -97,6 +97,6 @@ server.post('/v:version/entry/:username/:repository/:branch/:property',
 // GitHub webhook route
 webhookHandler.on('pull_request', require('./controllers/handlePR'))
 
-server.listen(config.get('port'), function () {
+server.listen(config.get('port'), () => {
   console.log('[Staticman] Server listening on port', config.get('port'))
 })
