@@ -2,6 +2,7 @@
 
 const config = require(__dirname + '/../config')
 const GitHubApi = require('github')
+const Staticman = require('../lib/Staticman')
 
 module.exports = (repo, data) => {
   const ua = config.get('analytics.uaTrackingId') ? require('universal-analytics')(config.get('analytics.uaTrackingId')) : null
@@ -33,20 +34,30 @@ module.exports = (repo, data) => {
         return null
       }
 
+      if (response.merged) {
+        const bodyMatch = response.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
+
+        if (bodyMatch.length === 2) {
+          try {
+            const parsedBody = JSON.parse(bodyMatch[1])
+            const staticman = new Staticman(parsedBody.parameters)
+
+            staticman.setConfigPath(parsedBody.configPath)
+            staticman.processMerge(parsedBody.fields, parsedBody.options).catch(err => {
+              return Promise.reject(err)
+            })
+          } catch (err) {
+            return Promise.reject(err)
+          }
+        }
+      }
+
       if (response.state === 'closed') {
         return github.gitdata.deleteReference({
           user: data.repository.owner.login,
           repo: data.repository.name,
           ref: 'heads/' + response.head.ref
         })
-      }
-
-      if (response.merged) {
-        const bodyMatch = response.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
-
-        if (bodyMatch.length === 2) {
-          console.log('*** PR BODY:', bodyMatch[1])
-        }
       }
     }).then(response => {
       if (ua) {

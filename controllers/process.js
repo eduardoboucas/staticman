@@ -22,9 +22,9 @@ module.exports = ((req, res) => {
   const fields = req.query.fields || req.body.fields
   const options = req.query.options || req.body.options || {}
 
-  var staticman = new Staticman(req.params)
+  const staticman = new Staticman(req.params)
 
-  staticman.setConfig(createConfigObject(res.locals.apiVersion, req.params.property))
+  staticman.setConfigPath(createConfigObject(res.locals.apiVersion, req.params.property))
   staticman.setIp(req.headers['x-forwarded-for'] || req.connection.remoteAddress)
   staticman.setUserAgent(req.headers['user-agent'])
 
@@ -42,7 +42,8 @@ module.exports = ((req, res) => {
       ua.event('Entries', 'New entry').send()
     }
   }).catch(err => {
-    console.log('** ERR:', err.stack || err);
+    console.log('** ERR:', err.stack || err)
+
     res.status(500).send(err)
 
     if (ua) {
