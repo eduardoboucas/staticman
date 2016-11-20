@@ -1,6 +1,6 @@
 const convict = require('convict')
 
-const schema = convict({
+const schema = {
   env: {
     doc: 'The applicaton environment',
     format: ['production', 'development', 'test'],
@@ -67,17 +67,19 @@ const schema = convict({
       env: 'EMAIL_FROM'
     }
   }
-})
+}
+
+let config
 
 try {
-  const env = schema.get('env')
-
-  schema.loadFile(__dirname + '/config.' + env + '.json')
-  schema.validate()
+  config = convict(schema)
+  config.loadFile(__dirname + '/config.' + config.get('env') + '.json')
+  config.validate()
 
   console.log('(*) Local config file loaded')
 } catch (e) {
   
 }
 
-module.exports = schema
+module.exports = config
+module.exports.schema = schema
