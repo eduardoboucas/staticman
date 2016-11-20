@@ -2,6 +2,7 @@
 
 const config = require(__dirname + '/../config')
 const GitHubApi = require('github')
+const Staticman = require('../lib/Staticman')
 
 module.exports = (repo, data) => {
   const ua = config.get('analytics.uaTrackingId') ? require('universal-analytics')(config.get('analytics.uaTrackingId')) : null
@@ -28,19 +29,41 @@ module.exports = (repo, data) => {
       user: data.repository.owner.login,
       repo: data.repository.name,
       number: data.number
-    }).then((response) => {
-      if ((response.state === 'closed') && (response.head.ref.indexOf('staticman_') === 0)) {
+    }).then(response => {
+      if (response.head.ref.indexOf('staticman_')) {
+        return null
+      }
+
+      if (response.merged) {
+        const bodyMatch = response.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
+
+        if (bodyMatch.length === 2) {
+          try {
+            const parsedBody = JSON.parse(bodyMatch[1])
+            const staticman = new Staticman(parsedBody.parameters)
+
+            staticman.setConfigPath(parsedBody.configPath)
+            staticman.processMerge(parsedBody.fields, parsedBody.options).catch(err => {
+              return Promise.reject(err)
+            })
+          } catch (err) {
+            return Promise.reject(err)
+          }
+        }
+      }
+
+      if (response.state === 'closed') {
         return github.gitdata.deleteReference({
           user: data.repository.owner.login,
           repo: data.repository.name,
           ref: 'heads/' + response.head.ref
         })
       }
-    }).then((response) => {
+    }).then(response => {
       if (ua) {
         ua.event('Hooks', 'Delete branch').send()
       }
-    }).catch((err) => {
+    }).catch(err => {
       console.log(err.stack || err)
 
       if (ua) {
