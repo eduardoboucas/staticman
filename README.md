@@ -9,9 +9,8 @@
 1. [Introduction](#introduction)
 1. [Prerequisites](#prerequisites)
 1. [Running on Docker](#running-on-docker)
-1. [Adding an entry](#adding-an-entry)
 1. [API configuration](#api-configuration)
-1. [Jekyll configuration](#jekyll-configuration)
+1. [Site configuration](#site-configuration)
 1. [Sites using Staticman](#sites-using-staticman)
 
 ---
@@ -64,39 +63,15 @@ docker-compose -f docker-compose.development.yml up
 
 Use your IP address or `localhost` as the Staticman API address.
 
-## Adding an entry
-
-Entries are added via `POST` to the `entry` endpoint. An entry is made up of two objects:
-
-- `fields` The data fields to be created
-- `options`: Various parameters to configure the request (optional)
-
-A simple data file with `name`, `email` and `comment` could be created using the following HTML markup:
-
-```html
-<form method="POST" action="http://your-staticman-url/v1/entry/eduardoboucas/my-site-repo/gh-pages">
-  <label><input name="fields[name]" type="text">Name</label>
-  <label><input name="fields[email]" type="email">E-mail</label>
-  <label><textarea name="fields[comment]"></textarea>Comment</label>
-  
-  <button type="submit">Send</button>
-</form>
-```
-
 ## API configuration
 
-These parameters configure the Staticman Node.js API. They can be supplied as part of a local config file (`config.json`) or environment variables.
+Staticman will look for a JSON configuration file named `config.{ENVIRONMENT}.json` in the root of the application, with `{ENVIRONMENT}` being replaced by the environment setting (e.g. `config.development.json`). Alternatively, each configuration parameter can be supplied using an environment variable.
 
-| Config file key | Environment variable | Description | Required |
-|-----------------|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|----------|
-| `port` | `PORT` | The port used by the server | **yes** |
-| `githubToken` | `GITHUB_TOKEN` | [Personal access token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/) for the GitHub account being used by the bot | **yes** |
-| `akismetSite` | `AKISMET_SITE` | URL of the site to be used with Akismet | no |
-| `akismetApiKey` | `AKISMET_API_KEY` | API key to be used with Akismet | no |
+[Click here](https://staticman.net/docs/api) to see a list of available configuration parameters.
 
-## Jekyll configuration
+## Site configuration
 
-Parameters used to configure Jekyll can be found [here](https://staticman.net/docs/configuration).
+Parameters used to configure a site can be found [here](https://staticman.net/docs/configuration).
 
 ## Sites using Staticman
 
