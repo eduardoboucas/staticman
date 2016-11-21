@@ -104,5 +104,7 @@ Parameters used to configure Jekyll can be found [here](https://staticman.net/do
 - [eduardoboucas.com](https://eduardoboucas.com) ([Source](https://github.com/eduardoboucas/eduardoboucas.github.io))
 - [Made Mistakes](https://mademistakes.com/) ([Source](https://github.com/mmistakes/made-mistakes-jekyll))
 - [Minimal Mistakes theme](https://mmistakes.github.io/minimal-mistakes/) ([Source](https://github.com/mmistakes/minimal-mistakes))
+- [/wg/ Startpages](http://startpages.cf/) ([Source](https://github.com/twentytwoo/startpages.cf))
+- [movw-0x16.cf](http://movw-0x16.cf/) ([Source](https://github.com/twentytwoo/movw-0x16))
 
 Are you using Staticman? [Let us know!](https://github.com/eduardoboucas/staticman/edit/master/README.md)
