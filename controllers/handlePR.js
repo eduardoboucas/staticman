@@ -37,7 +37,7 @@ module.exports = (repo, data) => {
       if (response.merged) {
         const bodyMatch = response.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
 
-        if (bodyMatch.length === 2) {
+        if (bodyMatch && (bodyMatch.length === 2)) {
           try {
             const parsedBody = JSON.parse(bodyMatch[1])
             const staticman = new Staticman(parsedBody.parameters)
