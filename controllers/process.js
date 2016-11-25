@@ -42,7 +42,7 @@ module.exports = ((req, res) => {
       ua.event('Entries', 'New entry').send()
     }
   }).catch(err => {
-    console.log('** ERR:', err.stack || err)
+    console.log('** ERR:', err.stack || err, options, fields, req.params)
 
     res.status(500).send(err)
 
