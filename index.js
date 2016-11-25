@@ -94,6 +94,12 @@ server.post('/v:version/entry/:username/:repository/:branch/:property',
             requireParams(['fields']),
             require('./controllers/process'))
 
+// Route: encrypt
+server.get('/v:version/encrypt/:text',
+            bruteforce.prevent,
+            requireApiVersion([2]),
+            require('./controllers/encrypt'))
+
 // GitHub webhook route
 webhookHandler.on('pull_request', require('./controllers/handlePR'))
 
