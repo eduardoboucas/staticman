@@ -1,11 +1,10 @@
 'use strict'
 
 const config = require(__dirname + '/../config')
-const privateKey = require('fs').readFileSync('staticman_key', 'utf8')
 const NodeRSA = require('node-rsa')
 const key = new NodeRSA()
 
-key.importKey(privateKey)
+key.importKey(config.get('rsaPrivateKey'))
 
 module.exports = ((req, res) => {
   try {
