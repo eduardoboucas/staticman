@@ -25,6 +25,7 @@
     "express": "^4.14.0",
     "express-brute": "^0.6.0",
     "express-github-webhook": "^1.0.5",
+    "express-recaptcha": "^2.1.0",
     "github": "^3.0.0",
     "js-yaml": "^3.6.1",
     "mailgun-js": "^0.7.13",

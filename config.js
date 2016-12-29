@@ -71,6 +71,20 @@ const schema = {
       default: 'noreply@staticman.net',
       env: 'EMAIL_FROM'
     }
+  },
+  reCAPTCHA: {
+    siteKey: {
+      doc: 'reCAPTCHA siteKey',
+      format: String,
+      default: null,
+      env: 'RECAPTCHA_SITEKEY'
+    },
+    secret: {
+      doc: 'reCAPTCHA secret',
+      format: String,
+      default: null,
+      env: 'RECAPTCHA_SECRET'
+    }
   }
 }
 
