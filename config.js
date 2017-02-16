@@ -21,7 +21,7 @@ const schema = {
     default: null,
     env: 'GITHUB_TOKEN'
   },
-  akistmet: {
+  akismet: {
     site: {
       doc: 'URL of an Akismet account used for spam checking.',
       docExample: 'http://yourdomain.com',
