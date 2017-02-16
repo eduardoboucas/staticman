@@ -5,6 +5,5 @@ services:
       file: docker-compose.yml
       service: staticman
     environment:
-      - NODE_ENV=development
-    volumes:
-      - ./:/app
+      NODE_ENV: development
+      RECAPTCHA_ENABLED: 'false'

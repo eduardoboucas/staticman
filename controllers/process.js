@@ -2,6 +2,9 @@
 
 const config = require(__dirname + '/../config')
 const Staticman = require('../lib/Staticman')
+let staticman;
+const NodeRSA = require('node-rsa')
+const recaptcha = require('express-recaptcha');
 
 function createConfigObject(apiVersion, property) {
   let remoteConfig = {}
@@ -17,14 +20,45 @@ function createConfigObject(apiVersion, property) {
   return remoteConfig
 }
 
-module.exports = ((req, res) => {
+function decrypt(encrypted) {
+  // Initialise RSA
+  const rsa = new NodeRSA();
+  rsa.importKey(config.get('rsaPrivateKey'), 'private');
+
+  return rsa.decrypt(encrypted, 'utf8');
+}
+
+function verifyCAPTCHA(req, res) {
+  return new Promise((resolve, reject) => {
+
+    if (!config.get('reCAPTCHA.enabled')) {
+      return resolve();
+    }
+
+    // Init reCAPTCHA
+    recaptcha.init(req.body.options.reCAPTCHA.siteKey, decrypt(req.body.options.reCAPTCHA.encryptedSecret));
+    recaptcha.verify(req, function (err) {
+
+      if (!err) {
+        return resolve()
+      } else {
+        return reject(res.status(500).send({
+          success: false,
+          errorCode: 'RECAPTCHA_ERROR',
+          data: err
+        }))
+      }
+    });
+
+  })
+}
+
+function process(req, res) {
   const ua = config.get('analytics.uaTrackingId') ? require('universal-analytics')(config.get('analytics.uaTrackingId')) : null
   const fields = req.query.fields || req.body.fields
   const options = req.query.options || req.body.options || {}
 
-  const staticman = new Staticman(req.params)
-
-  staticman.setConfigPath(createConfigObject(res.locals.apiVersion, req.params.property))
+  staticman.setConfigPath(createConfigObject(req.params.version, req.params.property))
   staticman.setIp(req.headers['x-forwarded-for'] || req.connection.remoteAddress)
   staticman.setUserAgent(req.headers['user-agent'])
 
@@ -50,4 +84,16 @@ module.exports = ((req, res) => {
       ua.event('Entries', 'New entry error').send()
     }
   })
-})
+}
+
+module.exports = (req, res, next) => {
+  staticman = new Staticman(req.params)
+
+  verifyCAPTCHA(req, res)
+    .then(() => {
+      return process(req, res)
+    })
+    .catch((res) => {
+      return next(res)
+    })
+};

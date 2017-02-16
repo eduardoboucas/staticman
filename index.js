@@ -6,7 +6,6 @@ const express = require('express')
 const ExpressBrute = require('express-brute')
 const GithubWebHook = require('express-github-webhook')
 const objectPath = require('object-path')
-const recaptcha = require('express-recaptcha');
 
 // ------------------------------------
 // Server
@@ -15,9 +14,6 @@ const recaptcha = require('express-recaptcha');
 const server = express()
 server.use(bodyParser.json())
 server.use(bodyParser.urlencoded({extended: true}))
-
-// Init reCAPTCHA
-recaptcha.init(config.get('reCAPTCHA.siteKey'), config.get('reCAPTCHA.secret'));
 
 // GitHub webhook middleware
 const webhookHandler = GithubWebHook({
@@ -50,9 +46,6 @@ const requireApiVersion = versions => {
       })
     }
 
-    res.locals.apiVersion = req.params.version
-    delete req.params.version
-
     return next()
   }
 }
@@ -79,21 +72,6 @@ const requireParams = (params) => {
   }
 }
 
-const verifyCAPTCHA = (req, res, next) => {
-    recaptcha.verify(req, function(err){
-
-        if(!err) {
-            next()
-        } else {
-            return res.status(500).send({
-              success: false,
-              errorCode: 'RECAPTCHA_ERROR',
-              data: err
-            })
-        }
-    });
-};
-
 // Route: connect
 server.get('/v:version/connect/:username/:repository',
            bruteforce.prevent,
@@ -105,7 +83,6 @@ server.post('/v:version/entry/:username/:repository/:branch',
             bruteforce.prevent,
             requireApiVersion([1, 2]),
             requireParams(['fields']),
-            verifyCAPTCHA,
             require('./controllers/process'))
 
 server.post('/v:version/entry/:username/:repository/:branch/:property',

@@ -73,17 +73,11 @@ const schema = {
     }
   },
   reCAPTCHA: {
-    siteKey: {
-      doc: 'reCAPTCHA siteKey',
-      format: String,
-      default: null,
-      env: 'RECAPTCHA_SITEKEY'
-    },
-    secret: {
-      doc: 'reCAPTCHA secret',
-      format: String,
-      default: null,
-      env: 'RECAPTCHA_SECRET'
+    enabled: {
+      doc: 'reCAPTCHA enabled',
+      format: Boolean,
+      default: false,
+      env: 'RECAPTCHA_ENABLED'
     }
   }
 }
