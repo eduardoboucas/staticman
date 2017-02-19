@@ -81,5 +81,6 @@ Parameters used to configure a site can be found [here](https://staticman.net/do
 - [Minimal Mistakes theme](https://mmistakes.github.io/minimal-mistakes/) ([Source](https://github.com/mmistakes/minimal-mistakes))
 - [/wg/ Startpages](http://startpages.cf/) ([Source](https://github.com/twentytwoo/startpages.cf))
 - [movw-0x16.cf](http://movw-0x16.cf/) ([Source](https://github.com/twentytwoo/movw-0x16))
+- [Open Source Design Job Board](http://opensourcedesign.net/jobs/) ([Source](https://github.com/opensourcedesign/jobs/))
 
 Are you using Staticman? [Let us know!](https://github.com/eduardoboucas/staticman/edit/master/README.md)
