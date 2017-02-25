@@ -6,4 +6,5 @@ services:
       service: staticman
     environment:
       NODE_ENV: development
-      RECAPTCHA_ENABLED: 'false'
+    volumes:
+      - ./:/app

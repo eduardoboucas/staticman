@@ -71,14 +71,6 @@ const schema = {
       default: 'noreply@staticman.net',
       env: 'EMAIL_FROM'
     }
-  },
-  reCAPTCHA: {
-    enabled: {
-      doc: 'reCAPTCHA enabled',
-      format: Boolean,
-      default: false,
-      env: 'RECAPTCHA_ENABLED'
-    }
   }
 }
 

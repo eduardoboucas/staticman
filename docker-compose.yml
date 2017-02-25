@@ -5,11 +5,11 @@ services:
     env_file: .env
     ports:
       - '8080:3000'
+    restart: unless-stopped
     environment:
       NODE_ENV: production
       PORT: 3000
       GITHUB_TOKEN: 5a6___________________________79
-      RECAPTCHA_ENABLED: 'true'
       RSA_PUBLIC_KEY: |
         -----BEGIN PUBLIC KEY-----
         MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0WTSD19Ym3fih7TjUCZb
