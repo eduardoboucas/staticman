@@ -22,6 +22,9 @@ comments:
   # request.
   branch: "master"
 
+  # Text to use as the commit message or pull request title. Accepts placeholders.
+  commitMessage: "Add Staticman data"
+
   # (*) REQUIRED
   #
   # Destination path (filename) for the data files. Accepts placeholders.
@@ -52,19 +55,19 @@ comments:
   # Notification settings. When enabled, users can choose to receive notifications
   # via email when someone adds a reply or a new comment. This requires an account
   # with Mailgun, which you can get for free at http://mailgun.com.
-  notifications:
+  #notifications:
     # Enable notifications
-    enabled: false
+    #enabled: true
 
     # (!) ENCRYPTED
     #
     # Mailgun API key
-    apiKey: "1q2w3e4r"
+    #apiKey: "1q2w3e4r"
 
     # (!) ENCRYPTED
     #
     # Mailgun domain (encrypted)
-    domain: "4r3e2w1q"
+    #domain: "4r3e2w1q"
 
   # (*) REQUIRED
   #
