@@ -126,7 +126,7 @@ const schema = {
     enabled: {
       doc: 'Set to `true` to force reCAPTCHA validation, set to `false` to accept comments without reCAPTCHA.',
       format: Boolean,
-      default: true
+      default: false
     }
   }
 }
