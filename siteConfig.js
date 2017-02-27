@@ -127,6 +127,16 @@ const schema = {
       doc: 'Set to `true` to force reCAPTCHA validation, set to `false` to accept comments without reCAPTCHA.',
       format: Boolean,
       default: false
+    },
+    siteKey: {
+      doc: 'Site Key for your reCAPTCHA site registration',
+      format: String,
+      default: ''
+    },
+    secret: {
+      doc: 'Encrypted Secret for your reCAPTCHA site registration',
+      format: 'EncryptedString',
+      default: ''
     }
   }
 }

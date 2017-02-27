@@ -52,6 +52,8 @@ function verifyCaptcha(req, res) {
   return new Promise((resolve, reject) => {
     staticman.getSiteConfig()
       .then(siteConfig => {
+        let captchaRequest;
+
         if (!siteConfig.get('reCaptcha.enabled')) {
           return resolve()
         }
@@ -59,18 +61,26 @@ function verifyCaptcha(req, res) {
         if(!req.body.options.reCaptcha  || !req.body.options.reCaptcha.siteKey  ||  !req.body.options.reCaptcha.encryptedSecret) {
           return reject('Missing reCAPTCHA API credential.')
         }
-
-        const captchaRequest = {
-          siteKey: req.body.options.reCaptcha.siteKey,
-          secret: staticman.decrypt(req.body.options.reCaptcha.encryptedSecret)
+        try {
+          captchaRequest = {
+            siteKey: req.body.options.reCaptcha.siteKey,
+            secret: staticman.decrypt(req.body.options.reCaptcha.encryptedSecret)
+          }
+        } catch(err) {
+          return reject('Invalid encryptedSecret')
         }
+
+        if(siteConfig.get('reCaptcha.siteKey') !== captchaRequest.siteKey  || siteConfig.get('reCaptcha.secret') !== captchaRequest.secret) {
+          return reject('ReCAPTCHA API credential spoofing is not allowed.')
+        }
+
         reCaptcha.init(captchaRequest.siteKey, captchaRequest.secret)
 
         reCaptcha.verify(req, (err) => {
           if (err) {
-            reject(err)
+            return reject(err)
           }
-          resolve()
+          return resolve()
         })
       })
       .catch(err => {
