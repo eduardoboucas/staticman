@@ -51,28 +51,27 @@ function process(req, res) {
 
 function verifyCAPTCHA(req, res) {
   return new Promise((resolve, reject) => {
-    staticman
-      .getSiteConfig()
+    staticman.getSiteConfig()
       .then(siteConfig => {
         if (!siteConfig.get('reCaptcha.enabled')) {
           return resolve()
         }
 
-        if(
-          req.body.options.reCAPTCHA === undefined ||
-          req.body.options.reCAPTCHA.siteKey === undefined ||
-          req.body.options.reCAPTCHA.encryptedSecret === undefined
-        ) {
+        if(!req.body.options.reCAPTCHA  || !req.body.options.reCAPTCHA.siteKey  ||  !req.body.options.reCAPTCHA.encryptedSecret) {
           return reject('Missing reCAPTCHA API credential.')
         }
 
-        recaptcha.init(
-          req.body.options.reCAPTCHA.siteKey,
-          staticman.decrypt(req.body.options.reCAPTCHA.encryptedSecret)
-        )
+        const captchaRequest = {
+          siteKey: req.body.options.reCAPTCHA.siteKey,
+          secret: staticman.decrypt(req.body.options.reCAPTCHA.encryptedSecret)
+        }
+        recaptcha.init(captchaRequest.siteKey, captchaRequest.secret)
 
         recaptcha.verify(req, (err) => {
-          return (!err) ? resolve() : reject(err)
+          if (err) {
+            reject(err)
+          }
+          resolve()
         })
       })
       .catch(err => {
