@@ -3,7 +3,7 @@
 const config = require(__dirname + '/../config')
 const Staticman = require('../lib/Staticman')
 const NodeRSA = require('node-rsa')
-const recaptcha = require('express-recaptcha')
+const reCaptcha = require('express-recaptcha')
 let staticman
 
 function createConfigObject(apiVersion, property) {
@@ -49,7 +49,7 @@ function process(req, res) {
   })
 }
 
-function verifyCAPTCHA(req, res) {
+function verifyCaptcha(req, res) {
   return new Promise((resolve, reject) => {
     staticman.getSiteConfig()
       .then(siteConfig => {
@@ -57,17 +57,17 @@ function verifyCAPTCHA(req, res) {
           return resolve()
         }
 
-        if(!req.body.options.reCAPTCHA  || !req.body.options.reCAPTCHA.siteKey  ||  !req.body.options.reCAPTCHA.encryptedSecret) {
+        if(!req.body.options.reCaptcha  || !req.body.options.reCaptcha.siteKey  ||  !req.body.options.reCaptcha.encryptedSecret) {
           return reject('Missing reCAPTCHA API credential.')
         }
 
         const captchaRequest = {
-          siteKey: req.body.options.reCAPTCHA.siteKey,
-          secret: staticman.decrypt(req.body.options.reCAPTCHA.encryptedSecret)
+          siteKey: req.body.options.reCaptcha.siteKey,
+          secret: staticman.decrypt(req.body.options.reCaptcha.encryptedSecret)
         }
-        recaptcha.init(captchaRequest.siteKey, captchaRequest.secret)
+        reCaptcha.init(captchaRequest.siteKey, captchaRequest.secret)
 
-        recaptcha.verify(req, (err) => {
+        reCaptcha.verify(req, (err) => {
           if (err) {
             reject(err)
           }
@@ -86,7 +86,7 @@ function main(req, res, next) {
   staticman.setIp(req.headers['x-forwarded-for'] || req.connection.remoteAddress)
   staticman.setUserAgent(req.headers['user-agent'])
 
-  verifyCAPTCHA(req, res)
+  verifyCaptcha(req, res)
     .then(() => {
       return process(req, res)
     })
