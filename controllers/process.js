@@ -2,7 +2,6 @@
 
 const config = require(__dirname + '/../config')
 const Staticman = require('../lib/Staticman')
-const NodeRSA = require('node-rsa')
 const reCaptcha = require('express-recaptcha')
 let staticman
 
