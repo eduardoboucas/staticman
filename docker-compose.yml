@@ -9,20 +9,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      GITHUB_TOKEN: 5a6___________________________79
-      RSA_PUBLIC_KEY: |
-        -----BEGIN PUBLIC KEY-----
-        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0WTSD19Ym3fih7TjUCZb
-        ...
-        i8F1a7KOTbOWC4aNbwqapneGHIPiGvjio1dhVfMmKdExCfWFnZ3OC2rLdEggsD7S
-        8wIDAQAB
-        -----END PUBLIC KEY-----
+      GITHUB_TOKEN: #insert your GitHub token here
       RSA_PRIVATE_KEY: |
-        -----BEGIN RSA PRIVATE KEY-----
-        MIIEpQIBAAKCAQEA0WTSD19Ym3fih7TjUCZbSIPQ9gxoPQyCmYIMenpTT4FfmuKq
-        ...
-        ...
-        ...
-        +Y7Za9Tm41Uuiyujdav1ZzM9bdrCDHLDgsq34b7Hf8cLzmRgW3syl35U7Qzx+5FK
-        ShRxZa+h60iJyWZvQrle9aaJkDuSboZX2X3Rp5S0C7ysi0aJDh2scvM=
-        -----END RSA PRIVATE KEY-----
+#        RSA private key to encrypt sensitive configuration parameters with.
+#        the correct format starts with "-----BEGIN RSA PRIVATE KEY-----"
