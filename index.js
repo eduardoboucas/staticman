@@ -46,9 +46,6 @@ const requireApiVersion = versions => {
       })
     }
 
-    res.locals.apiVersion = req.params.version
-    delete req.params.version
-
     return next()
   }
 }
