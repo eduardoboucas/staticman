@@ -56,35 +56,6 @@ function createConfigObject(apiVersion, property) {
   return remoteConfig
 }
 
-function process(staticman, req, res) {
-  const ua = config.get('analytics.uaTrackingId') ? require('universal-analytics')(config.get('analytics.uaTrackingId')) : null
-  const fields = req.query.fields || req.body.fields
-  const options = req.query.options || req.body.options || {}
-
-  return staticman.processEntry(fields, options).then(data => {
-    if (data.redirect) {
-      res.redirect(data.redirect)
-    } else {
-      res.send({
-        success: true,
-        fields: data.fields
-      })
-    }
-
-    if (ua) {
-      ua.event('Entries', 'New entry').send()
-    }
-  }).catch(err => {
-    console.log('** ERR:', err.stack || err, options, fields, req.params)
-
-    res.status(500).send(err)
-
-    if (ua) {
-      ua.event('Entries', 'New entry error').send()
-    }
-  })
-}
-
 function getRecaptchaError(errorCode) {
   switch (errorCode) {
     case 'missing-input-secret':
@@ -103,6 +74,60 @@ function getRecaptchaError(errorCode) {
   return errorCode
 }
 
+function process(staticman, req, res) {
+  const ua = config.get('analytics.uaTrackingId') ? require('universal-analytics')(config.get('analytics.uaTrackingId')) : null
+  const fields = req.query.fields || req.body.fields
+  const options = req.query.options || req.body.options || {}
+
+  return staticman.processEntry(fields, options).then(data => {
+    sendResponse(res, {
+      redirect: data.redirect,
+      fields: data.fields
+    })
+
+    if (ua) {
+      ua.event('Entries', 'New entry').send()
+    }
+  }).catch(err => {
+    console.log('** ERR:', err.stack || err, options, fields, req.params)
+
+    sendResponse(res, {
+      error: err,
+      errorCode: 'ENTRY_ERROR',
+      redirectError: req.body.options.redirectError
+    })
+
+    if (ua) {
+      ua.event('Entries', 'New entry error').send()
+    }
+  })
+}
+
+function sendResponse(res, data) {
+  const statusCode = data.error ? 500 : 200
+
+  if (!data.error && data.redirect) {
+    return res.redirect(data.redirect)
+  }
+
+  if (data.error && data.redirectError) {
+    return res.redirect(data.redirectError)
+  }
+
+  let payload = {
+    success: !data.error
+  }
+
+  if (data.error) {
+    payload.data = data.error
+    payload.errorCode = data.errorCode || 'UNKNOWN_ERROR'
+  } else {
+    payload.fields = data.fields
+  }
+
+  res.status(statusCode).send(payload)
+}
+
 module.exports = (req, res, next) => {
   const staticman = new Staticman(req.params)
 
@@ -113,10 +138,11 @@ module.exports = (req, res, next) => {
   return checkRecaptcha(staticman, req).then(usedRecaptcha => {
     return process(staticman, req, res)
   }).catch(err => {
-    return res.status(500).send({
-      success: false,
+    return sendResponse(res, {
+      error: err,
       errorCode: 'RECAPTCHA_ERROR',
-      data: err
+      redirect: req.body.options.redirect,
+      redirectError: req.body.options.redirectError
     })
   })
 }
