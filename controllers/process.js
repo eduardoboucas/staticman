@@ -26,7 +26,7 @@ function checkRecaptcha(staticman, req) {
       }
 
       if ((reCaptchaOptions.siteKey) !== siteConfig.get('reCaptcha.siteKey') ||
-          (decryptedSecret !== siteConfig.get('reCaptcha.secret'))) {
+        (decryptedSecret !== siteConfig.get('reCaptcha.secret'))) {
         return reject('reCAPTCHA options do not match Staticman config')
       }
 
