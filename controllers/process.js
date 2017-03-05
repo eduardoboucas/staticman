@@ -2,7 +2,7 @@
 
 const config = require(__dirname + '/../config')
 const Staticman = require('../lib/Staticman')
-const reCaptcha = require('express-recaptcha')
+const Captcha = require('../lib/Captcha')
 let staticman
 
 function createConfigObject(apiVersion, property) {
@@ -21,10 +21,8 @@ function createConfigObject(apiVersion, property) {
 
 function process(req, res) {
   const ua = config.get('analytics.uaTrackingId') ? require('universal-analytics')(config.get('analytics.uaTrackingId')) : null
-  const fields = req.query.fields || req.body.fields
-  const options = req.query.options || req.body.options || {}
 
-  staticman.processEntry(fields, options).then(data => {
+  staticman.processEntry().then(data => {
     if (data.redirect) {
       res.redirect(data.redirect)
     } else {
@@ -48,61 +46,22 @@ function process(req, res) {
   })
 }
 
-function verifyCaptcha(req, res) {
-  return new Promise((resolve, reject) => {
-    staticman.getSiteConfig()
-      .then(siteConfig => {
-        let captchaRequest;
-
-        if (!siteConfig.get('reCaptcha.enabled')) {
-          return resolve()
-        }
-
-        if(!req.body.options.reCaptcha  || !req.body.options.reCaptcha.siteKey  ||  !req.body.options.reCaptcha.encryptedSecret) {
-          return reject('Missing reCAPTCHA API credential.')
-        }
-        try {
-          captchaRequest = {
-            siteKey: req.body.options.reCaptcha.siteKey,
-            secret: staticman.decrypt(req.body.options.reCaptcha.encryptedSecret)
-          }
-        } catch(err) {
-          return reject('Invalid encryptedSecret')
-        }
-
-        if(siteConfig.get('reCaptcha.siteKey') !== captchaRequest.siteKey  || siteConfig.get('reCaptcha.secret') !== captchaRequest.secret) {
-          return reject('ReCAPTCHA API credential spoofing is not allowed.')
-        }
-
-        reCaptcha.init(captchaRequest.siteKey, captchaRequest.secret)
-
-        reCaptcha.verify(req, (err) => {
-          if (err) {
-            return reject(err)
-          }
-          return resolve()
-        })
-      })
-      .catch(err => {
-        return reject(err)
-      })
-  })
-}
-
 function main(req, res, next) {
-  staticman = new Staticman(req.params)
+  staticman = new Staticman(req)
   staticman.setConfigPath(createConfigObject(req.params.version, req.params.property))
   staticman.setIp(req.headers['x-forwarded-for'] || req.connection.remoteAddress)
   staticman.setUserAgent(req.headers['user-agent'])
 
-  verifyCaptcha(req, res)
+  const captcha = Captcha.create(staticman)
+
+  captcha.validateRequest(req)
     .then(() => {
       return process(req, res)
     })
     .catch(reason => {
       return res.status(500).send({
         success: false,
-        errorCode: 'RECAPTCHA_ERROR',
+        errorCode: 'PROCESSING_ERROR',
         data: reason
       })
     })
