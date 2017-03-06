@@ -15,7 +15,7 @@ function checkRecaptcha(staticman, req) {
       const reCaptchaOptions = req.body.options && req.body.options.reCaptcha
 
       if (!reCaptchaOptions || !reCaptchaOptions.siteKey || !reCaptchaOptions.secret) {
-        return reject('Missing reCAPTCHA API credentials')
+        return reject(errorHandler('RECAPTCHA_MISSING_CREDENTIALS'))
       }
 
       let decryptedSecret
@@ -23,18 +23,18 @@ function checkRecaptcha(staticman, req) {
       try {
         decryptedSecret = staticman.decrypt(reCaptchaOptions.secret)
       } catch (err) {
-        return reject('Could not decrypt reCAPTCHA secret')
+        return reject(errorHandler('RECAPTCHA_FAILED_DECRYPT'))
       }
 
       if ((reCaptchaOptions.siteKey) !== siteConfig.get('reCaptcha.siteKey') ||
           (decryptedSecret !== siteConfig.get('reCaptcha.secret'))) {
-        return reject('reCAPTCHA options do not match Staticman config')
+        return reject(errorHandler('RECAPTCHA_CONFIG_MISMATCH'))
       }
 
       reCaptcha.init(reCaptchaOptions.siteKey, decryptedSecret)
       reCaptcha.verify(req, err => {
         if (err) {
-          return reject(getErrorMessage(err))
+          return reject(errorHandler(err))
         }
 
         return resolve(true)
