@@ -71,6 +71,11 @@ const schema = {
       default: 'noreply@staticman.net',
       env: 'EMAIL_FROM'
     }
+  },
+  sentryDSN: {
+    doc: 'Sentry DSN',
+    format: String,
+    default: null
   }
 }
 

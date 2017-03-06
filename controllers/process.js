@@ -1,8 +1,9 @@
 'use strict'
 
 const config = require(__dirname + '/../config')
-const Staticman = require('../lib/Staticman')
+const errorHandler = require('../lib/ErrorHandler')
 const reCaptcha = require('express-recaptcha')
+const Staticman = require('../lib/Staticman')
 
 function checkRecaptcha(staticman, req) {
   return new Promise((resolve, reject) => {
@@ -33,7 +34,7 @@ function checkRecaptcha(staticman, req) {
       reCaptcha.init(reCaptchaOptions.siteKey, decryptedSecret)
       reCaptcha.verify(req, err => {
         if (err) {
-          return reject(getRecaptchaError(err))
+          return reject(getErrorMessage(err))
         }
 
         return resolve(true)
@@ -56,24 +57,6 @@ function createConfigObject(apiVersion, property) {
   return remoteConfig
 }
 
-function getRecaptchaError(errorCode) {
-  switch (errorCode) {
-    case 'missing-input-secret':
-      return 'reCAPTCHA: The secret parameter is missing'
-
-    case 'invalid-input-secret':
-      return 'reCAPTCHA: The secret parameter is invalid or malformed'
-
-    case 'missing-input-response':
-      return 'reCAPTCHA: The response parameter is missing'
-
-    case 'invalid-input-response':
-      return 'reCAPTCHA: The response parameter is invalid or malformed'
-  }
-
-  return errorCode
-}
-
 function process(staticman, req, res) {
   const ua = config.get('analytics.uaTrackingId') ? require('universal-analytics')(config.get('analytics.uaTrackingId')) : null
   const fields = req.query.fields || req.body.fields
@@ -89,13 +72,9 @@ function process(staticman, req, res) {
       ua.event('Entries', 'New entry').send()
     }
   }).catch(err => {
-    console.log('** ERR:', err.stack || err, options, fields, req.params)
-
-    sendResponse(res, {
-      error: err,
-      errorCode: 'ENTRY_ERROR',
+    sendResponse(res, Object.assign({}, errorHandler('UNKNOWN_ERROR', {err}), {
       redirectError: req.body.options.redirectError
-    })
+    }))
 
     if (ua) {
       ua.event('Entries', 'New entry error').send()
@@ -104,23 +83,29 @@ function process(staticman, req, res) {
 }
 
 function sendResponse(res, data) {
-  const statusCode = data.error ? 500 : 200
+  const statusCode = data._smErrorCode ? 500 : 200
 
-  if (!data.error && data.redirect) {
+  if (!data._smErrorCode && data.redirect) {
     return res.redirect(data.redirect)
   }
 
-  if (data.error && data.redirectError) {
+  if (data._smErrorCode && data.redirectError) {
     return res.redirect(data.redirectError)
   }
 
   let payload = {
-    success: !data.error
+    success: !data._smErrorCode
   }
 
-  if (data.error) {
-    payload.data = data.error
-    payload.errorCode = data.errorCode || 'UNKNOWN_ERROR'
+  if (data._smErrorCode) {
+    const errorCode = errorHandler.getInstance().getErrorCode(data._smErrorCode)
+    const errorMessage = errorHandler.getInstance().getMessage(data._smErrorCode)
+
+    if (errorMessage) {
+      payload.message = errorMessage
+    }
+
+    payload.errorCode = errorCode
   } else {
     payload.fields = data.fields
   }
@@ -140,7 +125,6 @@ module.exports = (req, res, next) => {
   }).catch(err => {
     return sendResponse(res, {
       error: err,
-      errorCode: 'RECAPTCHA_ERROR',
       redirect: req.body.options.redirect,
       redirectError: req.body.options.redirectError
     })
