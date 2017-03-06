@@ -9,12 +9,6 @@ const schema = {
     format: Array,
     default: []
   },
-  allowedOrigins: {
-    doc: 'An array with the domains you might serve your website from. When enabled, the origin sent via the `options.origin` field (e.g. `<input type="hidden" name="options[origin]" value="http://yourdomain.com/post1.html">) must match one of the domains in the array, or the operation will be aborted. This is important when using notifications, as it ensures any links included in the email will point to a safe, trusted domain under your control.',
-    docExample: 'allowedOrigins: ["localhost", "yourdomain.com"]',
-    format: Array,
-    default: []
-  },
   akismet: {
     enabled: {
       doc: 'Whether to use Akismet to check entries for spam. This requires an Akismet account to be configured in the Staticman API instance being used.',
