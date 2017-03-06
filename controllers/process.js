@@ -72,9 +72,10 @@ function process(staticman, req, res) {
       ua.event('Entries', 'New entry').send()
     }
   }).catch(err => {
-    sendResponse(res, Object.assign({}, errorHandler('UNKNOWN_ERROR', {err}), {
+    sendResponse(res, {
+      err: errorHandler('UNKNOWN_ERROR', {err}),
       redirectError: req.body.options.redirectError
-    }))
+    })
 
     if (ua) {
       ua.event('Entries', 'New entry error').send()
@@ -83,23 +84,24 @@ function process(staticman, req, res) {
 }
 
 function sendResponse(res, data) {
-  const statusCode = data._smErrorCode ? 500 : 200
+  const error = data && data.err
+  const statusCode = (error && error._smErrorCode) ? 500 : 200
 
-  if (!data._smErrorCode && data.redirect) {
+  if (!error && data.redirect) {
     return res.redirect(data.redirect)
   }
 
-  if (data._smErrorCode && data.redirectError) {
+  if (error && data.redirectError) {
     return res.redirect(data.redirectError)
   }
 
   let payload = {
-    success: !data._smErrorCode
+    success: !error
   }
 
-  if (data._smErrorCode) {
-    const errorCode = errorHandler.getInstance().getErrorCode(data._smErrorCode)
-    const errorMessage = errorHandler.getInstance().getMessage(data._smErrorCode)
+  if (error && error._smErrorCode) {
+    const errorCode = errorHandler.getInstance().getErrorCode(error._smErrorCode)
+    const errorMessage = errorHandler.getInstance().getMessage(error._smErrorCode)
 
     if (errorMessage) {
       payload.message = errorMessage
@@ -124,7 +126,7 @@ module.exports = (req, res, next) => {
     return process(staticman, req, res)
   }).catch(err => {
     return sendResponse(res, {
-      error: err,
+      err,
       redirect: req.body.options.redirect,
       redirectError: req.body.options.redirectError
     })
