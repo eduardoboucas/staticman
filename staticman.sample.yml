@@ -9,13 +9,6 @@ comments:
   # not here is part of the request, an error will be thrown.
   allowedFields: ["name", "email", "url", "message"]
 
-  # (*) REQUIRED WHEN USING NOTIFICATIONS
-  #
-  # When allowedOrigins is defined, only requests sent from one of the domains
-  # listed will be accepted. The origin is sent as part as the `options` object
-  # (e.g. <input name="options[origin]" value="http://yourdomain.com/post1")
-  allowedOrigins: ["localhost", "eduardoboucas.com"]
-
   # (*) REQUIRED
   #
   # Name of the branch being used. Must match the one sent in the URL of the

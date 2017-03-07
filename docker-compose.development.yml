@@ -5,6 +5,6 @@ services:
       file: docker-compose.yml
       service: staticman
     environment:
-      - NODE_ENV=development
+      NODE_ENV: development
     volumes:
       - ./:/app

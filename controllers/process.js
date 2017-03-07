@@ -1,7 +1,47 @@
 'use strict'
 
 const config = require(__dirname + '/../config')
+const errorHandler = require('../lib/ErrorHandler')
+const reCaptcha = require('express-recaptcha')
 const Staticman = require('../lib/Staticman')
+
+function checkRecaptcha(staticman, req) {
+  return new Promise((resolve, reject) => {
+    staticman.getSiteConfig().then(siteConfig => {
+      if (!siteConfig.get('reCaptcha.enabled')) {
+        return resolve(false)
+      }
+
+      const reCaptchaOptions = req.body.options && req.body.options.reCaptcha
+
+      if (!reCaptchaOptions || !reCaptchaOptions.siteKey || !reCaptchaOptions.secret) {
+        return reject(errorHandler('RECAPTCHA_MISSING_CREDENTIALS'))
+      }
+
+      let decryptedSecret
+
+      try {
+        decryptedSecret = staticman.decrypt(reCaptchaOptions.secret)
+      } catch (err) {
+        return reject(errorHandler('RECAPTCHA_FAILED_DECRYPT'))
+      }
+
+      if ((reCaptchaOptions.siteKey) !== siteConfig.get('reCaptcha.siteKey') ||
+          (decryptedSecret !== siteConfig.get('reCaptcha.secret'))) {
+        return reject(errorHandler('RECAPTCHA_CONFIG_MISMATCH'))
+      }
+
+      reCaptcha.init(reCaptchaOptions.siteKey, decryptedSecret)
+      reCaptcha.verify(req, err => {
+        if (err) {
+          return reject(errorHandler(err))
+        }
+
+        return resolve(true)
+      })
+    }).catch(err => reject(err))
+  })
+}
 
 function createConfigObject(apiVersion, property) {
   let remoteConfig = {}
@@ -17,37 +57,78 @@ function createConfigObject(apiVersion, property) {
   return remoteConfig
 }
 
-module.exports = ((req, res) => {
+function process(staticman, req, res) {
   const ua = config.get('analytics.uaTrackingId') ? require('universal-analytics')(config.get('analytics.uaTrackingId')) : null
   const fields = req.query.fields || req.body.fields
   const options = req.query.options || req.body.options || {}
 
-  const staticman = new Staticman(req.params)
-
-  staticman.setConfigPath(createConfigObject(res.locals.apiVersion, req.params.property))
-  staticman.setIp(req.headers['x-forwarded-for'] || req.connection.remoteAddress)
-  staticman.setUserAgent(req.headers['user-agent'])
-
-  staticman.processEntry(fields, options).then(data => {
-    if (data.redirect) {
-      res.redirect(data.redirect)
-    } else {
-      res.send({
-        success: true,
-        fields: data.fields
-      })
-    }
+  return staticman.processEntry(fields, options).then(data => {
+    sendResponse(res, {
+      redirect: data.redirect,
+      fields: data.fields
+    })
 
     if (ua) {
       ua.event('Entries', 'New entry').send()
     }
   }).catch(err => {
-    console.log('** ERR:', err.stack || err, options, fields, req.params)
-
-    res.status(500).send(err)
+    sendResponse(res, {
+      err: errorHandler('UNKNOWN_ERROR', {err}),
+      redirectError: req.body.options.redirectError
+    })
 
     if (ua) {
       ua.event('Entries', 'New entry error').send()
     }
   })
-})
+}
+
+function sendResponse(res, data) {
+  const error = data && data.err
+  const statusCode = (error && error._smErrorCode) ? 500 : 200
+
+  if (!error && data.redirect) {
+    return res.redirect(data.redirect)
+  }
+
+  if (error && data.redirectError) {
+    return res.redirect(data.redirectError)
+  }
+
+  let payload = {
+    success: !error
+  }
+
+  if (error && error._smErrorCode) {
+    const errorCode = errorHandler.getInstance().getErrorCode(error._smErrorCode)
+    const errorMessage = errorHandler.getInstance().getMessage(error._smErrorCode)
+
+    if (errorMessage) {
+      payload.message = errorMessage
+    }
+
+    payload.errorCode = errorCode
+  } else {
+    payload.fields = data.fields
+  }
+
+  res.status(statusCode).send(payload)
+}
+
+module.exports = (req, res, next) => {
+  const staticman = new Staticman(req.params)
+
+  staticman.setConfigPath(createConfigObject(req.params.version, req.params.property))
+  staticman.setIp(req.headers['x-forwarded-for'] || req.connection.remoteAddress)
+  staticman.setUserAgent(req.headers['user-agent'])
+
+  return checkRecaptcha(staticman, req).then(usedRecaptcha => {
+    return process(staticman, req, res)
+  }).catch(err => {
+    return sendResponse(res, {
+      err,
+      redirect: req.body.options.redirect,
+      redirectError: req.body.options.redirectError
+    })
+  })
+}
