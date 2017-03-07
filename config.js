@@ -75,7 +75,8 @@ const schema = {
   sentryDSN: {
     doc: 'Sentry DSN',
     format: String,
-    default: null
+    default: null,
+    env: 'SENTRY_DSN'
   }
 }
 
