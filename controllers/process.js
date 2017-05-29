@@ -116,7 +116,6 @@ function sendResponse(res, data) {
 }
 
 module.exports = (req, res, next) => {
-    console.log("1")
   const staticman = new Staticman(req.params)
 
   staticman.setConfigPath(createConfigObject(req.params.version, req.params.property))
@@ -126,7 +125,6 @@ module.exports = (req, res, next) => {
   return checkRecaptcha(staticman, req).then(usedRecaptcha => {
     return process(staticman, req, res)
   }).catch(err => {
-      console.log("2")
     return sendResponse(res, {
       err,
       redirect: req.body.options.redirect,
