@@ -4,10 +4,11 @@ const config = require(__dirname + '/../config')
 const GitHubApi = require('github')
 
 module.exports = ((req, res) => {
+    console.log("1")
   const ua = config.get('analytics.uaTrackingId') ? require('universal-analytics')(config.get('analytics.uaTrackingId')) : null
 
   const github = new GitHubApi({
-    debug: false,
+    debug: true,
     protocol: 'https',
     host: 'api.github.com',
     pathPrefix: '',
@@ -23,9 +24,12 @@ module.exports = ((req, res) => {
     type: 'oauth',
     token: config.get('githubToken')
   })
-
+    console.log("2")
+    
   github.users.getRepoInvites({}).then(response => {
-    let invitationId
+      console.log("3")
+
+      let invitationId
 
     const invitation = response.some(invitation => {
       if (invitation.repository.full_name === (req.params.username + '/' + req.params.repository)) {
@@ -35,11 +39,13 @@ module.exports = ((req, res) => {
       }
     })
 
-    if (invitation) {
+      if (invitation) {
+	  console.log("4")
       return github.users.acceptRepoInvite({
         id: invitationId
       })
-    } else {
+      } else {
+	  console.log("4a")
       return Promise.reject()
     }
   }).then(response => {
