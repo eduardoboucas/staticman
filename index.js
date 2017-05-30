@@ -81,6 +81,12 @@ server.get('/v:version/connect/:username/:repository',
            requireApiVersion([1, 2]),
            require('./controllers/connect'))
 
+// Route: fork
+server.get('/v:version/fork/:username/:repository',
+           bruteforce.prevent,
+           requireApiVersion([1, 2]),
+           require('./controllers/fork'))
+
 // Route: process
 server.post('/v:version/entry/:username/:repository/:branch',
             bruteforce.prevent,
