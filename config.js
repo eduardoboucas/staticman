@@ -15,12 +15,6 @@ const schema = {
     default: 0,
     env: 'PORT'
   },
-  botUsername: {
-    doc: 'Username of the GitHub account being used to push files with.',
-    format: String,
-    default: null,
-    env: 'BOT_USERNAME'
-  },
   githubToken: {
     doc: 'Access token to the GitHub account being used to push files with.',
     format: String,
