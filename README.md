@@ -30,7 +30,13 @@ Staticman runs as a GitHub bot, so it needs a GitHub account and a [personal acc
 The bot needs push permission on the repositories it works with, so you'll need to add him as a collaborator. In order for him to accept the invitation, fire a `GET` request to:
 
 ```
-http://your-staticman-url/v1/connect/{GitHub username}/{GitHub repository}
+http://your-staticman-url/v2/connect/{GitHub username}/{GitHub repository}
+```
+
+Alternatively, put `fork: true` in your `staticman.yml` config file, and then the bot will *not* need push permission to your repository.  Instead he will fork your repository and make pull requests from the forked repository.  To tell him to fork your repository, send a `GET` request to:
+
+```
+http://your-staticman-url/v2/fork/{GitHub username}/{GitHub repository}
 ```
 
 ## Running on Docker
