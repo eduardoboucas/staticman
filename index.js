@@ -7,9 +7,6 @@ const ExpressBrute = require('express-brute')
 const GithubWebHook = require('express-github-webhook')
 const objectPath = require('object-path')
 
-const https = require('https')
-const fs = require('fs')
-
 // ------------------------------------
 // Server
 // ------------------------------------
@@ -112,16 +109,3 @@ webhookHandler.on('pull_request', require('./controllers/handlePR'))
 server.listen(config.get('port'), () => {
   console.log('[Staticman] Server listening on port', config.get('port'))
 })
-
-
-var privateKey = fs.readFileSync('ssl/selfsigned.key')
-var certificate = fs.readFileSync('ssl/selfsigned.crt')
-
-var options = {
-    key: privateKey,
-    cert: certificate
-}
-
-var httpsServer = https.createServer(options, server)
-
-httpsServer.listen(443)
