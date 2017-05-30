@@ -56,6 +56,11 @@ const schema = {
     format: String,
     default: '{@id}'
   },
+  fork: {
+    doc: 'Ignored if `moderation=false`.  When `fork` is set to `true`, Staticman will not need push access to the repository.  Instead, it will fork the repository and make a pull request with the data files from a branch of the fork.',
+    format: Boolean,
+    default: false
+  },
   format: {
     doc: 'Format of the data files being uploaded to the repository.',
     format: ['yaml', 'yml', 'json', 'frontmatter'],
