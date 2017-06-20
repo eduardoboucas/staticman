@@ -4,6 +4,7 @@ const config = require(__dirname + '/../config')
 const errorHandler = require('../lib/ErrorHandler')
 const reCaptcha = require('express-recaptcha')
 const Staticman = require('../lib/Staticman')
+const universalAnalytics = require('universal-analytics')
 
 function checkRecaptcha(staticman, req) {
   return new Promise((resolve, reject) => {
@@ -23,11 +24,13 @@ function checkRecaptcha(staticman, req) {
       try {
         decryptedSecret = staticman.decrypt(reCaptchaOptions.secret)
       } catch (err) {
-        return reject(errorHandler('RECAPTCHA_FAILED_DECRYPT'))
+        return reject(errorHandler('RECAPTCHA_CONFIG_MISMATCH'))
       }
 
-      if ((reCaptchaOptions.siteKey) !== siteConfig.get('reCaptcha.siteKey') ||
-          (decryptedSecret !== siteConfig.get('reCaptcha.secret'))) {
+      if (
+        reCaptchaOptions.siteKey !== siteConfig.get('reCaptcha.siteKey') ||
+        decryptedSecret !== siteConfig.get('reCaptcha.secret')
+      ) {
         return reject(errorHandler('RECAPTCHA_CONFIG_MISMATCH'))
       }
 
@@ -58,7 +61,9 @@ function createConfigObject(apiVersion, property) {
 }
 
 function process(staticman, req, res) {
-  const ua = config.get('analytics.uaTrackingId') ? require('universal-analytics')(config.get('analytics.uaTrackingId')) : null
+  const ua = config.get('analytics.uaTrackingId')
+    ? universalAnalytics(config.get('analytics.uaTrackingId'))
+    : null
   const fields = req.query.fields || req.body.fields
   const options = req.query.options || req.body.options || {}
 
@@ -80,12 +85,14 @@ function process(staticman, req, res) {
     if (ua) {
       ua.event('Entries', 'New entry error').send()
     }
+
+    return Promise.reject(err)
   })
 }
 
 function sendResponse(res, data) {
   const error = data && data.err
-  const statusCode = (error && error._smErrorCode) ? 500 : 200
+  const statusCode = error ? 500 : 200
 
   if (!error && data.redirect) {
     return res.redirect(data.redirect)
@@ -132,3 +139,8 @@ module.exports = (req, res, next) => {
     })
   })
 }
+
+module.exports.checkRecaptcha = checkRecaptcha
+module.exports.createConfigObject = createConfigObject
+module.exports.process = process
+module.exports.sendResponse = sendResponse

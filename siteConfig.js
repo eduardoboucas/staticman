@@ -54,7 +54,7 @@ const schema = {
   filename: {
     doc: 'Name for the data files being uploaded to the repository. You can use placeholders (denoted by curly braces), which will be dynamically replaced with the content of a field (e.g. `{fields.name}`), the content of an option (e.g. `{options.slug}`) or other dynamic placeholders such as the entry\'s unique id (`{@id}`).',
     format: String,
-    default: '{@id}'
+    default: ''
   },
   format: {
     doc: 'Format of the data files being uploaded to the repository.',

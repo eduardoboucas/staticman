@@ -4,7 +4,9 @@ const config = require(__dirname + '/../config')
 const GitHubApi = require('github')
 
 module.exports = ((req, res) => {
-  const ua = config.get('analytics.uaTrackingId') ? require('universal-analytics')(config.get('analytics.uaTrackingId')) : null
+  const ua = config.get('analytics.uaTrackingId') ?
+    require('universal-analytics')(config.get('analytics.uaTrackingId')) :
+    null
 
   const github = new GitHubApi({
     debug: false,
@@ -24,7 +26,7 @@ module.exports = ((req, res) => {
     token: config.get('githubToken')
   })
 
-  github.users.getRepoInvites({}).then(response => {
+  return github.users.getRepoInvites({}).then(response => {
     let invitationId
 
     const invitation = response.some(invitation => {
@@ -40,7 +42,7 @@ module.exports = ((req, res) => {
         id: invitationId
       })
     } else {
-      return Promise.reject()
+      res.status(404).send('Invitation not found')
     }
   }).then(response => {
     res.send('OK!')
@@ -49,8 +51,6 @@ module.exports = ((req, res) => {
       ua.event('Repositories', 'Connect').send()
     }
   }).catch(err => {
-    console.log(err.stack || err)
-
     res.status(500).send('Error')
 
     if (ua) {

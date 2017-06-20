@@ -55,7 +55,10 @@ const requireParams = (params) => {
     let missingParams = []
 
     params.forEach(param => {
-      if ((objectPath.get(req.query, param) === undefined) && (objectPath.get(req.body, param) === undefined)) {
+      if (
+        objectPath.get(req.query, param) === undefined &&
+        objectPath.get(req.body, param) === undefined
+      ) {
         missingParams.push(param)
       }
     })
@@ -73,29 +76,37 @@ const requireParams = (params) => {
 }
 
 // Route: connect
-server.get('/v:version/connect/:username/:repository',
-           bruteforce.prevent,
-           requireApiVersion([1, 2]),
-           require('./controllers/connect'))
+server.get(
+  '/v:version/connect/:username/:repository',
+  bruteforce.prevent,
+  requireApiVersion([1, 2]),
+  require('./controllers/connect')
+)
 
 // Route: process
-server.post('/v:version/entry/:username/:repository/:branch',
-            bruteforce.prevent,
-            requireApiVersion([1, 2]),
-            requireParams(['fields']),
-            require('./controllers/process'))
+server.post(
+  '/v:version/entry/:username/:repository/:branch',
+  bruteforce.prevent,
+  requireApiVersion([1, 2]),
+  requireParams(['fields']),
+  require('./controllers/process')
+)
 
-server.post('/v:version/entry/:username/:repository/:branch/:property',
-            bruteforce.prevent,
-            requireApiVersion([2]),
-            requireParams(['fields']),
-            require('./controllers/process'))
+server.post(
+  '/v:version/entry/:username/:repository/:branch/:property',
+  bruteforce.prevent,
+  requireApiVersion([2]),
+  requireParams(['fields']),
+  require('./controllers/process')
+)
 
 // Route: encrypt
-server.get('/v:version/encrypt/:text',
-            bruteforce.prevent,
-            requireApiVersion([2]),
-            require('./controllers/encrypt'))
+server.get(
+  '/v:version/encrypt/:text',
+  bruteforce.prevent,
+  requireApiVersion([2]),
+  require('./controllers/encrypt')
+)
 
 // GitHub webhook route
 webhookHandler.on('pull_request', require('./controllers/handlePR'))

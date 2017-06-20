@@ -4,6 +4,9 @@
 
 > Static sites with superpowers
 
+[![coverage](https://img.shields.io/badge/coverage-76%25-yellow.svg?style=flat?style=flat-square)](https://github.com/eduardoboucas/staticman)
+[![Build Status](https://travis-ci.org/eduardoboucas/staticman.svg?branch=master)](https://travis-ci.org/eduardoboucas/staticman)
+
 ## Table of contents
 
 1. [Introduction](#introduction)
