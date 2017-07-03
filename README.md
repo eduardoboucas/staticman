@@ -65,6 +65,15 @@ Staticman will look for a config file. For the deprecated `v1` endpoints, this i
 
 For a list of available configuration parameters, please refer to the [documentation page](https://staticman.net/docs/configuration).
 
+## Development
+
+Would you like to contribute to Staticman? That's great! Here's how:
+
+1. Read the [contributing guidelines](CONTRIBUTING.md)
+1. Pull the repository and start hacking
+1. Make sure tests are passing by running `npm test`
+1. Send a pull request and celebrate
+
 ## Sites using Staticman
 
 - [Popcorn](http://popcorn.staticman.net) ([Source](https://github.com/eduardoboucas/popcorn))
