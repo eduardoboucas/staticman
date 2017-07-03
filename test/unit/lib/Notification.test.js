@@ -1,6 +1,5 @@
 const config = require('./../../../config')
 const mockHelpers = require('./../../helpers')
-const nock = require('nock')
 const Notification = require('./../../../lib/Notification')
 
 const mockSendFn = jest.fn()

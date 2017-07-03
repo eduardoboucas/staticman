@@ -24,7 +24,7 @@ beforeEach(() => {
   encrypt = require('./../../../controllers/encrypt')
 })
 
-describe('Encrypt endpoint', () => {
+describe('Encrypt controller', () => {
   test('returns an encrypted version of the given text', () => {
     req.params.text = 'This is the text to encrypt'
 

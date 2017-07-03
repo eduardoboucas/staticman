@@ -3,12 +3,13 @@ const config = require('./../../config')
 const objectPath = require('object-path')
 const markdownTable = require('markdown-table')
 const NodeRSA = require('node-rsa')
+const request = require('request-promise-native')
 const sampleData = require('./sampleData')
 const SiteConfig = require('./../../siteConfig')
 const yaml = require('js-yaml')
 
-console.log = jest.fn()
-console.warn = jest.fn()
+//console.log = jest.fn()
+//console.warn = jest.fn()
 
 const rsa = new NodeRSA()
 rsa.importKey(config.get('rsaPrivateKey'))
@@ -27,6 +28,8 @@ const parameters = {
   username: 'johndoe',
   version: 'v2'
 }
+
+module.exports.baseUrl = 
 
 module.exports.decrypt = text => {
   return rsa.decrypt(text, 'utf8')
@@ -110,4 +113,14 @@ module.exports.getParsedConfig = () => {
 
 module.exports.getUserAgent = () => {
   return 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
+}
+
+module.exports.wrappedRequest = options => {
+  const newOptions = typeof options === 'string'
+    ? `http://localhost:${config.get('port')}${options}`
+    : Object.assign({}, options, {
+      uri: `http://localhost:${config.get('port')}${options.uri}`
+    })
+
+  return request(newOptions)
 }

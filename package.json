@@ -20,7 +20,7 @@
   "homepage": "https://github.com/eduardoboucas/staticman#readme",
   "dependencies": {
     "akismet": "^1.0.0",
-    "body-parser": "^1.15.2",
+    "body-parser": "^1.17.x",
     "convict": "^1.5.0",
     "express": "^4.14.0",
     "express-brute": "^0.6.0",
@@ -43,7 +43,8 @@
     "front-matter": "^2.1.2",
     "istanbul-cobertura-badger": "^1.3.0",
     "jest": "^20.0.4",
-    "nock": "^9.0.13"
+    "nock": "^9.0.13",
+    "request-promise-native": "^1.0.4"
   },
   "jest": {
     "collectCoverage": true,
@@ -54,6 +55,10 @@
     ],
     "coverageReporters": [
       "cobertura"
+    ],
+    "testMatch": [
+      "*/**/test/acceptance/**/*.test.js",
+      "*/**/test/unit/**/*.test.js"
     ]
   }
 }

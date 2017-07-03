@@ -66,7 +66,7 @@ comments:
   reCaptcha:
     enabled: true
     siteKey: "123456789"
-    secret: "ZguqL+tEc+XPFmWZdaFxWqqB1xtwe79o5SLWrjuAIA/45N5hPQk3HcKKfLBl0ZyqVff+JEY76xLBVFn+jn4Wc8egnKtA7HJfjMpbR4WdSFVm/Hcca3L3id9JNYmGPFRJmzOlG2qjSr2Z8y3Y1i02EjQrzUcfqCuCfeEbZxmCNp0="`
+    secret: "@reCaptchaSecret@"`
 
 module.exports.config2 = `{
   "comments": {
@@ -112,6 +112,30 @@ module.exports.config2 = `{
     }
   }
 }`
+
+module.exports.config3 = `comments:
+  allowedFields: ["name", "email", "url", "message"]
+  allowedOrigins: ["localhost", "eduardoboucas.com"]
+  branch: "master"
+  generatedFields:
+    date:
+      type date
+      options:
+        format: "timestamp-seconds"
+  format: "yaml"
+  moderation: false
+  name: "eduardoboucas.com"
+  notifications:
+    enabled: true
+  path: "_data/comments/{options.slug}"
+  filename: "entry{@timestamp}"
+  requiredFields: ["name", "email", "message"]
+  transforms:
+    email: md5
+  reCaptcha:
+    enabled: true
+    siteKey: "123456789"
+    secret: "@reCaptchaSecret@"`
 
 module.exports.prBody1 = `Dear human,
 

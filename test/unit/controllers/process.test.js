@@ -2,7 +2,6 @@ const config = require('./../../../config')
 const errorHandler = require('./../../../lib/ErrorHandler').getInstance()
 const githubToken = config.get('githubToken')
 const mockHelpers = require('./../../helpers')
-const nock = require('nock')
 const sampleData = require('./../../helpers/sampleData')
 
 let mockSiteConfig
@@ -16,11 +15,7 @@ beforeEach(() => {
   req = mockHelpers.getMockRequest()
 })
 
-afterEach(() => {
-  nock.cleanAll()
-})
-
-describe('Process endpoint', () => {
+describe('Process controller', () => {
   describe('checkRecaptcha', () => {
     test('does nothing if reCaptcha is not enabled in config', () => {
       mockSiteConfig.set('reCaptcha.enabled', false)
