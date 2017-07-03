@@ -8,8 +8,9 @@ const sampleData = require('./sampleData')
 const SiteConfig = require('./../../siteConfig')
 const yaml = require('js-yaml')
 
-//console.log = jest.fn()
-//console.warn = jest.fn()
+// Disable console.log() for tests
+console.log = jest.fn()
+console.warn = jest.fn()
 
 const rsa = new NodeRSA()
 rsa.importKey(config.get('rsaPrivateKey'))

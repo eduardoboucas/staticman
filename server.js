@@ -19,8 +19,8 @@ const StaticmanAPI = function () {
   this.server = express()
   this.server.use(bodyParser.json())
   this.server.use(bodyParser.urlencoded({
-    extended: true,
-    //type: '*'
+    extended: true
+    // type: '*'
   }))
 
   this.initialiseWebhookHandler()
@@ -32,16 +32,16 @@ const StaticmanAPI = function () {
 StaticmanAPI.prototype.initialiseBruteforceProtection = function () {
   const store = new ExpressBrute.MemoryStore()
 
-  this.bruteforce = new ExpressBrute(store)  
+  this.bruteforce = new ExpressBrute(store)
 }
 
 StaticmanAPI.prototype.initialiseCORS = function () {
   this.server.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*')
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
-    
+
     next()
-  })  
+  })
 }
 
 StaticmanAPI.prototype.initialiseRoutes = function () {

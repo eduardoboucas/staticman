@@ -1,12 +1,13 @@
 'use strict'
 
-const config = require(__dirname + '/../config')
+const path = require('path')
+const config = require(path.join(__dirname, '/../config'))
 const GitHubApi = require('github')
 
-module.exports = ((req, res) => {
-  const ua = config.get('analytics.uaTrackingId') ?
-    require('universal-analytics')(config.get('analytics.uaTrackingId')) :
-    null
+module.exports = (req, res) => {
+  const ua = config.get('analytics.uaTrackingId')
+    ? require('universal-analytics')(config.get('analytics.uaTrackingId'))
+    : null
 
   const github = new GitHubApi({
     debug: false,
@@ -50,11 +51,11 @@ module.exports = ((req, res) => {
     if (ua) {
       ua.event('Repositories', 'Connect').send()
     }
-  }).catch(err => {
+  }).catch(err => { // eslint-disable-line handle-callback-err
     res.status(500).send('Error')
 
     if (ua) {
       ua.event('Repositories', 'Connect error').send()
     }
   })
-})
+}
