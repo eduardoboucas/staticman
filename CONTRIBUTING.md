@@ -2,7 +2,7 @@
 
 Your contributions to Staticman are more than welcome! Here are a few things to keep in mind:
 
-1. The codebase unofficially uses the [StandardJS](https://standardjs.com/) style guide. I say *unofficially* because it hasn't been formally made part of the build process and some parts of the codebase might need some adjustments, which will be done soon. In the meantime, please have a quick glance through StandardJS and the rest of the code base and try to format your code accordingly.
+1. The codebase adheres to the [StandardJS](https://standardjs.com/) style guide and code will be validated against it by the CI tool. Please take a moment to familiarise yourself with the basic rules before writing any code.
 
 1. Staticman uses [Jest](https://facebook.github.io/jest/) for unit and acceptance tests. You can run the suite with `npm test`. Make sure existing tests are passing and, if you're adding a new feature, make sure it comes with a set of new tests.
 

@@ -18,27 +18,27 @@ const schema = {
     author: {
       doc: 'Name of the field to be used as the entry\'s author in Akistmet',
       format: String,
-      default: ""
+      default: ''
     },
     authorEmail: {
       doc: 'Name of the field to be used as the entry\'s author\'s email in Akistmet',
       format: String,
-      default: ""
+      default: ''
     },
     authorUrl: {
       doc: 'Name of the field to be used as the entry\'s author\'s URL in Akistmet',
       format: String,
-      default: ""
+      default: ''
     },
     content: {
       doc: 'Name of the field to be used as the entry\'s body in Akistmet',
       format: String,
-      default: ""
+      default: ''
     },
     type: {
       doc: 'Type of entry to be sent to Akismet',
       format: String,
-      default: "comment"
+      default: 'comment'
     }
   },
   branch: {
@@ -76,7 +76,7 @@ const schema = {
     doc: 'Human-friendly name of the property/website. This is used in notification emails.',
     docExample: 'name: "My awesome blog"',
     format: String,
-    default: ""
+    default: ''
   },
   notifications: {
     enabled: {
@@ -144,7 +144,7 @@ module.exports = (data, rsa) => {
     }
   })
 
-  const config = convict(schema) 
+  const config = convict(schema)
 
   try {
     config.load(data)

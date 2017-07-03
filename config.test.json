@@ -4,8 +4,7 @@
   "email": {
     "apiKey": "key-1q2w3e4r"
   },
-  "port": 8092,
-  "sentryDSN": "https://1q2w3e4r:1q2w3e4r@sentry.io/123456",
+  "port": 8094,
   "akismet": {
     "site": "https://test.staticman.net",
     "apiKey": "1q2w3e4r5t6y7u8i9o0p"

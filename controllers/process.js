@@ -1,12 +1,13 @@
 'use strict'
 
-const config = require(__dirname + '/../config')
+const path = require('path')
+const config = require(path.join(__dirname, '/../config'))
 const errorHandler = require('../lib/ErrorHandler')
 const reCaptcha = require('express-recaptcha')
 const Staticman = require('../lib/Staticman')
 const universalAnalytics = require('universal-analytics')
 
-function checkRecaptcha(staticman, req) {
+function checkRecaptcha (staticman, req) {
   return new Promise((resolve, reject) => {
     staticman.getSiteConfig().then(siteConfig => {
       if (!siteConfig.get('reCaptcha.enabled')) {
@@ -46,7 +47,7 @@ function checkRecaptcha(staticman, req) {
   })
 }
 
-function createConfigObject(apiVersion, property) {
+function createConfigObject (apiVersion, property) {
   let remoteConfig = {}
 
   if (apiVersion === '1') {
@@ -60,7 +61,7 @@ function createConfigObject(apiVersion, property) {
   return remoteConfig
 }
 
-function process(staticman, req, res) {
+function process (staticman, req, res) {
   const ua = config.get('analytics.uaTrackingId')
     ? universalAnalytics(config.get('analytics.uaTrackingId'))
     : null
@@ -90,7 +91,7 @@ function process(staticman, req, res) {
   })
 }
 
-function sendResponse(res, data) {
+function sendResponse (res, data) {
   const error = data && data.err
   const statusCode = error ? 500 : 200
 

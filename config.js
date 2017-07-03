@@ -1,6 +1,7 @@
 'use strict'
 
 const convict = require('convict')
+const path = require('path')
 
 const schema = {
   env: {
@@ -84,12 +85,15 @@ let config
 
 try {
   config = convict(schema)
-  config.loadFile(__dirname + '/config.' + config.get('env') + '.json')
+
+  const fileName = 'config.' + config.get('env') + '.json'
+
+  config.loadFile(path.join(__dirname, fileName))
   config.validate()
 
   console.log('(*) Local config file loaded')
 } catch (e) {
-  
+
 }
 
 module.exports = config

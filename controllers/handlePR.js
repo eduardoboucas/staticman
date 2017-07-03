@@ -1,11 +1,12 @@
 'use strict'
 
-const config = require(__dirname + '/../config')
+const path = require('path')
+const config = require(path.join(__dirname, '/../config'))
 const GitHubApi = require('github')
 const Staticman = require('../lib/Staticman')
 
 module.exports = (repo, data) => {
-  const ua = config.get('analytics.uaTrackingId') 
+  const ua = config.get('analytics.uaTrackingId')
     ? require('universal-analytics')(config.get('analytics.uaTrackingId'))
     : null
 
