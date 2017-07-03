@@ -4,74 +4,66 @@
 
 > Static sites with superpowers
 
-## Table of contents
-
-1. [Introduction](#introduction)
-1. [Prerequisites](#prerequisites)
-1. [Running on Docker](#running-on-docker)
-1. [API configuration](#api-configuration)
-1. [Site configuration](#site-configuration)
-1. [Sites using Staticman](#sites-using-staticman)
-
----
-
 ## Introduction
 
-Staticman is a Node.js application that receives user-generated content and uploads it as data files to a GitHub repository. In practice, this allows you to have dynamic content (e.g. blog post comments) as part of a fully static Jekyll site running on GitHub Pages.
+Staticman is a Node.js application that receives user-generated content and uploads it as data files to a GitHub repository. In practice, this allows you to have dynamic content (e.g. blog post comments) as part of a fully static website, as long as your site automatically deploys on every push to GitHub, as seen on [GitHub Pages](https://pages.github.com/), [Netlify](http://netlify.com/) and others.
 
-It consists of a small web server that handles the `POST` requests from your forms, runs various forms of validation and then pushes them to your repository as data files. You can choose to enable moderation, which means files will be pushed to a separate branch and a pull request will be created for your approval, or disable it completely, meaning that files will be pushed to the main branch automatically.
+It consists of a small web service that handles the `POST` requests from your forms, runs various forms of validation and manipulation defined by you and finally pushes them to your repository as data files. You can choose to enable moderation, which means files will be pushed to a separate branch and a pull request will be created for your approval, or disable it completely, meaning that files will be pushed to the main branch automatically.
 
-**NOTE:** Sections [Prerequisites](#prerequisites) and [Middleman configuration](#middleman-configuration) are only relevant if you wish to host your own instance of Staticman. If not, there is an instance you can use for free. Please see  https://staticman.net/get-started for more details.
+You can download and run the Staticman API on your own infrastructure, or you can simply use the public instance of the Staticman API for free. If using the public instance, you can skip to section XXXX.
 
-## Prerequisites
+## Requirements
 
-Staticman runs as a GitHub bot, so it needs a GitHub account and a [personal access token](https://help.github.com/articles/creating-an-access-token-for-command-line-use/).
+- Node.js 4.8.3+
+- npm
+- A [personal access token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) for the GitHub account you want to run Staticman with
+- An SSH key (click [here](https://help.github.com/articles/connecting-to-github-with-ssh/) to learn how to create one)
 
-The bot needs push permission on the repositories it works with, so you'll need to add him as a collaborator. In order for him to accept the invitation, fire a `GET` request to:
+## Setting up the server
+
+- Clone the repository and install the dependencies via npm.
+
+  ```
+  git clone git@github.com:eduardoboucas/staticman.git
+  cd staticman
+  npm install
+  ```
+
+- Create a development config file from the sample file.
+
+  ```
+  cp config.sample.json config.development.json
+  ```
+
+- Edit the newly-created config file with your GitHub access token, SSH private key and the port to run the server. Click [here](https://staticman.net/docs/api) for the list of available configuration parameters.
+
+- Start the server.
+
+  ```
+  npm start
+  ```
+
+Each environment, determined by the `NODE_ENV` environment variable, requires its own configuration file. When you're ready to push your Staticman API live, create a `config.production.json` file before deploying.
+
+Check [this guide](docs/docker.md) if you're using Docker.
+
+## Setting up a repository
+
+Staticman runs as a bot using a GitHub account, as opposed to accessing your account using the traditional OAuth flow. This means that you can give it access to just the repositories you're planning on using it on, instead of exposing all your repositories.
+
+To add Staticman to a repository, you need to add the bot as a collaborator with write access to the repository and ask the bot to accept the invite by firing a `GET` request to this URL:
 
 ```
-http://your-staticman-url/v1/connect/{GitHub username}/{GitHub repository}
+http://your-staticman-url/v2/connect/GITHUB-USERNAME/GITHUB-REPOSITORY
 ```
 
-## Running on Docker
-
-With Docker, it's easy to run Staticman on any environment without downloading, configuring or installing anything manually on your host other than Docker and Docker Compose.
-
-First, you need to install [Docker](https://docs.docker.com/engine/installation/) and [Docker Compose](https://docs.docker.com/compose/install/).
-
-### Production
-
-In production mode, the project source is imported and dependencies installed to the container.
-
-To start the service:  
-
-```shell
-docker-compose up
-```
-
-### Development
-
-In development mode, the source code is mounted from the host. You can see any changes you made in the sources by simply restarting the container.
-
-To start the service: 
-
-```shell 
-docker-compose -f docker-compose.development.yml up
-```
-
-### Usage
-
-Use your IP address or `localhost` as the Staticman API address.
-
-## API configuration
-
-Staticman will look for a JSON configuration file named `config.{ENVIRONMENT}.json` in the root of the application, with `{ENVIRONMENT}` being replaced by the environment setting (e.g. `config.development.json`). Alternatively, each configuration parameter can be supplied using an environment variable.
-
-[Click here](https://staticman.net/docs/api) to see a list of available configuration parameters.
+If you're using the public instance, the account you want to add is [staticmanapp](https://github.com/staticmanapp) and the URL is https://api.staticman.net/v2/connect/GITHUB-USERNAME/GITHUB-REPOSITORY.
 
 ## Site configuration
 
-Parameters used to configure a site can be found [here](https://staticman.net/docs/configuration).
+Staticman will look for a config file. For the deprecated `v1` endpoints, this is a  `_config.yml` with a `staticman` property inside; for `v2` endpoints, Staticman looks for a `staticman.yml` file at the root of the repository.
+
+For a list of available configuration parameters, please refer to the [documentation page](https://staticman.net/docs/configuration).
 
 ## Sites using Staticman
 
