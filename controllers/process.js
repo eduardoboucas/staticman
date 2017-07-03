@@ -79,7 +79,7 @@ function process(staticman, req, res) {
   }).catch(err => {
     sendResponse(res, {
       err: errorHandler('UNKNOWN_ERROR', {err}),
-      redirectError: req.body.options.redirectError
+      redirectError: req.body.options && req.body.options.redirectError
     })
 
     if (ua) {
@@ -114,6 +114,10 @@ function sendResponse(res, data) {
       payload.message = errorMessage
     }
 
+    if (error.data) {
+      payload.data = error.data
+    }
+
     payload.errorCode = errorCode
   } else {
     payload.fields = data.fields
@@ -134,8 +138,8 @@ module.exports = (req, res, next) => {
   }).catch(err => {
     return sendResponse(res, {
       err,
-      redirect: req.body.options.redirect,
-      redirectError: req.body.options.redirectError
+      redirect: req.body.options && req.body.options.redirect,
+      redirectError: req.body.options && req.body.options.redirectError
     })
   })
 }
