@@ -4,6 +4,7 @@ const config = require(__dirname + '/../config')
 const errorHandler = require('../lib/ErrorHandler')
 const reCaptcha = require('express-recaptcha')
 const Staticman = require('../lib/Staticman')
+const universalAnalytics = require('universal-analytics')
 
 function checkRecaptcha(staticman, req) {
   return new Promise((resolve, reject) => {
@@ -23,11 +24,13 @@ function checkRecaptcha(staticman, req) {
       try {
         decryptedSecret = staticman.decrypt(reCaptchaOptions.secret)
       } catch (err) {
-        return reject(errorHandler('RECAPTCHA_FAILED_DECRYPT'))
+        return reject(errorHandler('RECAPTCHA_CONFIG_MISMATCH'))
       }
 
-      if ((reCaptchaOptions.siteKey) !== siteConfig.get('reCaptcha.siteKey') ||
-          (decryptedSecret !== siteConfig.get('reCaptcha.secret'))) {
+      if (
+        reCaptchaOptions.siteKey !== siteConfig.get('reCaptcha.siteKey') ||
+        decryptedSecret !== siteConfig.get('reCaptcha.secret')
+      ) {
         return reject(errorHandler('RECAPTCHA_CONFIG_MISMATCH'))
       }
 
@@ -58,7 +61,9 @@ function createConfigObject(apiVersion, property) {
 }
 
 function process(staticman, req, res) {
-  const ua = config.get('analytics.uaTrackingId') ? require('universal-analytics')(config.get('analytics.uaTrackingId')) : null
+  const ua = config.get('analytics.uaTrackingId')
+    ? universalAnalytics(config.get('analytics.uaTrackingId'))
+    : null
   const fields = req.query.fields || req.body.fields
   const options = req.query.options || req.body.options || {}
 
@@ -74,18 +79,20 @@ function process(staticman, req, res) {
   }).catch(err => {
     sendResponse(res, {
       err: errorHandler('UNKNOWN_ERROR', {err}),
-      redirectError: req.body.options.redirectError
+      redirectError: req.body.options && req.body.options.redirectError
     })
 
     if (ua) {
       ua.event('Entries', 'New entry error').send()
     }
+
+    return Promise.reject(err)
   })
 }
 
 function sendResponse(res, data) {
   const error = data && data.err
-  const statusCode = (error && error._smErrorCode) ? 500 : 200
+  const statusCode = error ? 500 : 200
 
   if (!error && data.redirect) {
     return res.redirect(data.redirect)
@@ -105,6 +112,10 @@ function sendResponse(res, data) {
 
     if (errorMessage) {
       payload.message = errorMessage
+    }
+
+    if (error.data) {
+      payload.data = error.data
     }
 
     payload.errorCode = errorCode
@@ -127,8 +138,13 @@ module.exports = (req, res, next) => {
   }).catch(err => {
     return sendResponse(res, {
       err,
-      redirect: req.body.options.redirect,
-      redirectError: req.body.options.redirectError
+      redirect: req.body.options && req.body.options.redirect,
+      redirectError: req.body.options && req.body.options.redirectError
     })
   })
 }
+
+module.exports.checkRecaptcha = checkRecaptcha
+module.exports.createConfigObject = createConfigObject
+module.exports.process = process
+module.exports.sendResponse = sendResponse
