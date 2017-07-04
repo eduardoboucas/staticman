@@ -535,7 +535,7 @@ describe('Staticman interface', () => {
   })
 
   describe('computes the full path and extension for new files', () => {
-    test('uses UID as the default file name is `filename` is not set in config', () => {
+    test('uses UID as the default file name and extension if `filename` and `extension` are not set in config', () => {
       const fields = mockHelpers.getFields()
       const directory = 'some/directory'
       const Staticman = require('./../../../lib/Staticman')
@@ -551,7 +551,7 @@ describe('Staticman interface', () => {
       expect(filePath).toBe(`${directory}/${staticman.uid}.json`)
     })
 
-    test('uses UID as the default file name is `filename` is not set in config', () => {
+    test('uses the config value of `filename`, if defined, as the file name', () => {
       const fields = mockHelpers.getFields()
       const directory = 'some/directory'
       const name = 'my-file'
@@ -566,6 +566,24 @@ describe('Staticman interface', () => {
       const filePath = staticman._getNewFilePath(fields)
 
       expect(filePath).toBe(`${directory}/${name}.json`)
+    })
+
+    test('uses the config value of `extension`, if defined, as the file extension', () => {
+      const fields = mockHelpers.getFields()
+      const directory = 'some/directory'
+      const name = 'my-file'
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      mockConfig.set('extension', 'html')
+      mockConfig.set('filename', name)
+      mockConfig.set('format', 'json')
+      mockConfig.set('path', directory)
+      staticman.siteConfig = mockConfig
+
+      const filePath = staticman._getNewFilePath(fields)
+
+      expect(filePath).toBe(`${directory}/${name}.html`)
     })
 
     test('removes a trailing slash from `path` if it exists', () => {
