@@ -2,6 +2,7 @@ const config = require('./../../../config')
 const errorHandler = require('./../../../lib/ErrorHandler')
 const frontMatter = require('front-matter')
 const md5 = require('md5')
+const moment = require('moment')
 const mockHelpers = require('./../../helpers')
 const querystring = require('querystring')
 const slugify = require('slug')
@@ -704,6 +705,29 @@ describe('Staticman interface', () => {
         .replace('{name}', data.name)
         .replace('{@timestamp}', mockDate.getTime())
         .replace('{@id}', staticman.uid)
+
+      expect(staticman._resolvePlaceholders(subject, data)).toBe(subjectReplaced)
+    })
+
+    test('returns the given string with `date:` placeholders replaced', () => {
+      const mockDate = new Date('1988-08-31T11:00:00')
+
+      Date = class extends Date {
+        constructor() {
+          return mockDate
+        }
+      }
+
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      const data = {
+        title: 'this-is-a-title'
+      }
+      const subject = '{@date:YYYY-MM-DD}-{title}'
+      const subjectReplaced = subject
+        .replace('{title}', data.title)
+        .replace('{@date:YYYY-MM-DD}', moment().format('YYYY-MM-DD'))
 
       expect(staticman._resolvePlaceholders(subject, data)).toBe(subjectReplaced)
     })
