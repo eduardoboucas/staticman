@@ -2,7 +2,7 @@
 
 const path = require('path')
 const config = require(path.join(__dirname, '/../config'))
-const GitHubApi = require('github')
+const GitHub = require(path.join(__dirname, '/../lib/GitHub'))
 const Staticman = require('../lib/Staticman')
 
 module.exports = (repo, data) => {
@@ -14,24 +14,11 @@ module.exports = (repo, data) => {
     return
   }
 
-  const github = new GitHubApi({
-    debug: false,
-    protocol: 'https',
-    host: 'api.github.com',
-    pathPrefix: '',
-    headers: {
-      'user-agent': 'Staticman agent'
-    },
-    timeout: 5000,
-    Promise: Promise
-  })
+  const github = new GitHub()
 
-  github.authenticate({
-    type: 'oauth',
-    token: config.get('githubToken')
-  })
+  github.authenticate(config.get('githubToken'))
 
-  return github.pullRequests.get({
+  return github.api.pullRequests.get({
     user: data.repository.owner.login,
     repo: data.repository.name,
     number: data.number
@@ -59,7 +46,7 @@ module.exports = (repo, data) => {
     }
 
     if (response.state === 'closed') {
-      return github.gitdata.deleteReference({
+      return github.api.gitdata.deleteReference({
         user: data.repository.owner.login,
         repo: data.repository.name,
         ref: 'heads/' + response.head.ref

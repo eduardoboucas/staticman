@@ -14,8 +14,16 @@ beforeEach(() => {
 })
 
 describe('GitHub interface', () => {
-  test('initialises the GitHub API wrapper and completes authentication', () => {
+  test('initialises the GitHub API wrapper', () => {
+    const GitHub = require('./../../../lib/GitHub')
+    const githubInstance = new GitHub(req.params)
+
+    expect(githubInstance.api).toBeDefined()
+  })
+
+  test('authenticates with the GitHub API using a personal access token', () => {
     const mockAuthenticate = jest.fn()
+    const token = config.get('githubToken')
 
     jest.mock('github', () => {
       const GithubApi = function () {}
@@ -28,11 +36,34 @@ describe('GitHub interface', () => {
     const GitHub = require('./../../../lib/GitHub')
     const githubInstance = new GitHub(req.params)
 
-    expect(githubInstance.api).toBeDefined()
-    expect(mockAuthenticate).toHaveBeenCalledTimes(1)
+    githubInstance.authenticate(token)
+
     expect(mockAuthenticate.mock.calls[0][0]).toEqual({
       type: 'oauth',
-      token: config.get('githubToken')
+      token
+    })
+  })
+
+  test('authenticates with the GitHub API using a temporary access token', () => {
+    const mockAuthenticate = jest.fn()
+    const token = '111222333444555666777'
+
+    jest.mock('github', () => {
+      const GithubApi = function () {}
+
+      GithubApi.prototype.authenticate = mockAuthenticate
+
+      return GithubApi
+    })
+
+    const GitHub = require('./../../../lib/GitHub')
+    const githubInstance = new GitHub(req.params)
+
+    githubInstance.authenticate(token, true)
+
+    expect(mockAuthenticate.mock.calls[0][0]).toEqual({
+      type: 'token',
+      token
     })
   })
 
