@@ -3,12 +3,9 @@
 const path = require('path')
 const config = require(path.join(__dirname, '/../config'))
 const errorHandler = require('../lib/ErrorHandler')
-const GitHub = require(path.join(__dirname, '/../lib/GitHub'))
-const querystring = require('querystring')
 const reCaptcha = require('express-recaptcha')
 const Staticman = require('../lib/Staticman')
 const universalAnalytics = require('universal-analytics')
-const url = require('url')
 
 function checkRecaptcha (staticman, req) {
   return new Promise((resolve, reject) => {
