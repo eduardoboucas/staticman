@@ -22,48 +22,49 @@ describe('GitHub interface', () => {
   })
 
   test('authenticates with the GitHub API using a personal access token', () => {
-    const mockAuthenticate = jest.fn()
     const token = config.get('githubToken')
-
-    jest.mock('github', () => {
-      const GithubApi = function () {}
-
-      GithubApi.prototype.authenticate = mockAuthenticate
-
-      return GithubApi
-    })
-
     const GitHub = require('./../../../lib/GitHub')
     const githubInstance = new GitHub(req.params)
+    const spy = jest.spyOn(githubInstance.api, 'authenticate')
 
-    githubInstance.authenticate(token)
+    githubInstance.authenticateWithToken(token)
 
-    expect(mockAuthenticate.mock.calls[0][0]).toEqual({
+    expect(spy.mock.calls[0][0]).toEqual({
       type: 'oauth',
       token
     })
   })
 
-  test('authenticates with the GitHub API using a temporary access token', () => {
-    const mockAuthenticate = jest.fn()
-    const token = '111222333444555666777'
+  test('authenticates with the GitHub API using a temporary access code', () => {
+    const accessToken = 'asdfghjkl'
+    const clientId = '123456789'
+    const clientSecret = '1q2w3e4r5t6y7u8i9o'
+    const code = 'abcdefghijklmnopqrst'
 
-    jest.mock('github', () => {
-      const GithubApi = function () {}
-
-      GithubApi.prototype.authenticate = mockAuthenticate
-
-      return GithubApi
-    })
+    nock(/github\.com/)
+      .post('/login/oauth/access_token')
+      .query({
+        client_id: clientId,
+        client_secret: clientSecret,
+        code
+      })
+      .reply(200, {
+        access_token: accessToken
+      })
 
     const GitHub = require('./../../../lib/GitHub')
     const githubInstance = new GitHub(req.params)
+    const spy = jest.spyOn(githubInstance.api, 'authenticate')
 
-    githubInstance.authenticate(token, true)
-
-    expect(mockAuthenticate.mock.calls[0][0]).toEqual({
-      type: 'token',
-      token
+    return githubInstance.authenticateWithCode({
+      clientId,
+      clientSecret,
+      code
+    }).then(() => {
+      expect(spy.mock.calls[0][0]).toEqual({
+        type: 'token',
+        token: accessToken
+      })
     })
   })
 

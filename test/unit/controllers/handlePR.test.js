@@ -4,6 +4,7 @@ const githubToken = config.get('githubToken')
 const sampleData = require('./../../helpers/sampleData')
 
 let catchAllMock
+let mockAuthenticate
 let mockSetConfigPathFn
 let mockProcessMergeFn
 let req
@@ -12,12 +13,14 @@ let res
 // Mock Staticman module
 jest.mock('./../../../lib/Staticman', () => {
   return jest.fn(parameters => ({
+    authenticate: mockAuthenticate,
     setConfigPath: mockSetConfigPathFn,
     processMerge: mockProcessMergeFn
   }))
 })
 
 beforeEach(() => {
+  mockAuthenticate = jest.fn()
   mockSetConfigPathFn = jest.fn()
   mockProcessMergeFn = jest.fn(() => Promise.resolve(true))
   req = helpers.getMockRequest()

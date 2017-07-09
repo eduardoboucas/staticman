@@ -9,6 +9,7 @@ const SiteConfig = require('./../../siteConfig')
 const yaml = require('js-yaml')
 
 // Disable console.log() for tests
+console.debug = console.log
 console.log = jest.fn()
 console.warn = jest.fn()
 
