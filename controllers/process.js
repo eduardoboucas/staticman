@@ -3,9 +3,12 @@
 const path = require('path')
 const config = require(path.join(__dirname, '/../config'))
 const errorHandler = require('../lib/ErrorHandler')
+const GitHub = require(path.join(__dirname, '/../lib/GitHub'))
+const querystring = require('querystring')
 const reCaptcha = require('express-recaptcha')
 const Staticman = require('../lib/Staticman')
 const universalAnalytics = require('universal-analytics')
+const url = require('url')
 
 function checkRecaptcha (staticman, req) {
   return new Promise((resolve, reject) => {
@@ -130,7 +133,8 @@ function sendResponse (res, data) {
 module.exports = (req, res, next) => {
   const staticman = new Staticman(req.params)
 
-  staticman.setConfigPath(createConfigObject(req.params.version, req.params.property))
+  staticman.authenticate()
+  staticman.setConfigPath()
   staticman.setIp(req.headers['x-forwarded-for'] || req.connection.remoteAddress)
   staticman.setUserAgent(req.headers['user-agent'])
 

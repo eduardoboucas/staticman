@@ -15,7 +15,7 @@ module.exports = (req, res) => {
     branch: req.params.branch
   })
 
-  github.authenticate(config.get('githubToken'))
+  github.authenticateWithToken(config.get('githubToken'))
 
   return github.api.users.getRepoInvites({}).then(response => {
     let invitationId

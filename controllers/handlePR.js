@@ -16,7 +16,7 @@ module.exports = (repo, data) => {
 
   const github = new GitHub()
 
-  github.authenticate(config.get('githubToken'))
+  github.authenticateWithToken(config.get('githubToken'))
 
   return github.api.pullRequests.get({
     user: data.repository.owner.login,
@@ -35,6 +35,7 @@ module.exports = (repo, data) => {
           const parsedBody = JSON.parse(bodyMatch[1])
           const staticman = new Staticman(parsedBody.parameters)
 
+          staticman.authenticate()
           staticman.setConfigPath(parsedBody.configPath)
           staticman.processMerge(parsedBody.fields, parsedBody.options).catch(err => {
             return Promise.reject(err)
