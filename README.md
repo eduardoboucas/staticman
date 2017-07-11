@@ -86,6 +86,7 @@ Would you like to contribute to Staticman? That's great! Here's how:
 - [zongren.me](https://zongren.me/) ([Source](https://gitlab.com/zongren/zongren.gitlab.io/)) 
 - [DOTSLASHLINUX](http://www.dotslashlinux.com/) ([Source](https://github.com/firasuke/DOTSLASHLINUX/))
 - [Spinningnumbers.org](http://spinningnumbers.org/) ([Source](https://github.com/willymcallister/spinningnumbers)
+- [blog.justin.kelly.org.au](https://blog.justin.kelly.org.au/) ([Source](github.com/justinkelly/justinkelly.github.io)
 
 
 Are you using Staticman? [Let us know!](https://github.com/eduardoboucas/staticman/edit/master/README.md)
