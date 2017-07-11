@@ -85,7 +85,7 @@ Would you like to contribute to Staticman? That's great! Here's how:
 - [Open Source Design Job Board](http://opensourcedesign.net/jobs/) ([Source](https://github.com/opensourcedesign/jobs/))
 - [zongren.me](https://zongren.me/) ([Source](https://gitlab.com/zongren/zongren.gitlab.io/)) 
 - [DOTSLASHLINUX](http://www.dotslashlinux.com/) ([Source](https://github.com/firasuke/DOTSLASHLINUX/))
-- [Spinningnumbers.org](http://spinningnumbers.org/) ([Source](https://github.com/willymcallister/spinningnumbers)
-
+- [Spinningnumbers.org](http://spinningnumbers.org/) ([Source](https://github.com/willymcallister/spinningnumbers))
+- [chimad-phase-field](https://pages.nist.gov/chimad-phase-field/) ([Source](https://github.com/usnistgov/chimad-phase-field))
 
 Are you using Staticman? [Let us know!](https://github.com/eduardoboucas/staticman/edit/master/README.md)
