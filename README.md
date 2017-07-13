@@ -87,6 +87,7 @@ Would you like to contribute to Staticman? That's great! Here's how:
 - [DOTSLASHLINUX](http://www.dotslashlinux.com/) ([Source](https://github.com/firasuke/DOTSLASHLINUX/))
 - [Spinningnumbers.org](http://spinningnumbers.org/) ([Source](https://github.com/willymcallister/spinningnumbers))
 - [blog.justin.kelly.org.au](https://blog.justin.kelly.org.au/) ([Source](github.com/justinkelly/justinkelly.github.io))
+- [chimad-phase-field]([Source](https://pages.nist.gov/chimad-phase-field/))
 
 
 Are you using Staticman? [Let us know!](https://github.com/eduardoboucas/staticman/edit/master/README.md)
