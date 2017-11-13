@@ -54,7 +54,7 @@ comments:
   # Destination path (filename) for the data files. Accepts placeholders.
   filename: "entry{@timestamp}"
 
-  # Names of required files. If any of these isn't in the request or is empty,
+  # Names of required fields. If any of these isn't in the request or is empty,
   # an error will be thrown.
   requiredFields: ["name", "email", "message"]
 
