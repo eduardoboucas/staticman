@@ -505,5 +505,40 @@ describe('Process controller', () => {
       expect(res.status.mock.calls.length).toBe(1)
       expect(res.status.mock.calls[0][0]).toBe(500)
     })
+
+    test('no AMP headers with regular requests', () => {
+      const data = {
+        fields: {
+          name: 'Eduardo Bouças',
+          email: 'mail@eduardoboucas.com'
+        }
+      }
+
+      const res = mockHelpers.getMockResponse()
+
+      sendResponse(res, data)
+
+      expect(res.header.mock.calls.length).toBe(0)
+    })
+
+    test('AMP headers if ampSourceOrigin is defined (by req.query.__amp_source_origin)', () => {
+      const data = {
+        ampSourceOrigin: 'https://eduardoboucas.com',
+        fields: {
+          name: 'Eduardo Bouças',
+          email: 'mail@eduardoboucas.com'
+        }
+      }
+
+      const res = mockHelpers.getMockResponse()
+
+      sendResponse(res, data)
+
+      expect(res.header.mock.calls.length).toBe(2)
+      expect(res.header.mock.calls[0][0]).toBe('AMP-Access-Control-Allow-Source-Origin')
+      expect(res.header.mock.calls[0][1]).toBe('https://eduardoboucas.com')
+      expect(res.header.mock.calls[1][0]).toBe('Access-Control-Expose-Headers')
+      expect(res.header.mock.calls[1][1]).toBe('AMP-Access-Control-Allow-Source-Origin')
+    })
   })
 })

@@ -99,11 +99,13 @@ module.exports.getMockResponse = () => {
   const statusFn = jest.fn(code => ({
     send: sendFn
   }))
+  const headerFn = jest.fn()
 
   return {
     redirect: redirectFn,
     send: sendFn,
-    status: statusFn
+    status: statusFn,
+    header: headerFn
   }
 }
 
