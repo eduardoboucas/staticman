@@ -89,5 +89,6 @@ Would you like to contribute to Staticman? That's great! Here's how:
 - [blog.justin.kelly.org.au](https://blog.justin.kelly.org.au/) ([Source](github.com/justinkelly/justinkelly.github.io))
 - [chimad-phase-field](https://pages.nist.gov/chimad-phase-field/) ([Source](https://github.com/usnistgov/chimad-phase-field))
 - [abhinavsarkar.net](https://abhinavsarkar.net) ([Source](https://github.com/abhin4v/abhin4v.github.io/))
+- [irz.fr](https://irz.fr) ([Source](https://github.com/arthurlacoste/irz.fr/tree/gh-pages))
 
 Are you using Staticman? [Let us know!](https://github.com/eduardoboucas/staticman/edit/master/README.md)
