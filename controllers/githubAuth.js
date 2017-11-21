@@ -26,6 +26,7 @@ module.exports = (req, res) => {
       })
     })
   }).catch(err => {
+    console.log('ERR:', err)
     res.send(err)
   })
 }

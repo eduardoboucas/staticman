@@ -10,5 +10,5 @@ module.exports = (req, res) => {
     res.status(500).send('Could not encrypt text')
   }
 
-  return encryptedText
+  res.send(encryptedText)
 }
