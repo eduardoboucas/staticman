@@ -92,5 +92,6 @@ Would you like to contribute to Staticman? That's great! Here's how:
 - [beautifullhugo theme](https://github.com/halogenica/beautifulhugo) ([Source](https://github.com/halogenica/beautifulhugo/pull/99))
 - [blog.jesuislibre.org](http://blog.jesuislibre.org) ([Source](https://github.com/badele/blog.jesuislibre.org))
 - [silentcomics.com](https://silentcomics.com) ([Source](https://github.com/SilentComics/silentcomics.github.io/))
+- [irz.fr](https://irz.fr) ([Source](https://github.com/arthurlacoste/irz.fr/tree/gh-pages))
 
 Are you using Staticman? [Let us know!](https://github.com/eduardoboucas/staticman/edit/master/README.md)
