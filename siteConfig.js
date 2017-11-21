@@ -72,6 +72,25 @@ const schema = {
     format: Object,
     default: {}
   },
+  githubAuth: {
+    clientId: {
+      doc: 'The client ID to the GitHub Application used for GitHub authentication.',
+      format: 'EncryptedString',
+      default: null,
+      env: 'GITHUB_AUTH_CLIENT_ID'
+    },
+    clientSecret: {
+      doc: 'The client secret to the GitHub Application used for GitHub authentication.',
+      format: 'EncryptedString',
+      default: null,
+      env: 'GITHUB_AUTH_CLIENT_SECRET'
+    },
+    required: {
+      doc: 'Whether GitHub Auth is required for an entry to be accepted.',
+      format: Boolean,
+      default: false
+    }
+  },
   moderation: {
     doc: 'When set to `true`, a pull request with the data files will be created to allow site administrators to approve or reject an entry. Otherwise, entries will be pushed to `branch` immediately.',
     format: Boolean,

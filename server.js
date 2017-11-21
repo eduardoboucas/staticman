@@ -11,6 +11,7 @@ const StaticmanAPI = function () {
   this.controllers = {
     connect: require('./controllers/connect'),
     encrypt: require('./controllers/encrypt'),
+    githubAuth: require('./controllers/githubAuth'),
     handlePR: require('./controllers/handlePR'),
     home: require('./controllers/home'),
     process: require('./controllers/process')
@@ -76,6 +77,14 @@ StaticmanAPI.prototype.initialiseRoutes = function () {
     this.bruteforce.prevent,
     this.requireApiVersion([2]),
     this.controllers.encrypt
+  )
+
+  // Route: GitHub auth
+  this.server.get(
+    '/v:version/auth/github/:username/:repository/:branch/:property',
+    this.bruteforce.prevent,
+    this.requireApiVersion([2]),
+    this.controllers.githubAuth
   )
 
   // Route: root

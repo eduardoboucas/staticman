@@ -4,24 +4,6 @@ const convict = require('convict')
 const path = require('path')
 
 const schema = {
-  env: {
-    doc: 'The applicaton environment.',
-    format: ['production', 'development', 'test'],
-    default: 'development',
-    env: 'NODE_ENV'
-  },
-  port: {
-    doc: 'The port to bind the application to.',
-    format: 'port',
-    default: 0,
-    env: 'PORT'
-  },
-  githubToken: {
-    doc: 'Access token to the GitHub account being used to push files with.',
-    format: String,
-    default: null,
-    env: 'GITHUB_TOKEN'
-  },
   akismet: {
     site: {
       doc: 'URL of an Akismet account used for spam checking.',
@@ -46,13 +28,6 @@ const schema = {
       env: 'UA_TRACKING_ID'
     }
   },
-  rsaPrivateKey: {
-    doc: 'RSA private key to encrypt sensitive configuration parameters with.',
-    docExample: 'rsaPrivateKey: "-----BEGIN RSA PRIVATE KEY-----\\nkey\\n-----END RSA PRIVATE KEY-----"',
-    format: String,
-    default: null,
-    env: 'RSA_PRIVATE_KEY'
-  },
   email: {
     apiKey: {
       doc: 'Mailgun API key to be used for email notifications. Will be overridden by a `notifications.apiKey` parameter in the site config, if one is set.',
@@ -72,6 +47,31 @@ const schema = {
       default: 'noreply@staticman.net',
       env: 'EMAIL_FROM'
     }
+  },
+  env: {
+    doc: 'The applicaton environment.',
+    format: ['production', 'development', 'test'],
+    default: 'development',
+    env: 'NODE_ENV'
+  },
+  githubToken: {
+    doc: 'Access token to the GitHub account being used to push files with.',
+    format: String,
+    default: null,
+    env: 'GITHUB_TOKEN'
+  },
+  port: {
+    doc: 'The port to bind the application to.',
+    format: 'port',
+    default: 0,
+    env: 'PORT'
+  },
+  rsaPrivateKey: {
+    doc: 'RSA private key to encrypt sensitive configuration parameters with.',
+    docExample: 'rsaPrivateKey: "-----BEGIN RSA PRIVATE KEY-----\\nkey\\n-----END RSA PRIVATE KEY-----"',
+    format: String,
+    default: null,
+    env: 'RSA_PRIVATE_KEY'
   },
   sentryDSN: {
     doc: 'Sentry DSN',

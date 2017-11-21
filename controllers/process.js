@@ -130,7 +130,8 @@ function sendResponse (res, data) {
 module.exports = (req, res, next) => {
   const staticman = new Staticman(req.params)
 
-  staticman.setConfigPath(createConfigObject(req.params.version, req.params.property))
+  staticman.authenticate()
+  staticman.setConfigPath()
   staticman.setIp(req.headers['x-forwarded-for'] || req.connection.remoteAddress)
   staticman.setUserAgent(req.headers['user-agent'])
 

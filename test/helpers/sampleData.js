@@ -66,7 +66,11 @@ comments:
   reCaptcha:
     enabled: true
     siteKey: "123456789"
-    secret: "@reCaptchaSecret@"`
+    secret: "@reCaptchaSecret@"
+
+  githubAuth:
+    clientId: "L4M3LIshioHbe3j+vMxEbGlCGDhyIcQF2jhmVOUp8DqC+RqNgvZSQp7qYYmjPPoyjFCVOsu5aHwcD1FkMlEaxLTqYOYUeq49Wb6uxePTBycmW14JI6fiM/PYTm6nqKH5fB/7wnohVgK+/1IVAF6DA7UAs0Ju+srlnqEbn30f84sySOeR+V6t9aF7OiF9DsGedsTfVrfj8opptwQe7nycsxQaTxvmwgQgP9FrDYH+PGy/3ThpQsPj+/Mnvbnn7PMJEJlZFtGZsMWWcE2anJlJ7fbHKNPNNg6l2qosh6/kMTrloCU6wA67ouai0OFiNR+gyQaqUiL3NMgN4k39nZuwOg=="
+    clientSecret: "0anSY5FBW+YF8BuFRRYxKX0yjDGU8/HhdirQMh+xFOEIvBQ8n/PdYi3qv2p4ngpFo5gb3PY2W6oWvHYLGgbFFse3YvzP5cbKRG0BN90hanlpVwmtAsapC7UepvOOUmNCRKHJ/pYICYcleUX/xGRiTugl9rcVw1MLg7kxcCuEMWcsBc9qCA9YHRcN3ucP+rT9x/2hLMiUmv3glYYZNgyQ3x1iqpOuTAIMeIkxMQo83vxGR57fpAx4+Yn1+hALhSl3sGaesUZhY9Py/OEZDFVWiN9RvrM4ND0IcfqyaQ4DuRPu2g8Es5fbmgSQoqkNPOcHT2+40pDbz3FPgz6QJou+pQ=="`
 
 module.exports.config2 = `{
   "comments": {

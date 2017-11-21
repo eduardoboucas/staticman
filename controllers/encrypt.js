@@ -1,18 +1,14 @@
 'use strict'
 
 const path = require('path')
-const config = require(path.join(__dirname, '/../config'))
-const NodeRSA = require('node-rsa')
-const key = new NodeRSA()
-
-key.importKey(config.get('rsaPrivateKey'))
+const RSA = require(path.join(__dirname, '/../lib/RSA'))
 
 module.exports = (req, res) => {
-  try {
-    const encryptedText = key.encrypt(req.params.text, 'base64')
+  const encryptedText = RSA.encrypt(req.params.text)
 
-    res.send(encryptedText)
-  } catch (err) {
+  if (!encryptedText) {
     res.status(500).send('Could not encrypt text')
   }
+
+  res.send(encryptedText)
 }

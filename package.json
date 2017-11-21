@@ -6,7 +6,8 @@
   "scripts": {
     "prestart": "if [ ! -d node_modules ]; then npm install; fi",
     "start": "node index.js",
-    "test": "standard && jest && node test/utils/coverage.js"
+    "test": "standard && jest && node test/utils/coverage.js",
+    "test-dev": "TEST_DEV=true jest --watch"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,7 @@
     "node-uuid": "^1.4.7",
     "object-path": "^0.11.1",
     "raven": "^1.1.3",
+    "request-promise-native": "^1.0.4",
     "sha1": "^1.1.1",
     "slug": "^0.9.1",
     "universal-analytics": "^0.4.2"
@@ -45,7 +47,6 @@
     "istanbul-cobertura-badger": "^1.3.0",
     "jest": "^20.0.4",
     "nock": "^9.0.13",
-    "request-promise-native": "^1.0.4",
     "standard": "^10.0.2"
   },
   "jest": {

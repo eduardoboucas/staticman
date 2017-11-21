@@ -14,25 +14,57 @@ beforeEach(() => {
 })
 
 describe('GitHub interface', () => {
-  test('initialises the GitHub API wrapper and completes authentication', () => {
-    const mockAuthenticate = jest.fn()
-
-    jest.mock('github', () => {
-      const GithubApi = function () {}
-
-      GithubApi.prototype.authenticate = mockAuthenticate
-
-      return GithubApi
-    })
-
+  test('initialises the GitHub API wrapper', () => {
     const GitHub = require('./../../../lib/GitHub')
     const githubInstance = new GitHub(req.params)
 
     expect(githubInstance.api).toBeDefined()
-    expect(mockAuthenticate).toHaveBeenCalledTimes(1)
-    expect(mockAuthenticate.mock.calls[0][0]).toEqual({
+  })
+
+  test('authenticates with the GitHub API using a personal access token', () => {
+    const token = config.get('githubToken')
+    const GitHub = require('./../../../lib/GitHub')
+    const githubInstance = new GitHub(req.params)
+    const spy = jest.spyOn(githubInstance.api, 'authenticate')
+
+    githubInstance.authenticateWithToken(token)
+
+    expect(spy.mock.calls[0][0]).toEqual({
       type: 'oauth',
-      token: config.get('githubToken')
+      token
+    })
+  })
+
+  test('authenticates with the GitHub API using a temporary access code', () => {
+    const accessToken = 'asdfghjkl'
+    const clientId = '123456789'
+    const clientSecret = '1q2w3e4r5t6y7u8i9o'
+    const code = 'abcdefghijklmnopqrst'
+
+    nock(/github\.com/)
+      .post('/login/oauth/access_token')
+      .query({
+        client_id: clientId,
+        client_secret: clientSecret,
+        code
+      })
+      .reply(200, {
+        access_token: accessToken
+      })
+
+    const GitHub = require('./../../../lib/GitHub')
+    const githubInstance = new GitHub(req.params)
+    const spy = jest.spyOn(githubInstance.api, 'authenticate')
+
+    return githubInstance.authenticateWithCode({
+      clientId,
+      clientSecret,
+      code
+    }).then(() => {
+      expect(spy.mock.calls[0][0]).toEqual({
+        type: 'token',
+        token: accessToken
+      })
     })
   })
 
