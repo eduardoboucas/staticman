@@ -71,7 +71,8 @@ function process (staticman, req, res) {
   return staticman.processEntry(fields, options).then(data => {
     sendResponse(res, {
       redirect: data.redirect,
-      fields: data.fields
+      fields: data.fields,
+      ampSourceOrigin: req.query.__amp_source_origin
     })
 
     if (ua) {
@@ -80,7 +81,8 @@ function process (staticman, req, res) {
   }).catch(err => {
     sendResponse(res, {
       err: errorHandler('UNKNOWN_ERROR', {err}),
-      redirectError: req.body.options && req.body.options.redirectError
+      redirectError: req.body.options && req.body.options.redirectError,
+      ampSourceOrigin: req.query.__amp_source_origin
     })
 
     if (ua) {
@@ -94,6 +96,11 @@ function process (staticman, req, res) {
 function sendResponse (res, data) {
   const error = data && data.err
   const statusCode = error ? 500 : 200
+
+  if (data && data.ampSourceOrigin) {
+    res.header('AMP-Access-Control-Allow-Source-Origin', data.ampSourceOrigin)
+    res.header('Access-Control-Expose-Headers', 'AMP-Access-Control-Allow-Source-Origin')
+  }
 
   if (!error && data.redirect) {
     return res.redirect(data.redirect)
@@ -141,7 +148,8 @@ module.exports = (req, res, next) => {
     return sendResponse(res, {
       err,
       redirect: req.body.options && req.body.options.redirect,
-      redirectError: req.body.options && req.body.options.redirectError
+      redirectError: req.body.options && req.body.options.redirectError,
+      ampSourceOrigin: req.query.__amp_source_origin
     })
   })
 }
