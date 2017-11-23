@@ -163,7 +163,7 @@ describe('GitHub interface', () => {
           ref: req.params.branch
         })
         expect(err._smErrorCode).toBe('PARSING_ERROR')
-        expect(err.data).toBeDefined()
+        expect(err.message).toBeDefined()
       })
     })
 

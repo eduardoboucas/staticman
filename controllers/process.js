@@ -77,17 +77,6 @@ function process (staticman, req, res) {
     if (ua) {
       ua.event('Entries', 'New entry').send()
     }
-  }).catch(err => {
-    sendResponse(res, {
-      err: errorHandler('UNKNOWN_ERROR', {err}),
-      redirectError: req.body.options && req.body.options.redirectError
-    })
-
-    if (ua) {
-      ua.event('Entries', 'New entry error').send()
-    }
-
-    return Promise.reject(err)
   })
 }
 
@@ -117,6 +106,10 @@ function sendResponse (res, data) {
 
     if (error.data) {
       payload.data = error.data
+    }
+
+    if (error) {
+      payload.rawError = error
     }
 
     payload.errorCode = errorCode

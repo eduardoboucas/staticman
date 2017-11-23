@@ -221,7 +221,8 @@ describe.only('Entry endpoint', () => {
 
       expect(error.success).toBe(false)
       expect(error.errorCode).toBe('PARSING_ERROR')
-      expect(error.data).toBeDefined()
+      expect(error.message).toBeDefined()
+      expect(error.rawError).toBeDefined()
     })
   })
 })
