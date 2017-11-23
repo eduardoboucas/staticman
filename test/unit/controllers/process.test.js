@@ -389,7 +389,7 @@ describe('Process controller', () => {
       })
     })
 
-    test('deliver an error object if `processEntry` succeeds', () => {
+    test('reject if `processEntry` fails', () => {
       const processEntryError = new Error('someError')
       const mockProcessEntry = jest.fn((fields, options) => {
         return Promise.reject(processEntryError)
@@ -423,11 +423,6 @@ describe('Process controller', () => {
 
       return processFn(staticman, req, res).catch(err => {
         expect(err).toEqual(processEntryError)
-        expect(res.send.mock.calls.length).toBe(1)
-        expect(res.send.mock.calls[0][0]).toEqual({
-          errorCode: 'UNKNOWN_ERROR',
-          success: false
-        })
       })
     })
   })
@@ -497,11 +492,13 @@ describe('Process controller', () => {
       sendResponse(res, data)
 
       expect(res.send.mock.calls.length).toBe(1)
-      expect(res.send.mock.calls[0][0]).toEqual({
-        success: false,
-        message: errorHandler.getMessage(data.err._smErrorCode),
-        errorCode: errorHandler.getErrorCode(data.err._smErrorCode)
-      })
+      expect(res.send.mock.calls[0][0].success).toBe(false)
+      expect(res.send.mock.calls[0][0].message).toBe(
+        errorHandler.getMessage(data.err._smErrorCode)
+      )
+      expect(res.send.mock.calls[0][0].errorCode).toBe(
+        errorHandler.getErrorCode(data.err._smErrorCode)
+      )
       expect(res.status.mock.calls.length).toBe(1)
       expect(res.status.mock.calls[0][0]).toBe(500)
     })
