@@ -43,6 +43,11 @@ StaticmanAPI.prototype.initialiseCORS = function () {
     res.header('Access-Control-Allow-Credentials', 'true')
     res.header('Access-Control-Allow-Methods', 'GET, POST')
 
+    if (req.query.__amp_source_origin) {
+      res.header('AMP-Access-Control-Allow-Source-Origin', req.query.__amp_source_origin)
+      res.header('Access-Control-Expose-Headers', 'AMP-Access-Control-Allow-Source-Origin')
+    }
+
     next()
   })
 }
