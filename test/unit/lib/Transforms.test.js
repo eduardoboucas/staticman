@@ -12,4 +12,10 @@ describe('Transforms', () => {
       expect(Transforms.upcase('foobar')).toEqual('FOOBAR')
     })
   })
+
+  describe('downcase', () => {
+    test('returns an downcased value', () => {
+      expect(Transforms.downcase('FOOBAR')).toEqual('foobar')
+    })
+  })
 })
