@@ -6,4 +6,10 @@ describe('Transforms', () => {
       expect(Transforms.md5('test-value')).toEqual('83b3c112b82dcca8376da029e8101bcc');
     })
   })
+
+  describe('upcase', () => {
+    test('returns an upcased value', () => {
+      expect(Transforms.upcase('foobar')).toEqual('FOOBAR')
+    })
+  })
 })
