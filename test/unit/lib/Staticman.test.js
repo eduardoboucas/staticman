@@ -230,6 +230,29 @@ describe('Staticman interface', () => {
         expect(transformedData).toEqual(extendedData)
       })
     })
+
+    test('handles multiple transforms per field', () => {
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      mockConfig.set('transforms', {
+        email: ['testTransform1', 'testTransform2']
+      })
+      staticman.siteConfig = mockConfig
+      staticman._transforms = {
+        testTransform1() { return 'transformed:1' },
+        testTransform2(v) { return `${v}-transformed:2` },
+      }
+
+      const data = mockHelpers.getFields()
+      const extendedData = Object.assign({}, data, {
+        email: 'transformed:1-transformed:2'
+      })
+
+      return staticman._applyTransforms(data).then(transformedData => {
+        expect(transformedData).toEqual(extendedData)
+      })
+    })
   })
 
   describe('spam detection', () => {
