@@ -95,5 +95,6 @@ Would you like to contribute to Staticman? That's great! Here's how:
 - [irz.fr](https://irz.fr) ([Source](https://github.com/arthurlacoste/irz.fr/tree/gh-pages))
 - [masterandrey.com](https://masterandrey.com/posts/en/disqus_comments_staticman/)
 - [Tyne Time](https://www.tynetime.com) ([Source](https://github.com/Doocey/tyne-time-hugo))
+- [BinaryMist](https://binarymist.io/blog) ([Source](https://github.com/binarymist/BinaryMistBlog))
 
 Are you using Staticman? [Let us know!](https://github.com/eduardoboucas/staticman/edit/master/README.md)
