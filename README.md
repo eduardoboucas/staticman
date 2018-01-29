@@ -101,5 +101,6 @@ Would you like to contribute to Staticman? That's great! Here's how:
 - [masterandrey.com](https://masterandrey.com/posts/en/disqus_comments_staticman/)
 - [Tyne Time](https://www.tynetime.com) ([Source](https://github.com/Doocey/tyne-time-hugo))
 - [BinaryMist](https://binarymist.io/blog) ([Source](https://github.com/binarymist/BinaryMistBlog))
+- [La ruta de la cebada](https://larutadelacebada.com) ([Source](https://github.com/lasocial/larutadelacebada.github.io))
 
 Are you using Staticman? [Let us know!](https://github.com/eduardoboucas/staticman/edit/master/README.md)
