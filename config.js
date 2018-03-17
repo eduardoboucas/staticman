@@ -77,7 +77,8 @@ const schema = {
     slackWebhook: {
       doc: 'Slack webhook URL to pipe log output to',
       format: String,
-      default: null
+      default: null,
+      env: 'SLACK_WEBHOOK'
     }
   }
 }
