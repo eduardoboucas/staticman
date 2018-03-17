@@ -73,11 +73,12 @@ const schema = {
     default: null,
     env: 'RSA_PRIVATE_KEY'
   },
-  sentryDSN: {
-    doc: 'Sentry DSN',
-    format: String,
-    default: null,
-    env: 'SENTRY_DSN'
+  logging: {
+    slackWebhook: {
+      doc: 'Slack webhook URL to pipe log output to',
+      format: String,
+      default: null
+    }
   }
 }
 

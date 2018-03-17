@@ -3,6 +3,7 @@
 const path = require('path')
 const config = require(path.join(__dirname, '/../config'))
 const errorHandler = require('../lib/ErrorHandler')
+const logger = require('../lib/logger')
 const reCaptcha = require('express-recaptcha')
 const Staticman = require('../lib/Staticman')
 const universalAnalytics = require('universal-analytics')
@@ -67,6 +68,19 @@ function process (staticman, req, res) {
     : null
   const fields = req.query.fields || req.body.fields
   const options = req.query.options || req.body.options || {}
+
+  logger.info(
+    JSON.stringify(
+      {
+        url: req.url,
+        fields,
+        options,
+        body: req.body 
+      }
+    ),
+    null,
+    2
+  )
 
   return staticman.processEntry(fields, options).then(data => {
     sendResponse(res, {
