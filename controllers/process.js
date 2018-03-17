@@ -3,7 +3,7 @@
 const path = require('path')
 const config = require(path.join(__dirname, '/../config'))
 const errorHandler = require('../lib/ErrorHandler')
-const logger = require('../lib/logger')
+const logger = require('../lib/Logger')
 const reCaptcha = require('express-recaptcha')
 const Staticman = require('../lib/Staticman')
 const universalAnalytics = require('universal-analytics')
