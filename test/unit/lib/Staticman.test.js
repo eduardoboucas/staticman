@@ -1,5 +1,6 @@
 const config = require('./../../../config')
 const errorHandler = require('./../../../lib/ErrorHandler')
+const RSA = require('./../../../lib/RSA')
 const frontMatter = require('front-matter')
 const md5 = require('md5')
 const moment = require('moment')
@@ -245,6 +246,10 @@ describe('Staticman interface', () => {
 
     test('makes a request to the Akismet API sending the correct data', () => {
       const fields = mockHelpers.getFields()
+      const options = {
+        origin: 'http://testsite.com'
+      }
+
       const mockCheckSpamFn = jest.fn((options, callback) => {
         callback(null, false)
       })
@@ -264,6 +269,7 @@ describe('Staticman interface', () => {
       mockConfig.set('akismet.authorEmail', 'email')
       mockConfig.set('akismet.authorUrl', 'url')
       mockConfig.set('akismet.content', 'message')
+      staticman.options = options
       staticman.siteConfig = mockConfig
 
       return staticman._checkForSpam(fields).then(response => {
@@ -277,6 +283,7 @@ describe('Staticman interface', () => {
 
         expect(mockCheckSpamFn).toHaveBeenCalledTimes(1)
         expect(mockCheckSpamFn.mock.calls[0][0]).toEqual({
+          permalink: options.origin,
           comment_type: 'comment',
           comment_author: fields.name,
           comment_author_email: fields.email,
@@ -284,6 +291,37 @@ describe('Staticman interface', () => {
           comment_content: fields.message
         })
         expect(mockCheckSpamFn.mock.calls[0][1]).toBeInstanceOf(Function)
+      })
+    })
+
+    test('overrides Akismet apiKey and site if they exist in site config', () => {
+      const fields = mockHelpers.getFields()
+      const mockCheckSpamFn = jest.fn((options, callback) => {
+        callback(null, false)
+      })
+      const mockClientFn = jest.fn(options => ({
+        checkSpam: mockCheckSpamFn
+      }))
+
+      jest.mock('akismet', () => ({
+        client: mockClientFn
+      }))
+
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      const akismetApiKey = '123456789'
+
+      mockConfig.set('akismet.enabled', true)
+      mockConfig.set('akismet.apiKey', RSA.encrypt(akismetApiKey))
+      mockConfig.set('akismet.site', 'http://mytestsite.com')
+      staticman.siteConfig = mockConfig
+
+      return staticman._checkForSpam(fields).then(response => {
+        expect(mockClientFn.mock.calls[0][0]).toEqual({
+          apiKey: akismetApiKey,
+          blog: mockConfig.get('akismet.site')
+        })
       })
     })
 
