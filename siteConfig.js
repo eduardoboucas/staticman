@@ -1,6 +1,7 @@
 'use strict'
 
 const convict = require('convict')
+const logger = require('./lib/Logger')
 
 const schema = {
   allowedFields: {
@@ -173,6 +174,17 @@ module.exports = (data, rsa) => {
   try {
     config.load(data)
     config.validate()
+
+    // After loading config, check what `generatedFields` looks like - #176
+    logger.info(
+      JSON.stringify({
+        stage: 'config.load',
+        generatedFields: config.get('generatedFields')
+      }),
+      null,
+      2
+    )
+
 
     return config
   } catch (e) {
