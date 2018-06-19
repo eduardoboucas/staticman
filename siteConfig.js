@@ -104,7 +104,7 @@ const schema = {
   },
   notifications: {
     enabled: {
-      doc: 'Whether email notifications are enabled. This allows users to subscribe to future comments on a thread. A [Mailgun](http://mailgun.com) account is required.',
+      doc: 'Whether email notifications are enabled. This allows users to subscribe to future comments on a thread. A [Mailgun](https://www.mailgun.com/) account is required.',
       format: Boolean,
       default: false
     },
