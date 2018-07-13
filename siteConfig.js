@@ -185,7 +185,6 @@ module.exports = (data, rsa) => {
       2
     )
 
-
     return config
   } catch (e) {
     throw e
