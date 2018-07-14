@@ -9,6 +9,9 @@
     "test": "standard && jest && node test/utils/coverage.js",
     "test-dev": "TEST_DEV=true jest --watch"
   },
+  "engines": {
+    "node": ">=8.11.3"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/eduardoboucas/staticman.git"
@@ -30,6 +33,7 @@
     "express-github-webhook": "^1.0.5",
     "express-recaptcha": "^2.1.0",
     "github": "^3.0.0",
+    "gitlab": "^3.5.1",
     "js-yaml": "^3.10.0",
     "mailgun-js": "^0.7.13",
     "markdown-table": "^1.0.0",
@@ -66,7 +70,9 @@
     ]
   },
   "standard": {
-    "env": ["jest"],
+    "env": [
+      "jest"
+    ],
     "ignore": [
       "test/**/*"
     ]

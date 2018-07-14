@@ -14,7 +14,7 @@ You can download and run the Staticman API on your own infrastructure, or you ca
 
 ## Requirements
 
-- Node.js 4.8.3+
+- Node.js 8.11.3+
 - npm
 - A [personal access token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) for the GitHub account you want to run Staticman with
 - An SSH key (click [here](https://help.github.com/articles/connecting-to-github-with-ssh/) to learn how to create one)
