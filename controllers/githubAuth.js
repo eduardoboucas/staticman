@@ -13,11 +13,11 @@ module.exports = (req, res) => {
   staticman.setConfigPath()
 
   return staticman.getSiteConfig().then(siteConfig => {
-    return github.authenticateWithCode({
-      code: req.query.code,
-      clientId: siteConfig.get('githubAuth.clientId'),
-      clientSecret: siteConfig.get('githubAuth.clientSecret')
-    })
+    return github.authenticateWithCode(
+      req.query.code,
+      siteConfig.get('githubAuth.clientId'),
+      siteConfig.get('githubAuth.clientSecret')
+    )
   }).then(accessToken => {
     return github.api.users.get({}).then(user => {
       res.send({

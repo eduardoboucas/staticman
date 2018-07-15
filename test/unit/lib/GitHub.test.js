@@ -56,11 +56,11 @@ describe('GitHub interface', () => {
     const githubInstance = new GitHub(req.params)
     const spy = jest.spyOn(githubInstance.api, 'authenticate')
 
-    return githubInstance.authenticateWithCode({
+    return githubInstance.authenticateWithCode(
+      code,
       clientId,
-      clientSecret,
-      code
-    }).then(() => {
+      clientSecret
+    ).then(() => {
       expect(spy.mock.calls[0][0]).toEqual({
         type: 'token',
         token: accessToken
@@ -415,7 +415,7 @@ describe('GitHub interface', () => {
     })
   })
 
-  describe('writeFileAndSendPR', () => {
+  describe('writeFileAndSendReview', () => {
     test('writes a file to a new branch and sends a PR to the base branch provided, using the given title and body for the commit/PR', () => {
       const options = {
         commitBody: 'This is a very cool file indeed...',
@@ -459,7 +459,7 @@ describe('GitHub interface', () => {
       const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
 
-      return githubInstance.writeFileAndSendPR(
+      return githubInstance.writeFileAndSendReview(
         options.path,
         options.content,
         options.newBranch,
@@ -513,7 +513,7 @@ describe('GitHub interface', () => {
         sha: '7fd1a60b01f91b314f59955a4e4d4e80d8edf11d'
       }
 
-      return githubInstance.writeFileAndSendPR(
+      return githubInstance.writeFileAndSendReview(
         options.path,
         options.content,
         options.newBranch,
