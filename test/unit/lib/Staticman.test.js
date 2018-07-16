@@ -110,7 +110,7 @@ describe('Staticman interface', () => {
       const staticman = new Staticman(mockParameters)
 
       staticman.options = {}
-      
+
       const data = mockHelpers.getFields()
       const extendedData = staticman._applyInternalFields(data)
 
@@ -129,7 +129,7 @@ describe('Staticman interface', () => {
       }
 
       staticman2.options = {}
-      
+
       const data = mockHelpers.getFields()
       const extendedData1 = staticman1._applyInternalFields(data)
       const extendedData2 = staticman2._applyInternalFields(data)
@@ -216,8 +216,8 @@ describe('Staticman interface', () => {
       })
       staticman.siteConfig = mockConfig
       staticman._transforms = {
-        testTransformName() { return 'transformed-name' },
-        testTransformEmail() { return 'transformed-email' }
+        testTransformName () { return 'transformed-name' },
+        testTransformEmail () { return 'transformed-email' }
       }
 
       const data = mockHelpers.getFields()
@@ -240,8 +240,8 @@ describe('Staticman interface', () => {
       })
       staticman.siteConfig = mockConfig
       staticman._transforms = {
-        testTransform1() { return 'transformed:1' },
-        testTransform2(v) { return `${v}-transformed:2` },
+        testTransform1 () { return 'transformed:1' },
+        testTransform2 (v) { return `${v}-transformed:2` }
       }
 
       const data = mockHelpers.getFields()
@@ -381,7 +381,7 @@ describe('Staticman interface', () => {
     const mockDate = new Date('1988-08-31T11:00:00')
 
     Date = class extends Date {
-      constructor() {
+      constructor () {
         return mockDate
       }
     }
@@ -408,22 +408,25 @@ describe('Staticman interface', () => {
       expect(date).toBe(Math.floor(mockDate.getTime() / 1000))
     })
 
-    test('creates a ISO-8601 representation of the date if the format is set to `iso8601`, absent, or set to none of the other supported formats', () => {
-      const Staticman = require('./../../../lib/Staticman')
-      const staticman = new Staticman(mockParameters)
+    test(
+      'creates a ISO-8601 representation of the date if the format is set to `iso8601`, absent, or set to none of the other supported formats',
+      () => {
+        const Staticman = require('./../../../lib/Staticman')
+        const staticman = new Staticman(mockParameters)
 
-      const date1 = staticman._createDate({
-        format: 'iso8601'
-      })
-      const date2 = staticman._createDate({
-        format: 'somethingNotValid'
-      })
-      const date3 = staticman._createDate()
+        const date1 = staticman._createDate({
+          format: 'iso8601'
+        })
+        const date2 = staticman._createDate({
+          format: 'somethingNotValid'
+        })
+        const date3 = staticman._createDate()
 
-      expect(date1).toBe(mockDate.toISOString())
-      expect(date2).toBe(mockDate.toISOString())
-      expect(date3).toBe(mockDate.toISOString())
-    })
+        expect(date1).toBe(mockDate.toISOString())
+        expect(date2).toBe(mockDate.toISOString())
+        expect(date3).toBe(mockDate.toISOString())
+      }
+    )
   })
 
   describe('file formatting', () => {
@@ -484,21 +487,24 @@ describe('Staticman interface', () => {
       })
     })
 
-    test('throws an error if `format` is set to `frontmatter` but there is no `frontmatterContent` transform defined', () => {
-      const fields = mockHelpers.getFields()
-      const Staticman = require('./../../../lib/Staticman')
-      const staticman = new Staticman(mockParameters)
+    test(
+      'throws an error if `format` is set to `frontmatter` but there is no `frontmatterContent` transform defined',
+      () => {
+        const fields = mockHelpers.getFields()
+        const Staticman = require('./../../../lib/Staticman')
+        const staticman = new Staticman(mockParameters)
 
-      mockConfig.set('format', 'frontmatter')
-      mockConfig.set('transforms', undefined)
-      staticman.siteConfig = mockConfig
+        mockConfig.set('format', 'frontmatter')
+        mockConfig.set('transforms', undefined)
+        staticman.siteConfig = mockConfig
 
-      return staticman._createFile(fields).catch(err => {
-        expect(err).toEqual({
-          _smErrorCode: 'NO_FRONTMATTER_CONTENT_TRANSFORM'
+        return staticman._createFile(fields).catch(err => {
+          expect(err).toEqual({
+            _smErrorCode: 'NO_FRONTMATTER_CONTENT_TRANSFORM'
+          })
         })
-      })
-    })
+      }
+    )
 
     test('throws an error if `format` contains an invalid format', () => {
       const fields = mockHelpers.getFields()
@@ -522,7 +528,7 @@ describe('Staticman interface', () => {
       const fieldsTable = mockHelpers.getFieldsTable()
       const Staticman = require('./../../../lib/Staticman')
       const staticman = new Staticman(mockParameters)
-      
+
       mockConfig.set('notifications.enabled', false)
       staticman.siteConfig = mockConfig
 
@@ -687,7 +693,7 @@ describe('Staticman interface', () => {
     test('returns the given string unchanged if it does not contain placeholders', () => {
       const Staticman = require('./../../../lib/Staticman')
       const staticman = new Staticman(mockParameters)
-      
+
       const subject = 'This is a normal string, nothing to replace here.'
       const data = mockHelpers.getParameters()
 
@@ -697,7 +703,7 @@ describe('Staticman interface', () => {
     test('returns the given string with placeholders replaced with data from the data object provided', () => {
       const Staticman = require('./../../../lib/Staticman')
       const staticman = new Staticman(mockParameters)
-      
+
       const subject = 'My name is {name} and I come from {location.city}, {location.country}'
       const data = {
         name: 'Eduardo',
@@ -718,14 +724,14 @@ describe('Staticman interface', () => {
       const mockDate = new Date('1988-08-31T11:00:00')
 
       Date = class extends Date {
-        constructor() {
+        constructor () {
           return mockDate
         }
       }
 
       const Staticman = require('./../../../lib/Staticman')
       const staticman = new Staticman(mockParameters)
-      
+
       const data = {
         name: 'Eduardo'
       }
@@ -742,7 +748,7 @@ describe('Staticman interface', () => {
       const mockDate = new Date('1988-08-31T11:00:00')
 
       Date = class extends Date {
-        constructor() {
+        constructor () {
           return mockDate
         }
       }
@@ -889,30 +895,33 @@ describe('Staticman interface', () => {
       })
     })
 
-    test('fetches the site config from the repository, even if there is one already defined, if `force` is truthy', () => {
-      const Staticman = require('./../../../lib/Staticman')
-      const staticman = new Staticman(mockParameters)
-      const configObject = mockHelpers.getConfigObject()
-      
-      staticman.setConfigPath(configObject)
-      staticman.siteConfig = mockConfig
-      staticman.github = {
-        readFile: jest.fn(() => {
-          const config = Object.assign({}, mockConfig.getProperties())
+    test(
+      'fetches the site config from the repository, even if there is one already defined, if `force` is truthy',
+      () => {
+        const Staticman = require('./../../../lib/Staticman')
+        const staticman = new Staticman(mockParameters)
+        const configObject = mockHelpers.getConfigObject()
 
-          config.reCaptcha.secret = mockConfig.getRaw('reCaptcha.secret')
+        staticman.setConfigPath(configObject)
+        staticman.siteConfig = mockConfig
+        staticman.github = {
+          readFile: jest.fn(() => {
+            const config = Object.assign({}, mockConfig.getProperties())
 
-          return Promise.resolve({
-            [configObject.path]: config
+            config.reCaptcha.secret = mockConfig.getRaw('reCaptcha.secret')
+
+            return Promise.resolve({
+              [configObject.path]: config
+            })
           })
+        }
+
+        return staticman.getSiteConfig(true).then(config => {
+          expect(staticman.github.readFile).toHaveBeenCalledTimes(1)
+          expect(staticman.github.readFile.mock.calls[0][0]).toBe(configObject.file)
         })
       }
-
-      return staticman.getSiteConfig(true).then(config => {
-        expect(staticman.github.readFile).toHaveBeenCalledTimes(1)
-        expect(staticman.github.readFile.mock.calls[0][0]).toBe(configObject.file)
-      })
-    })
+    )
 
     test('fetches the site config from the repository and throws an error if it fails validation', () => {
       const Staticman = require('./../../../lib/Staticman')
@@ -925,7 +934,7 @@ describe('Staticman interface', () => {
       }
 
       mockRemoteConfig.reCaptcha.secret = mockConfig.getRaw('reCaptcha.secret')
-      
+
       staticman.setConfigPath(configObject)
       staticman.github = {
         readFile: jest.fn(() => {
@@ -950,7 +959,7 @@ describe('Staticman interface', () => {
 
       mockRemoteConfig.branch = 'some-other-branch'
       mockRemoteConfig.reCaptcha.secret = mockConfig.getRaw('reCaptcha.secret')
-      
+
       staticman.setConfigPath(configObject)
       staticman.github = {
         readFile: jest.fn(() => {
@@ -975,7 +984,7 @@ describe('Staticman interface', () => {
       const mockRemoteConfig = Object.assign({}, mockConfig.getProperties())
 
       mockRemoteConfig.reCaptcha.secret = mockConfig.getRaw('reCaptcha.secret')
-      
+
       staticman.setConfigPath(configObject)
       staticman.github = {
         readFile: jest.fn(() => {
@@ -1036,39 +1045,42 @@ describe('Staticman interface', () => {
           _smErrorCode: 'INVALID_FIELDS',
           data: ['someField1']
         })
-      })  
-    })
-
-    test('creates a file after applying generated fields, transforms and internal fields, throwing an error if file creation fails', () => {
-      const Staticman = require('./../../../lib/Staticman')
-      const staticman = new Staticman(mockParameters)
-      const fields = mockHelpers.getFields()
-
-      mockConfig.set('allowedFields', Object.keys(fields))
-
-      staticman.siteConfig = mockConfig
-      staticman._checkForSpam = () => Promise.resolve(fields)
-
-      const spyApplyGeneratedFields = jest.spyOn(staticman, '_applyGeneratedFields')
-      const spyApplyTransforms = jest.spyOn(staticman, '_applyTransforms')
-      const spyApplyInternalFields = jest.spyOn(staticman, '_applyInternalFields')
-      
-      staticman._createFile = jest.fn(() => {
-        return Promise.reject(errorHandler('INVALID_FORMAT'))
       })
-
-      return staticman.processEntry(
-        mockHelpers.getFields(),
-        {}
-      ).catch(err => {
-        expect(spyApplyGeneratedFields).toHaveBeenCalled()
-        expect(spyApplyTransforms).toHaveBeenCalled()
-        expect(spyApplyInternalFields).toHaveBeenCalled()
-        expect(err).toEqual({
-          _smErrorCode: 'INVALID_FORMAT'
-        })
-      })  
     })
+
+    test(
+      'creates a file after applying generated fields, transforms and internal fields, throwing an error if file creation fails',
+      () => {
+        const Staticman = require('./../../../lib/Staticman')
+        const staticman = new Staticman(mockParameters)
+        const fields = mockHelpers.getFields()
+
+        mockConfig.set('allowedFields', Object.keys(fields))
+
+        staticman.siteConfig = mockConfig
+        staticman._checkForSpam = () => Promise.resolve(fields)
+
+        const spyApplyGeneratedFields = jest.spyOn(staticman, '_applyGeneratedFields')
+        const spyApplyTransforms = jest.spyOn(staticman, '_applyTransforms')
+        const spyApplyInternalFields = jest.spyOn(staticman, '_applyInternalFields')
+
+        staticman._createFile = jest.fn(() => {
+          return Promise.reject(errorHandler('INVALID_FORMAT'))
+        })
+
+        return staticman.processEntry(
+          mockHelpers.getFields(),
+          {}
+        ).catch(err => {
+          expect(spyApplyGeneratedFields).toHaveBeenCalled()
+          expect(spyApplyTransforms).toHaveBeenCalled()
+          expect(spyApplyInternalFields).toHaveBeenCalled()
+          expect(err).toEqual({
+            _smErrorCode: 'INVALID_FORMAT'
+          })
+        })
+      }
+    )
 
     test('subscribes the user to notifications', () => {
       const mockSubscriptionSet = jest.fn(() => Promise.resolve(true))
@@ -1235,6 +1247,5 @@ describe('Staticman interface', () => {
         expect(mockSubscriptionSend.mock.calls[0][3]).toEqual(mockConfig)
       })
     })
-  })  
+  })
 })
-

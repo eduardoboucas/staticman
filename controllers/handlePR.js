@@ -18,16 +18,16 @@ module.exports = (repo, data) => {
   })
 
   return github.api.pullRequests.get({
-    user: data.repository.owner.login,
+    owner: data.repository.owner.login,
     repo: data.repository.name,
     number: data.number
-  }).then(response => {
-    if (response.head.ref.indexOf('staticman_')) {
+  }).then(({data}) => {
+    if (data.head.ref.indexOf('staticman_')) {
       return null
     }
 
-    if (response.merged) {
-      const bodyMatch = response.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
+    if (data.merged) {
+      const bodyMatch = data.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
 
       if (bodyMatch && (bodyMatch.length === 2)) {
         try {
@@ -44,11 +44,11 @@ module.exports = (repo, data) => {
       }
     }
 
-    if (response.state === 'closed') {
+    if (data.state === 'closed') {
       return github.api.gitdata.deleteReference({
-        user: data.repository.owner.login,
+        owner: data.repository.owner.login,
         repo: data.repository.name,
-        ref: 'heads/' + response.head.ref
+        ref: 'heads/' + data.head.ref
       })
     }
   }).then(response => {

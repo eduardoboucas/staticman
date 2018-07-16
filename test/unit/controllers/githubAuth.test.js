@@ -19,7 +19,7 @@ const mockSiteConfig = helpers.getConfig()
 
 beforeEach(() => {
   //jest.resetModules()
-  //jest.unmock('github')
+  //jest.unmock('@octokit/rest')
 
   req = helpers.getMockRequest()
   res = helpers.getMockResponse()  

@@ -16,10 +16,10 @@ module.exports = (req, res) => {
     token: config.get('githubToken')
   })
 
-  return github.api.users.getRepoInvites({}).then(response => {
+  return github.api.users.getRepoInvites({}).then(({data}) => {
     let invitationId
 
-    const invitation = response.some(invitation => {
+    const invitation = data.some(invitation => {
       if (invitation.repository.full_name === (req.params.username + '/' + req.params.repository)) {
         invitationId = invitation.id
 

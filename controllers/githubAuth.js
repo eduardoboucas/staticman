@@ -20,12 +20,13 @@ module.exports = (req, res) => {
       const github = new GitHub({
         oauthToken: accessToken
       })
-      return github.api.users.get({}).then(user =>
-        res.send({
-          accessToken: RSA.encrypt(accessToken),
-          user
+      return github.api.users.get({})
+        .then(({data}) => {
+          res.send({
+            accessToken: RSA.encrypt(accessToken),
+            user: data
+          })
         })
-      )
     })
     .catch(err => {
       console.log('ERR:', err)
