@@ -44,11 +44,10 @@ describe('GitHub Auth controller', () => {
         access_token: mockAccessToken
       })
 
-    nock(/github\.com/, {
-      reqheaders: {
-        authorization: `token ${mockAccessToken}`
-      }
-    }).get('/user')
+    nock(/github\.com/).get('/user')
+      .query({
+        access_token: mockAccessToken
+      })
       .reply(200, mockUser)
 
     const reqWithQuery = Object.assign({}, req, {

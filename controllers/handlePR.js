@@ -1,8 +1,7 @@
 'use strict'
 
-const path = require('path')
-const config = require(path.join(__dirname, '/../config'))
-const GitHub = require(path.join(__dirname, '/../lib/GitHub'))
+const config = require('../config')
+const GitHub = require('../lib/GitHub')
 const Staticman = require('../lib/Staticman')
 
 module.exports = (repo, data) => {
@@ -14,9 +13,9 @@ module.exports = (repo, data) => {
     return
   }
 
-  const github = new GitHub()
-
-  github.authenticateWithToken(config.get('githubToken'))
+  const github = new GitHub({
+    token: config.get('githubToken')
+  })
 
   return github.api.pullRequests.get({
     user: data.repository.owner.login,
@@ -35,7 +34,6 @@ module.exports = (repo, data) => {
           const parsedBody = JSON.parse(bodyMatch[1])
           const staticman = new Staticman(parsedBody.parameters)
 
-          staticman.authenticate()
           staticman.setConfigPath(parsedBody.configPath)
           staticman.processMerge(parsedBody.fields, parsedBody.options).catch(err => {
             return Promise.reject(err)

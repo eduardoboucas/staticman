@@ -33,7 +33,7 @@ const parameters = {
   version: 'v2'
 }
 
-module.exports.baseUrl = 
+module.exports.baseUrl = ''
 
 module.exports.decrypt = text => {
   return rsa.decrypt(text, 'utf8')

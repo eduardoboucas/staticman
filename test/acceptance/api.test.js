@@ -7,6 +7,8 @@ const request = helpers.wrappedRequest
 const sampleData = require('./../helpers/sampleData')
 const StaticmanAPI = require('./../../server')
 
+const btoa = contents => Buffer.from(contents).toString('base64')
+
 let server
 
 beforeAll(done => {
@@ -68,7 +70,7 @@ describe('Connect endpoint', () => {
         expect(reqListInvititations.isDone()).toBe(true)
         expect(reqAcceptInvitation.isDone()).toBe(false)
         expect(err.response.body).toBe('Invitation not found')
-        expect(err.statusCode).toBe(404)        
+        expect(err.statusCode).toBe(404)
       })
   })
 })
@@ -82,8 +84,12 @@ describe.only('Entry endpoint', () => {
     const mockConfig = sampleData.config1
       .replace('@reCaptchaSecret@', reCaptchaSecret)
 
-    const mockGetConfig = nock(/api\.github\.com/)
-      .get(`/repos/${data.username}/${data.repository}/contents/${data.path}?ref=${data.branch}&access_token=${githubToken}`)
+    nock(/api\.github\.com/, {
+      reqHeaders: {
+        Authorization: `token ${githubToken}`
+      }
+    })
+      .get(`/repos/${data.username}/${data.repository}/contents/${data.path}?ref=${data.branch}`)
       .reply(200, {
         type: 'file',
         encoding: 'base64',
@@ -117,7 +123,7 @@ describe.only('Entry endpoint', () => {
       headers: {
         'content-type': 'application/x-www-form-urlencoded'
       }
-    }).catch(response => {
+    }).catch((response) => {
       const error = JSON.parse(response.error)
 
       expect(error.success).toBe(false)
@@ -134,8 +140,12 @@ describe.only('Entry endpoint', () => {
     const mockConfig = sampleData.config1
       .replace('@reCaptchaSecret@', helpers.encrypt(reCaptchaSecret))
 
-    const mockGetConfig = nock(/api\.github\.com/)
-      .get(`/repos/${data.username}/${data.repository}/contents/${data.path}?ref=${data.branch}&access_token=${githubToken}`)
+    nock(/api\.github\.com/, {
+      reqHeaders: {
+        Authorization: `token ${githubToken}`
+      }
+    })
+      .get(`/repos/${data.username}/${data.repository}/contents/${data.path}?ref=${data.branch}`)
       .reply(200, {
         type: 'file',
         encoding: 'base64',
@@ -183,8 +193,12 @@ describe.only('Entry endpoint', () => {
       path: 'staticman.yml'
     })
 
-    const mockGetConfig = nock(/api\.github\.com/)
-      .get(`/repos/${data.username}/${data.repository}/contents/${data.path}?ref=${data.branch}&access_token=${githubToken}`)
+    const mockGetConfig = nock(/api\.github\.com/, {
+      reqHeaders: {
+        Authorization: `token ${githubToken}`
+      }
+    })
+      .get(`/repos/${data.username}/${data.repository}/contents/${data.path}?ref=${data.branch}`)
       .reply(200, {
         type: 'file',
         encoding: 'base64',

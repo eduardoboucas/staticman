@@ -1,16 +1,17 @@
-const config = require('./../../../config')
 const mockHelpers = require('./../../helpers')
 const nock = require('nock')
 const sampleData = require('./../../helpers/sampleData')
 const yaml = require('js-yaml')
 
-let req, res
+let req
+
+const btoa = contents => Buffer.from(contents).toString('base64')
 
 beforeEach(() => {
   jest.resetModules()
 
   req = mockHelpers.getMockRequest()
-  res = mockHelpers.getMockResponse()
+  req.params.token = 'test-token'
 })
 
 describe('GitHub interface', () => {
@@ -22,20 +23,48 @@ describe('GitHub interface', () => {
   })
 
   test('authenticates with the GitHub API using a personal access token', () => {
-    const token = config.get('githubToken')
+    jest.mock('github', () => {
+      const GithubApi = function () {}
+      GithubApi.prototype.authenticate = jest.fn()
+
+      return GithubApi
+    })
+
     const GitHub = require('./../../../lib/GitHub')
     const githubInstance = new GitHub(req.params)
-    const spy = jest.spyOn(githubInstance.api, 'authenticate')
 
-    githubInstance.authenticateWithToken(token)
-
-    expect(spy.mock.calls[0][0]).toEqual({
-      type: 'oauth',
-      token
+    expect(githubInstance.api.authenticate.mock.calls[0][0]).toEqual({
+      type: 'token',
+      token: req.params.token
     })
   })
 
-  test('authenticates with the GitHub API using a temporary access code', () => {
+  test('authenticates with the GitHub API using an OAuth token', () => {
+    jest.mock('github', () => {
+      const GithubApi = function () {}
+      GithubApi.prototype.authenticate = jest.fn()
+
+      return GithubApi
+    })
+
+    const GitHub = require('./../../../lib/GitHub')
+
+    const oauthToken = 'test-oauth-token'
+    const githubInstance = new GitHub(Object.assign({}, req.params, {oauthToken}))
+
+    expect(githubInstance.api.authenticate.mock.calls[0][0]).toEqual({
+      type: 'oauth',
+      token: oauthToken
+    })
+  })
+
+  test('throws error if no personal access token or OAuth token is provided', () => {
+    const GitHub = require('./../../../lib/GitHub')
+
+    expect(() => new GitHub({})).toThrowError()
+  })
+
+  test('requests OAuth access token from GitHub', () => {
     const accessToken = 'asdfghjkl'
     const clientId = '123456789'
     const clientSecret = '1q2w3e4r5t6y7u8i9o'
@@ -53,19 +82,9 @@ describe('GitHub interface', () => {
       })
 
     const GitHub = require('./../../../lib/GitHub')
-    const githubInstance = new GitHub(req.params)
-    const spy = jest.spyOn(githubInstance.api, 'authenticate')
 
-    return githubInstance.authenticateWithCode(
-      code,
-      clientId,
-      clientSecret
-    ).then(() => {
-      expect(spy.mock.calls[0][0]).toEqual({
-        type: 'token',
-        token: accessToken
-      })
-    })
+    GitHub.requestOAuthAccessToken(code, clientId, clientSecret)
+      .then(token => expect(token).toEqual(accessToken))
   })
 
   describe('readFile', () => {
@@ -89,7 +108,7 @@ describe('GitHub interface', () => {
 
       const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
-      
+
       return githubInstance.readFile(filePath).then(contents => {
         expect(mockReposGetContent.mock.calls[0][0]).toEqual({
           user: req.params.username,
@@ -102,7 +121,7 @@ describe('GitHub interface', () => {
 
     test('returns an error if GitHub API call errors', () => {
       const filePath = 'path/to/file.yml'
-      const mockReposGetContent = jest.fn(() => Promise.reject())
+      const mockReposGetContent = jest.fn(() => Promise.reject()) // eslint-disable-line prefer-promise-reject-errors
 
       jest.mock('github', () => {
         const GithubApi = function () {}
@@ -231,7 +250,7 @@ describe('GitHub interface', () => {
         expect(response.content).toEqual(parsedConfig)
         expect(response.file).toEqual(fileContents)
       })
-    })  
+    })
 
     test('reads a JSON file and returns its parsed contents', () => {
       const filePath = 'path/to/file.json'
@@ -253,7 +272,7 @@ describe('GitHub interface', () => {
 
       const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
-      
+
       return githubInstance.readFile(filePath).then(contents => {
         expect(mockReposGetContent.mock.calls[0][0]).toEqual({
           user: req.params.username,
@@ -307,7 +326,7 @@ describe('GitHub interface', () => {
         commitTitle: 'Adds a new file',
         content: 'This is a new file',
         path: 'path/to/file.txt'
-      }      
+      }
       const mockReposCreateFile = jest.fn(() => Promise.resolve())
 
       jest.mock('github', () => {
@@ -329,13 +348,13 @@ describe('GitHub interface', () => {
         options.content,
         options.branch,
         options.commitTitle
-      ).then(response => {    
+      ).then(response => {
         expect(mockReposCreateFile).toHaveBeenCalledTimes(1)
         expect(mockReposCreateFile.mock.calls[0][0]).toEqual({
           user: req.params.username,
           repo: req.params.repository,
           path: options.path,
-          content: new Buffer(options.content).toString('base64'),
+          content: btoa(options.content),
           message: options.commitTitle,
           branch: options.branch
         })
@@ -374,7 +393,7 @@ describe('GitHub interface', () => {
           user: req.params.username,
           repo: req.params.repository,
           path: options.path,
-          content: new Buffer(options.content).toString('base64'),
+          content: btoa(options.content),
           message: options.commitTitle,
           branch: req.params.branch
         })
@@ -387,7 +406,7 @@ describe('GitHub interface', () => {
 
         GithubApi.prototype.authenticate = jest.fn()
         GithubApi.prototype.repos = {
-          createFile: () => Promise.reject()
+          createFile: () => Promise.reject() // eslint-disable-line prefer-promise-reject-errors
         }
 
         return GithubApi
@@ -495,7 +514,7 @@ describe('GitHub interface', () => {
         GithubApi.prototype.authenticate = jest.fn()
         GithubApi.prototype.repos = {
           createFile: () => Promise.resolve(),
-          getBranch: () => Promise.reject()
+          getBranch: () => Promise.reject() // eslint-disable-line prefer-promise-reject-errors
         }
 
         return GithubApi
