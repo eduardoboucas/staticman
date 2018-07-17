@@ -14,20 +14,22 @@ module.exports = (repo, data) => {
   }
 
   const github = new GitHub({
+    username: data.repository.owner.login,
+    repository: data.repository.name,
     token: config.get('githubToken')
   })
 
-  return github.api.pullRequests.get({
-    owner: data.repository.owner.login,
-    repo: data.repository.name,
-    number: data.number
-  }).then(({data}) => {
-    if (data.head.ref.indexOf('staticman_')) {
+  return github.getReview(data.number).then((review) => {
+    if (review.sourceBranch.indexOf('staticman_')) {
       return null
     }
 
-    if (data.merged) {
-      const bodyMatch = data.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
+    if (review.state !== 'merged' && review.state !== 'closed') {
+      return null
+    }
+
+    if (review.state === 'merged') {
+      const bodyMatch = review.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
 
       if (bodyMatch && (bodyMatch.length === 2)) {
         try {
@@ -35,22 +37,15 @@ module.exports = (repo, data) => {
           const staticman = new Staticman(parsedBody.parameters)
 
           staticman.setConfigPath(parsedBody.configPath)
-          staticman.processMerge(parsedBody.fields, parsedBody.options).catch(err => {
-            return Promise.reject(err)
-          })
+          staticman.processMerge(parsedBody.fields, parsedBody.options)
+            .catch(err => Promise.reject(err))
         } catch (err) {
           return Promise.reject(err)
         }
       }
     }
 
-    if (data.state === 'closed') {
-      return github.api.gitdata.deleteReference({
-        owner: data.repository.owner.login,
-        repo: data.repository.name,
-        ref: 'heads/' + data.head.ref
-      })
-    }
+    return github.deleteBranch(review.sourceBranch)
   }).then(response => {
     if (ua) {
       ua.event('Hooks', 'Delete branch').send()

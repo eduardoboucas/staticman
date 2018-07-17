@@ -20,11 +20,11 @@ module.exports = (req, res) => {
       const github = new GitHub({
         oauthToken: accessToken
       })
-      return github.api.users.get({})
-        .then(({data}) => {
+      return github.getCurrentUser()
+        .then((user) => {
           res.send({
             accessToken: RSA.encrypt(accessToken),
-            user: data
+            user
           })
         })
     })

@@ -17,7 +17,7 @@ module.exports = (req, res) => {
   })
 
   return github.api.users.getRepoInvites({}).then(({data}) => {
-    let invitationId
+    let invitationId = null
 
     const invitation = data.some(invitation => {
       if (invitation.repository.full_name === (req.params.username + '/' + req.params.repository)) {

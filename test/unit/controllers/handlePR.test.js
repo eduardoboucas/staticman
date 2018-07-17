@@ -1,9 +1,6 @@
-const config = require('./../../../config')
 const helpers = require('./../../helpers')
-const githubToken = config.get('githubToken')
 const sampleData = require('./../../helpers/sampleData')
 
-let catchAllMock
 let mockAuthenticate
 let mockSetConfigPathFn
 let mockProcessMergeFn
@@ -36,6 +33,9 @@ describe('HandlePR controller', () => {
       number: 123,
       head: {
         ref: 'some-other-branch'
+      },
+      base: {
+        ref: 'master'
       },
       repository: {
         name: req.params.repository,
@@ -76,6 +76,9 @@ describe('HandlePR controller', () => {
         head: {
           ref: 'staticman_1234567'
         },
+        base: {
+          ref: 'master'
+        },
         merged: true,
         repository: {
           name: req.params.repository,
@@ -114,6 +117,9 @@ describe('HandlePR controller', () => {
         body: sampleData.prBody1,
         head: {
           ref: 'staticman_1234567'
+        },
+        base: {
+          ref: 'master'
         },
         merged: true,
         repository: {
@@ -158,6 +164,9 @@ describe('HandlePR controller', () => {
         body: sampleData.prBody1,
         head: {
           ref: 'staticman_1234567'
+        },
+        base: {
+          ref: 'master'
         },
         merged: true,
         repository: {
