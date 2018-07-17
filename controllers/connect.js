@@ -29,7 +29,7 @@ module.exports = (req, res) => {
 
     if (invitation) {
       return github.api.users.acceptRepoInvite({
-        id: invitationId
+        invitation_id: invitationId
       })
     } else {
       res.status(404).send('Invitation not found')

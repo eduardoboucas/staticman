@@ -1,7 +1,4 @@
-const config = require('./../../../config')
 const helpers = require('./../../helpers')
-const githubToken = config.get('githubToken')
-const nock = require('nock')
 
 let req, res
 
@@ -82,7 +79,6 @@ describe('Connect controller', () => {
   })
 
   test('returns a 500 and an error message if the response from GitHub is invalid', () => {
-    const invitationId = 123
     const mockAcceptRepoInvite = jest.fn(() => Promise.resolve())
     const mockGetRepoInvites = jest.fn(() => Promise.resolve({
       data: {
