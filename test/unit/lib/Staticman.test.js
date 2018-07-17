@@ -1,10 +1,8 @@
 const config = require('./../../../config')
 const errorHandler = require('./../../../lib/ErrorHandler')
 const frontMatter = require('front-matter')
-const md5 = require('md5')
 const moment = require('moment')
 const mockHelpers = require('./../../helpers')
-const querystring = require('querystring')
 const slugify = require('slug')
 const yaml = require('js-yaml')
 
@@ -23,13 +21,25 @@ beforeEach(() => {
 describe('Staticman interface', () => {
   describe('initialisation', () => {
     test('creates an instance of the GitHub module', () => {
+      const GitHub = require('../../../lib/GitHub')
       const Staticman = require('./../../../lib/Staticman')
       const staticman = new Staticman(mockParameters)
 
-      expect(staticman.github.options.username).toBe(mockParameters.username)
-      expect(staticman.github.options.repository).toBe(mockParameters.repository)
-      expect(staticman.github.options.branch).toBe(mockParameters.branch)
-      expect(staticman.github.api).toBeDefined()
+      expect(staticman.git).toBeInstanceOf(GitHub)
+      expect(staticman.git.username).toBe(mockParameters.username)
+      expect(staticman.git.repository).toBe(mockParameters.repository)
+      expect(staticman.git.branch).toBe(mockParameters.branch)
+    })
+
+    test('creates an instance of the GitLab module', () => {
+      const GitLab = require('../../../lib/GitLab')
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(Object.assign({}, mockParameters, {service: 'gitlab'}))
+
+      expect(staticman.git).toBeInstanceOf(GitLab)
+      expect(staticman.git.username).toBe(mockParameters.username)
+      expect(staticman.git.repository).toBe(mockParameters.repository)
+      expect(staticman.git.branch).toBe(mockParameters.branch)
     })
 
     test('generates a new unique ID', () => {
@@ -346,7 +356,6 @@ describe('Staticman interface', () => {
     })
 
     test('throws an error if the content is flagged as spam', () => {
-      const akismetError = new Error('Akismet error')
       const fields = mockHelpers.getFields()
       const mockCheckSpamFn = jest.fn((options, callback) => {
         callback(null, true)
@@ -380,6 +389,7 @@ describe('Staticman interface', () => {
   describe('date creator', () => {
     const mockDate = new Date('1988-08-31T11:00:00')
 
+    // eslint-disable-next-line no-global-assign
     Date = class extends Date {
       constructor () {
         return mockDate
@@ -723,6 +733,7 @@ describe('Staticman interface', () => {
     test('returns the given string with special placeholders replaced', () => {
       const mockDate = new Date('1988-08-31T11:00:00')
 
+      // eslint-disable-next-line no-global-assign
       Date = class extends Date {
         constructor () {
           return mockDate
@@ -747,6 +758,7 @@ describe('Staticman interface', () => {
     test('returns the given string with `date:` placeholders replaced', () => {
       const mockDate = new Date('1988-08-31T11:00:00')
 
+      // eslint-disable-next-line no-global-assign
       Date = class extends Date {
         constructor () {
           return mockDate
@@ -904,21 +916,17 @@ describe('Staticman interface', () => {
 
         staticman.setConfigPath(configObject)
         staticman.siteConfig = mockConfig
-        staticman.github = {
+        staticman.git = {
           readFile: jest.fn(() => {
-            const config = Object.assign({}, mockConfig.getProperties())
+            const config = mockHelpers.getParsedConfig()
 
-            config.reCaptcha.secret = mockConfig.getRaw('reCaptcha.secret')
-
-            return Promise.resolve({
-              [configObject.path]: config
-            })
+            return Promise.resolve(config)
           })
         }
 
         return staticman.getSiteConfig(true).then(config => {
-          expect(staticman.github.readFile).toHaveBeenCalledTimes(1)
-          expect(staticman.github.readFile.mock.calls[0][0]).toBe(configObject.file)
+          expect(staticman.git.readFile).toHaveBeenCalledTimes(1)
+          expect(staticman.git.readFile.mock.calls[0][0]).toBe(configObject.file)
         })
       }
     )
@@ -927,19 +935,20 @@ describe('Staticman interface', () => {
       const Staticman = require('./../../../lib/Staticman')
       const staticman = new Staticman(mockParameters)
       const configObject = mockHelpers.getConfigObject()
-      const mockRemoteConfig = Object.assign({}, mockConfig.getProperties())
       const validationErrors = {
         _smErrorCode: 'MISSING_CONFIG_FIELDS',
         data: ['branch', 'path']
       }
 
-      mockRemoteConfig.reCaptcha.secret = mockConfig.getRaw('reCaptcha.secret')
+      const invalidConfig = {
+        missingFields: true
+      }
 
       staticman.setConfigPath(configObject)
-      staticman.github = {
+      staticman.git = {
         readFile: jest.fn(() => {
           return Promise.resolve({
-            [configObject.path]: mockRemoteConfig
+            [configObject.path]: invalidConfig
           })
         })
       }
@@ -947,21 +956,20 @@ describe('Staticman interface', () => {
 
       return staticman.getSiteConfig().catch(err => {
         expect(err).toEqual(validationErrors)
-        expect(staticman._validateConfig.mock.calls[0][0]).toEqual(mockRemoteConfig)
+        expect(staticman._validateConfig.mock.calls[0][0]).toEqual(invalidConfig)
       })
     })
 
-    test('fetches the site config from the repository and throws an error if it fails validation', () => {
+    test('fetches the site config from the repository and throws an error if there is a branch mismatch', () => {
       const Staticman = require('./../../../lib/Staticman')
       const staticman = new Staticman(mockParameters)
       const configObject = mockHelpers.getConfigObject()
       const mockRemoteConfig = Object.assign({}, mockConfig.getProperties())
 
       mockRemoteConfig.branch = 'some-other-branch'
-      mockRemoteConfig.reCaptcha.secret = mockConfig.getRaw('reCaptcha.secret')
 
       staticman.setConfigPath(configObject)
-      staticman.github = {
+      staticman.git = {
         readFile: jest.fn(() => {
           return Promise.resolve({
             [configObject.path]: mockRemoteConfig
@@ -981,16 +989,13 @@ describe('Staticman interface', () => {
       const Staticman = require('./../../../lib/Staticman')
       const staticman = new Staticman(mockParameters)
       const configObject = mockHelpers.getConfigObject()
-      const mockRemoteConfig = Object.assign({}, mockConfig.getProperties())
-
-      mockRemoteConfig.reCaptcha.secret = mockConfig.getRaw('reCaptcha.secret')
 
       staticman.setConfigPath(configObject)
-      staticman.github = {
+      staticman.git = {
         readFile: jest.fn(() => {
-          return Promise.resolve({
-            [configObject.path]: mockRemoteConfig
-          })
+          const mockRemoteConfig = mockHelpers.getParsedConfig()
+
+          return Promise.resolve(mockRemoteConfig)
         })
       }
 
@@ -1001,7 +1006,7 @@ describe('Staticman interface', () => {
   })
 
   describe('`processEntry()`', () => {
-    test.only('gets site config and checks for spam, throwing an error if found', () => {
+    test('gets site config and checks for spam, throwing an error if found', () => {
       const Staticman = require('./../../../lib/Staticman')
       const staticman = new Staticman(mockParameters)
 
@@ -1106,7 +1111,7 @@ describe('Staticman interface', () => {
 
       staticman.siteConfig = mockConfig
       staticman._checkForSpam = () => Promise.resolve(fields)
-      staticman.github.writeFile = jest.fn(() => {
+      staticman.git.writeFile = jest.fn(() => {
         return Promise.resolve()
       })
 
@@ -1130,7 +1135,7 @@ describe('Staticman interface', () => {
 
       staticman.siteConfig = mockConfig
       staticman._checkForSpam = () => Promise.resolve(fields)
-      staticman.github.writeFileAndSendPR = jest.fn(() => {
+      staticman.git.writeFileAndSendReview = jest.fn(() => {
         return Promise.resolve()
       })
 
@@ -1147,15 +1152,15 @@ describe('Staticman interface', () => {
           }
         )
 
-        expect(staticman.github.writeFileAndSendPR.mock.calls[0][0])
+        expect(staticman.git.writeFileAndSendReview.mock.calls[0][0])
           .toBe(staticman._getNewFilePath(fields))
-        expect(staticman.github.writeFileAndSendPR.mock.calls[0][1])
+        expect(staticman.git.writeFileAndSendReview.mock.calls[0][1])
           .toBe(expectedFile)
-        expect(staticman.github.writeFileAndSendPR.mock.calls[0][2])
+        expect(staticman.git.writeFileAndSendReview.mock.calls[0][2])
           .toBe(`staticman_${staticman.uid}`)
-        expect(staticman.github.writeFileAndSendPR.mock.calls[0][3])
+        expect(staticman.git.writeFileAndSendReview.mock.calls[0][3])
           .toBe(expectedCommitMessage)
-        expect(staticman.github.writeFileAndSendPR.mock.calls[0][4])
+        expect(staticman.git.writeFileAndSendReview.mock.calls[0][4])
           .toBe(staticman._generatePRBody(fields))
       })
     })
@@ -1184,7 +1189,7 @@ describe('Staticman interface', () => {
 
       staticman.siteConfig = mockConfig
       staticman._checkForSpam = () => Promise.resolve(fields)
-      staticman.github.writeFile = jest.fn(() => {
+      staticman.git.writeFile = jest.fn(() => {
         return Promise.resolve()
       })
 
@@ -1203,13 +1208,13 @@ describe('Staticman interface', () => {
 
         expect(mockSubscriptionSend.mock.calls[0][0]).toBe(options.parent)
         expect(mockSubscriptionSend.mock.calls[0][1]).toEqual(fields)
-        expect(staticman.github.writeFile.mock.calls[0][0])
+        expect(staticman.git.writeFile.mock.calls[0][0])
           .toBe(staticman._getNewFilePath(fields))
-        expect(staticman.github.writeFile.mock.calls[0][1])
+        expect(staticman.git.writeFile.mock.calls[0][1])
           .toBe(expectedFile)
-        expect(staticman.github.writeFile.mock.calls[0][2])
+        expect(staticman.git.writeFile.mock.calls[0][2])
           .toBe(mockParameters.branch)
-        expect(staticman.github.writeFile.mock.calls[0][3])
+        expect(staticman.git.writeFile.mock.calls[0][3])
           .toBe(expectedCommitMessage)
       })
     })

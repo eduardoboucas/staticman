@@ -54,6 +54,12 @@ const schema = {
     default: 'development',
     env: 'NODE_ENV'
   },
+  gitlabToken: {
+    doc: 'Access token to the GitLab account being used to push files with.',
+    format: String,
+    default: null,
+    env: 'GITLAB_TOKEN'
+  },
   githubToken: {
     doc: 'Access token to the GitHub account being used to push files with.',
     format: String,

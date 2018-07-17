@@ -1,6 +1,6 @@
 <img src="logo.png" width="300">
 
-# Staticman [![coverage](https://img.shields.io/badge/coverage-51%25-red.svg?style=flat](https://travis-ci.org/eduardoboucas/staticman) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+# Staticman [![coverage](https://img.shields.io/badge/coverage-51%25-red.svg?style=flat
 
 > Static sites with superpowers
 

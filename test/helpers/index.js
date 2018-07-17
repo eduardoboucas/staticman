@@ -49,12 +49,6 @@ module.exports.getCatchAllApiMock = callback => {
 
 module.exports.getConfig = () => {
   const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
-  const reCaptchaSecret = rsa.encrypt('This is a nice little secret', 'base64')
-
-  // For some reason, node-rsa is failing the tests if the secret is encrypted
-  // beforehand. As a workaround, we generate a new secret when we retrieve the
-  // config object. We can still obtain its raw value with `getRaw().
-  parsedConfig.comments.reCaptcha.secret = reCaptchaSecret
 
   const siteConfig = SiteConfig(parsedConfig.comments, rsa)
 
