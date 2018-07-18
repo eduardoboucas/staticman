@@ -542,7 +542,7 @@ describe('Staticman interface', () => {
       mockConfig.set('notifications.enabled', false)
       staticman.siteConfig = mockConfig
 
-      const pullRequestBody = staticman._generatePRBody(fields)
+      const pullRequestBody = staticman._generateReviewBody(fields)
 
       expect(pullRequestBody).toBe(mockConfig.get('pullRequestBody') + fieldsTable)
     })
@@ -570,7 +570,7 @@ describe('Staticman interface', () => {
         parameters: req.params
       }
       const notificationsComment = `\n\n<!--staticman_notification:${JSON.stringify(notificationsData)}-->`
-      const pullRequestBody = staticman._generatePRBody(fields)
+      const pullRequestBody = staticman._generateReviewBody(fields)
 
       expect(pullRequestBody).toBe(
         mockConfig.get('pullRequestBody') +
@@ -1161,7 +1161,7 @@ describe('Staticman interface', () => {
         expect(staticman.git.writeFileAndSendReview.mock.calls[0][3])
           .toBe(expectedCommitMessage)
         expect(staticman.git.writeFileAndSendReview.mock.calls[0][4])
-          .toBe(staticman._generatePRBody(fields))
+          .toBe(staticman._generateReviewBody(fields))
       })
     })
 
