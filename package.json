@@ -40,12 +40,12 @@
     "md5": "^2.1.0",
     "moment": "^2.18.1",
     "node-rsa": "^0.4.2",
-    "node-uuid": "^1.4.7",
     "object-path": "^0.11.1",
     "request-promise": "^4.2.2",
     "sha1": "^1.1.1",
     "slug": "^0.9.1",
-    "universal-analytics": "^0.4.2"
+    "universal-analytics": "^0.4.2",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "front-matter": "^2.1.2",
