@@ -71,6 +71,15 @@ StaticmanAPI.prototype.initialiseRoutes = function () {
     this.controllers.process
   )
 
+  this.server.post(
+    '/v:version/entry/:service/:username/:repository/:branch/:property',
+    this.bruteforce.prevent,
+    this.requireApiVersion([3]),
+    this.requireService(['github', 'gitlab']),
+    this.requireParams(['fields']),
+    this.controllers.process
+  )
+
   // Route: encrypt
   this.server.get(
     '/v:version/encrypt/:text',
@@ -111,9 +120,24 @@ StaticmanAPI.prototype.requireApiVersion = function (versions) {
     })
 
     if (!versionMatch) {
-      return res.status(500).send({
+      return res.status(400).send({
         success: false,
         errorCode: 'INVALID_VERSION'
+      })
+    }
+
+    return next()
+  }
+}
+
+StaticmanAPI.prototype.requireService = function (services) {
+  return (req, res, next) => {
+    const serviceMatch = services.some(service => service === req.params.service)
+
+    if (!serviceMatch) {
+      return res.status(400).send({
+        success: false,
+        errorCode: 'INVALID_SERVICE'
       })
     }
 

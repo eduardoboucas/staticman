@@ -127,15 +127,13 @@ module.exports = (req, res, next) => {
   staticman.setIp(req.headers['x-forwarded-for'] || req.connection.remoteAddress)
   staticman.setUserAgent(req.headers['user-agent'])
 
-  return checkRecaptcha(staticman, req).then(usedRecaptcha => {
-    return process(staticman, req, res)
-  }).catch(err => {
-    return sendResponse(res, {
+  return checkRecaptcha(staticman, req)
+    .then(usedRecaptcha => process(staticman, req, res))
+    .catch(err => sendResponse(res, {
       err,
       redirect: req.body.options && req.body.options.redirect,
       redirectError: req.body.options && req.body.options.redirectError
-    })
-  })
+    }))
 }
 
 module.exports.checkRecaptcha = checkRecaptcha
