@@ -74,21 +74,42 @@ const schema = {
   },
   githubAuth: {
     clientId: {
-      doc: 'The client ID to the GitHub Application used for GitHub authentication.',
+      doc: 'The client ID to the GitHub Application used for GitHub OAuth.',
       format: 'EncryptedString',
       default: null,
       env: 'GITHUB_AUTH_CLIENT_ID'
     },
     clientSecret: {
-      doc: 'The client secret to the GitHub Application used for GitHub authentication.',
+      doc: 'The client secret to the GitHub Application used for GitHub OAuth.',
       format: 'EncryptedString',
       default: null,
       env: 'GITHUB_AUTH_CLIENT_SECRET'
     },
-    required: {
-      doc: 'Whether GitHub Auth is required for an entry to be accepted.',
-      format: Boolean,
-      default: false
+    redirectUri: {
+      doc: 'The URL to redirect to after authenticating with GitHub.',
+      format: String,
+      default: '',
+      env: 'GITHUB_AUTH_REDIRECT_URI'
+    }
+  },
+  gitlabAuth: {
+    clientId: {
+      doc: 'The client ID to the GitLab Application used for GitLab OAuth.',
+      format: 'EncryptedString',
+      default: null,
+      env: 'GITLAB_AUTH_CLIENT_ID'
+    },
+    clientSecret: {
+      doc: 'The client secret to the GitLab Application used for GitLab OAuth.',
+      format: 'EncryptedString',
+      default: null,
+      env: 'GITLAB_AUTH_CLIENT_SECRET'
+    },
+    redirectUri: {
+      doc: 'The URL to redirect to after authenticating with GitLab.',
+      format: String,
+      default: '',
+      env: 'GITLAB_AUTH_REDIRECT_URI'
     }
   },
   moderation: {
