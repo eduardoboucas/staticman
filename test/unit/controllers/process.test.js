@@ -201,7 +201,7 @@ describe('Process controller', () => {
           decrypt: mockHelpers.decrypt,
           getSiteConfig: () => Promise.resolve(mockSiteConfig)
         }))
-      })    
+      })
 
       const checkRecaptcha = require('./../../../controllers/process').checkRecaptcha
       const Staticman = require('./../../../lib/Staticman')
@@ -479,7 +479,7 @@ describe('Process controller', () => {
       expect(res.status.mock.calls[0][0]).toBe(200)
     })
 
-    test('sends a 500 with an error object if there is an error', () => {
+    test('sends a 4XX with an error object if there is an error', () => {
       const data = {
         err: {
           _smErrorCode: 'missing-input-secret'
@@ -500,7 +500,7 @@ describe('Process controller', () => {
         errorHandler.getErrorCode(data.err._smErrorCode)
       )
       expect(res.status.mock.calls.length).toBe(1)
-      expect(res.status.mock.calls[0][0]).toBe(500)
+      expect(res.status.mock.calls[0][0]).toBe(404)
     })
   })
 })
