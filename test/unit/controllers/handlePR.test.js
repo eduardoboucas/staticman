@@ -31,18 +31,22 @@ describe('HandlePR controller', () => {
   test('ignores pull requests from branches not prefixed with `staticman_`', () => {
     const pr = {
       number: 123,
+      title: 'Some random PR',
+      body: 'Unrelated review body',
       head: {
         ref: 'some-other-branch'
       },
       base: {
         ref: 'master'
       },
+      merged: false,
       repository: {
         name: req.params.repository,
         owner: {
           login: req.params.username
         }
-      }
+      },
+      state: 'open'
     }
     const mockPullRequestsGet = jest.fn(() => Promise.resolve({data: pr}))
 
@@ -72,6 +76,7 @@ describe('HandlePR controller', () => {
     test('do nothing if PR body doesn\'t match template', () => {
       const pr = {
         number: 123,
+        title: 'Add Staticman data',
         body: sampleData.prBody2,
         head: {
           ref: 'staticman_1234567'
@@ -114,6 +119,7 @@ describe('HandlePR controller', () => {
     test('abort and return an error if `processMerge` fails', () => {
       const pr = {
         number: 123,
+        title: 'Add Staticman data',
         body: sampleData.prBody1,
         head: {
           ref: 'staticman_1234567'
@@ -161,6 +167,7 @@ describe('HandlePR controller', () => {
     test('delete the branch if the pull request is closed', () => {
       const pr = {
         number: 123,
+        title: 'Add Staticman data',
         body: sampleData.prBody1,
         head: {
           ref: 'staticman_1234567'

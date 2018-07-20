@@ -30,7 +30,7 @@ const parameters = {
   property: 'comments',
   repository: 'foobar',
   username: 'johndoe',
-  version: 'v2'
+  version: '3'
 }
 
 module.exports.baseUrl = ''

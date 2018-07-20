@@ -1,5 +1,4 @@
 const mockHelpers = require('./../../helpers')
-const nock = require('nock')
 const sampleData = require('./../../helpers/sampleData')
 const yaml = require('js-yaml')
 
@@ -60,29 +59,6 @@ describe('GitHub interface', () => {
     const GitHub = require('./../../../lib/GitHub')
 
     expect(() => new GitHub({})).toThrowError()
-  })
-
-  test('requests OAuth access token from GitHub', () => {
-    const accessToken = 'asdfghjkl'
-    const clientId = '123456789'
-    const clientSecret = '1q2w3e4r5t6y7u8i9o'
-    const code = 'abcdefghijklmnopqrst'
-
-    nock(/github\.com/)
-      .post('/login/oauth/access_token')
-      .query({
-        client_id: clientId,
-        client_secret: clientSecret,
-        code
-      })
-      .reply(200, {
-        access_token: accessToken
-      })
-
-    const GitHub = require('./../../../lib/GitHub')
-
-    GitHub.requestOAuthAccessToken(code, clientId, clientSecret)
-      .then(token => expect(token).toEqual(accessToken))
   })
 
   describe('readFile', () => {

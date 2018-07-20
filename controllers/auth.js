@@ -38,7 +38,12 @@ module.exports = (req, res) => {
         oauthToken: accessToken
       })
 
-      return git.getCurrentUser()
+      // TODO: Simplify this when v2 support is dropped.
+      const getUser = req.params.version === '2' && req.params.service === 'github'
+        ? git.api.users.get({}).then(({data}) => data)
+        : git.getCurrentUser()
+
+      return getUser
         .then((user) => {
           res.send({
             accessToken: RSA.encrypt(accessToken),

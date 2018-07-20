@@ -21,6 +21,48 @@ describe('Auth controller', () => {
       const mockAccessToken = 'qwertyuiop'
       const mockCode = '1q2w3e4r'
       const mockUser = {
+        login: 'johndoe',
+        name: 'John Doe'
+      }
+
+      const siteConfig = helpers.getConfig()
+
+      nock(/github\.com/)
+        .post('/login/oauth/access_token')
+        .query({
+          client_id: siteConfig.get('githubAuth.clientId'),
+          client_secret: siteConfig.get('githubAuth.clientSecret'),
+          code: mockCode,
+          redirect_uri: siteConfig.get('githubAuth.redirectUri')
+        })
+        .reply(200, {
+          access_token: mockAccessToken
+        })
+
+      nock(/github\.com/)
+        .get('/user')
+        .query({
+          access_token: mockAccessToken
+        })
+        .reply(200, mockUser)
+
+      const reqWithQuery = Object.assign({}, req, {
+        query: {
+          code: mockCode
+        }
+      })
+
+      return auth(reqWithQuery, res).then(result => {
+        expect(res.send).toHaveBeenCalledTimes(1)
+        expect(helpers.decrypt(res.send.mock.calls[0][0].accessToken)).toBe(mockAccessToken)
+        expect(res.send.mock.calls[0][0].user.username).toBe(mockUser.login)
+      })
+    })
+
+    test('authenticates to GitHub with the given code and returns the original GitHub user when using v2 API', () => {
+      const mockAccessToken = 'qwertyuiop'
+      const mockCode = '1q2w3e4r'
+      const mockUser = {
         login: 'johndoe'
       }
 
@@ -38,13 +80,18 @@ describe('Auth controller', () => {
           access_token: mockAccessToken
         })
 
-      nock(/github\.com/).get('/user')
+      nock(/github\.com/)
+        .get('/user')
         .query({
           access_token: mockAccessToken
         })
         .reply(200, mockUser)
 
       const reqWithQuery = Object.assign({}, req, {
+        params: {
+          service: 'github',
+          version: '2'
+        },
         query: {
           code: mockCode
         }
@@ -134,7 +181,8 @@ describe('Auth controller', () => {
       const mockAccessToken = 'qwertyuiop'
       const mockCode = '1q2w3e4r'
       const mockUser = {
-        login: 'johndoe'
+        username: 'johndoe',
+        name: 'John Doe'
       }
 
       const siteConfig = helpers.getConfig()
