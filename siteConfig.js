@@ -41,6 +41,13 @@ const schema = {
       default: 'comment'
     }
   },
+  auth: {
+    required: {
+      doc: 'Whether authentication is required for an entry to be accepted.',
+      format: Boolean,
+      default: false
+    }
+  },
   branch: {
     doc: 'Name of the branch being used within the GitHub repository.',
     format: String,

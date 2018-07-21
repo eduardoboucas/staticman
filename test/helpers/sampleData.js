@@ -13,6 +13,9 @@ comments:
   # listed will be accepted.
   allowedOrigins: ["localhost", "eduardoboucas.com"]
 
+  auth:
+    required: false
+
   # (*) REQUIRED
   #
   # Name of the branch being used. Must match the one sent in the URL of the

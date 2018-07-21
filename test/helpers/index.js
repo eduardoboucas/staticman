@@ -85,7 +85,7 @@ module.exports.getMockRequest = () => {
     headers: {
       'x-forwarded-for': '123.456.78.9'
     },
-    params: parameters
+    params: Object.assign({}, parameters)
   }
 }
 
@@ -103,7 +103,7 @@ module.exports.getMockResponse = () => {
   }
 }
 
-module.exports.getParameters = () => parameters
+module.exports.getParameters = () => Object.assign({}, parameters)
 
 module.exports.getParsedConfig = () => {
   return yaml.safeLoad(sampleData.config1, 'utf8')

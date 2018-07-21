@@ -5,6 +5,7 @@ const moment = require('moment')
 const mockHelpers = require('./../../helpers')
 const slugify = require('slug')
 const yaml = require('js-yaml')
+const User = require('../../../lib/models/User')
 
 let mockConfig
 let mockParameters
@@ -382,6 +383,200 @@ describe('Staticman interface', () => {
         expect(err).toEqual({
           _smErrorCode: 'IS_SPAM'
         })
+      })
+    })
+  })
+
+  describe('authentication', () => {
+    beforeEach(() => {
+      mockConfig.set('auth.required', true)
+    })
+
+    test('throws an error if `auth-token` field is missing', () => {
+      const fields = mockHelpers.getFields()
+      const options = {}
+
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      staticman.fields = fields
+      staticman.options = options
+      staticman.siteConfig = mockConfig
+
+      return staticman._checkAuth().catch(err => {
+        expect(err).toEqual({
+          _smErrorCode: 'AUTH_TOKEN_MISSING'
+        })
+      })
+    })
+
+    test('throws an error if `github-token` field is missing in v2 API', () => {
+      const fields = mockHelpers.getFields()
+      const options = {}
+
+      mockParameters.version = '2'
+
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      staticman.fields = fields
+      staticman.options = options
+      staticman.siteConfig = mockConfig
+
+      return staticman._checkAuth().catch(err => {
+        expect(err).toEqual({
+          _smErrorCode: 'GITHUB_AUTH_TOKEN_MISSING'
+        })
+      })
+    })
+
+    test('throws an error if unable to decrypt the `auth-token` option', () => {
+      const fields = mockHelpers.getFields()
+      const options = {
+        'auth-token': 'invalid token'
+      }
+
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      staticman.fields = fields
+      staticman.options = options
+      staticman.siteConfig = mockConfig
+
+      return staticman._checkAuth().catch(err => {
+        expect(err).toEqual({
+          _smErrorCode: 'AUTH_TOKEN_INVALID'
+        })
+      })
+    })
+
+    test('throws an error if unable to decrypt the `github-token` option in the v2 API', () => {
+      const fields = mockHelpers.getFields()
+      const options = {
+        'github-token': 'invalid token'
+      }
+
+      mockParameters.version = '2'
+
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      staticman.fields = fields
+      staticman.options = options
+      staticman.siteConfig = mockConfig
+
+      return staticman._checkAuth().catch(err => {
+        expect(err).toEqual({
+          _smErrorCode: 'GITHUB_AUTH_TOKEN_INVALID'
+        })
+      })
+    })
+
+    test('sets the `gitUser` property to the authenticated User and returns true for GitHub authentication', () => {
+      const mockGetCurrentUser = jest.fn(() => Promise.resolve(mockUser))
+
+      jest.mock('../../../lib/GitHub', () => {
+        return function () {
+          return {
+            getCurrentUser: mockGetCurrentUser
+          }
+        }
+      })
+
+      const fields = mockHelpers.getFields()
+      const options = {
+        'auth-token': mockHelpers.encrypt('test-token')
+      }
+
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      staticman.fields = fields
+      staticman.options = options
+      staticman.siteConfig = mockConfig
+
+      const mockUser = new User('github', 'johndoe', 'John Doe')
+
+      return staticman._checkAuth().then((result) => {
+        expect(mockGetCurrentUser).toHaveBeenCalledTimes(1)
+        expect(staticman.gitUser).toEqual(mockUser)
+        expect(result).toBeTruthy()
+      })
+    })
+
+    test('sets the `gitUser` property to the authenticated User and returns true for GitLab authentication', () => {
+      const mockGetCurrentUser = jest.fn(() => Promise.resolve(mockUser))
+
+      jest.mock('../../../lib/GitLab', () => {
+        return function () {
+          return {
+            getCurrentUser: mockGetCurrentUser
+          }
+        }
+      })
+
+      const fields = mockHelpers.getFields()
+      const options = {
+        'auth-token': mockHelpers.encrypt('test-token')
+      }
+
+      mockParameters.service = 'gitlab'
+
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      staticman.fields = fields
+      staticman.options = options
+      staticman.siteConfig = mockConfig
+
+      const mockUser = new User('github', 'johndoe', 'John Doe')
+
+      return staticman._checkAuth().then((result) => {
+        expect(mockGetCurrentUser).toHaveBeenCalledTimes(1)
+        expect(staticman.gitUser).toEqual(mockUser)
+        expect(result).toBeTruthy()
+      })
+    })
+
+    test('sets the `gitUser` property to the GitHub user in the v2 API', () => {
+      const mockUser = {
+        login: 'johndoe',
+        name: 'John Doe'
+      }
+      const mockGetCurrentUser = jest.fn(() => Promise.resolve({
+        data: mockUser
+      }))
+
+      jest.mock('../../../lib/GitHub', () => {
+        return function () {
+          return {
+            api: {
+              users: {
+                get: mockGetCurrentUser
+              }
+            }
+          }
+        }
+      })
+
+      const fields = mockHelpers.getFields()
+      const options = {
+        'github-token': mockHelpers.encrypt('test-token')
+      }
+
+      mockParameters.version = '2'
+
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      staticman.fields = fields
+      staticman.options = options
+      staticman.siteConfig = mockConfig
+
+      return staticman._checkAuth().then((result) => {
+        expect(mockGetCurrentUser).toHaveBeenCalledTimes(1)
+        expect(staticman.gitUser).toEqual(mockUser)
+        expect(result).toBeTruthy()
       })
     })
   })
@@ -1087,6 +1282,59 @@ describe('Staticman interface', () => {
       }
     )
 
+    test('authenticates user before creating file', () => {
+      const mockUser = new User('github', 'johndoe', 'John Doe')
+      const mockGetCurrentUser = jest.fn(() => Promise.resolve(mockUser))
+
+      jest.mock('../../../lib/GitHub', () => {
+        return function () {
+          return {
+            getCurrentUser: mockGetCurrentUser
+          }
+        }
+      })
+
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+      const fields = mockHelpers.getFields()
+      const options = {
+        'auth-token': mockHelpers.encrypt('test-token')
+      }
+
+      mockConfig.set('auth.required', true)
+
+      staticman.siteConfig = mockConfig
+      staticman._checkForSpam = () => Promise.resolve(fields)
+      staticman.git.writeFile = jest.fn(() => Promise.resolve())
+
+      const spyCheckAuth = jest.spyOn(staticman, '_checkAuth')
+
+      return staticman.processEntry(fields, options).then(_ => {
+        expect(spyCheckAuth).toHaveBeenCalledTimes(1)
+        expect(mockGetCurrentUser).toHaveBeenCalledTimes(1)
+        expect(staticman.gitUser).toEqual(mockUser)
+      })
+    })
+
+    test('authenticates user before creating file, throwing an error if unable to authenticate', () => {
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+      const fields = mockHelpers.getFields()
+      const options = {
+        'auth-token': 'invalid token'
+      }
+
+      mockConfig.set('auth.required', true)
+
+      staticman.siteConfig = mockConfig
+      staticman._checkForSpam = () => Promise.resolve(fields)
+      staticman.git.writeFile = jest.fn(() => Promise.resolve())
+
+      return staticman.processEntry(fields, options).catch(err => {
+        err._smErrorCode = 'AUTH_TOKEN_INVALID'
+      })
+    })
+
     test('subscribes the user to notifications', () => {
       const mockSubscriptionSet = jest.fn(() => Promise.resolve(true))
 
@@ -1218,38 +1466,38 @@ describe('Staticman interface', () => {
           .toBe(expectedCommitMessage)
       })
     })
-  })
 
-  describe('`processMerge()`', () => {
-    test('subscribes the user to notifications', () => {
-      const mockSubscriptionSend = jest.fn()
+    describe('`processMerge()`', () => {
+      test('subscribes the user to notifications', () => {
+        const mockSubscriptionSend = jest.fn()
 
-      jest.mock('./../../../lib/SubscriptionsManager', () => {
-        return jest.fn(() => ({
-          send: mockSubscriptionSend
-        }))
-      })
+        jest.mock('./../../../lib/SubscriptionsManager', () => {
+          return jest.fn(() => ({
+            send: mockSubscriptionSend
+          }))
+        })
 
-      const Staticman = require('./../../../lib/Staticman')
-      const staticman = new Staticman(mockParameters)
-      const fields = mockHelpers.getFields()
-      const options = {
-        parent: '1a2b3c4d5e6f',
-        subscribe: 'email'
-      }
+        const Staticman = require('./../../../lib/Staticman')
+        const staticman = new Staticman(mockParameters)
+        const fields = mockHelpers.getFields()
+        const options = {
+          parent: '1a2b3c4d5e6f',
+          subscribe: 'email'
+        }
 
-      mockConfig.set('notifications.enabled', true)
+        mockConfig.set('notifications.enabled', true)
 
-      staticman.siteConfig = mockConfig
+        staticman.siteConfig = mockConfig
 
-      return staticman.processMerge(
-        fields,
-        options
-      ).then(response => {
-        expect(mockSubscriptionSend.mock.calls[0][0]).toBe(options.parent)
-        expect(mockSubscriptionSend.mock.calls[0][1]).toEqual(fields)
-        expect(mockSubscriptionSend.mock.calls[0][2]).toEqual(options)
-        expect(mockSubscriptionSend.mock.calls[0][3]).toEqual(mockConfig)
+        return staticman.processMerge(
+          fields,
+          options
+        ).then(response => {
+          expect(mockSubscriptionSend.mock.calls[0][0]).toBe(options.parent)
+          expect(mockSubscriptionSend.mock.calls[0][1]).toEqual(fields)
+          expect(mockSubscriptionSend.mock.calls[0][2]).toEqual(options)
+          expect(mockSubscriptionSend.mock.calls[0][3]).toEqual(mockConfig)
+        })
       })
     })
   })
