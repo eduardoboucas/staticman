@@ -472,6 +472,70 @@ describe('Staticman interface', () => {
       })
     })
 
+    test('authenticates with GitHub using OAuth access token', () => {
+      const mockConstructor = jest.fn()
+      const mockUser = new User('github', 'johndoe', 'johndoe@test.com', 'John Doe')
+
+      jest.mock('../../../lib/GitHub', () => {
+        return mockConstructor.mockImplementation(() => {
+          return {
+            getCurrentUser: () => Promise.resolve(mockUser)
+          }
+        })
+      })
+
+      const fields = mockHelpers.getFields()
+      const options = {
+        'auth-token': mockHelpers.encrypt('test-token')
+      }
+
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      staticman.fields = fields
+      staticman.options = options
+      staticman.siteConfig = mockConfig
+
+      return staticman._checkAuth().then((result) => {
+        expect(mockConstructor.mock.calls[1][0]).toEqual({
+          oauthToken: 'test-token'
+        })
+      })
+    })
+
+    test('authenticates with GitLab using OAuth access token', () => {
+      const mockConstructor = jest.fn()
+      const mockUser = new User('gitlab', 'johndoe', 'johndoe@test.com', 'John Doe')
+
+      jest.mock('../../../lib/GitLab', () => {
+        return mockConstructor.mockImplementation(() => {
+          return {
+            getCurrentUser: () => Promise.resolve(mockUser)
+          }
+        })
+      })
+
+      const fields = mockHelpers.getFields()
+      const options = {
+        'auth-token': mockHelpers.encrypt('test-token')
+      }
+
+      mockParameters.service = 'gitlab'
+
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      staticman.fields = fields
+      staticman.options = options
+      staticman.siteConfig = mockConfig
+
+      return staticman._checkAuth().then((result) => {
+        expect(mockConstructor.mock.calls[1][0]).toEqual({
+          oauthToken: 'test-token'
+        })
+      })
+    })
+
     test('sets the `gitUser` property to the authenticated User and returns true for GitHub authentication', () => {
       const mockGetCurrentUser = jest.fn(() => Promise.resolve(mockUser))
 
