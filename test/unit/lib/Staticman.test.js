@@ -200,6 +200,71 @@ describe('Staticman interface', () => {
         slug: slugify(data.name).toLowerCase()
       }))
     })
+
+    test('adds the `user` generated fields to the data object', () => {
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      mockConfig.set('generatedFields', {
+        username: {
+          options: {
+            property: 'username'
+          },
+          type: 'user'
+        },
+        name: {
+          options: {
+            property: 'name'
+          },
+          type: 'user'
+        }
+      })
+      staticman.siteConfig = mockConfig
+
+      staticman.gitUser = new User('github', 'johndoe', 'johndoe@test.com', 'John Doe')
+
+      const data = mockHelpers.getFields()
+      const extendedData = staticman._applyGeneratedFields(data)
+
+      expect(extendedData).toEqual(Object.assign({}, data, {
+        name: 'John Doe',
+        username: 'johndoe'
+      }))
+    })
+
+    test('adds the `github` generated fields to the data object in the v2 API', () => {
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      mockConfig.set('generatedFields', {
+        username: {
+          options: {
+            property: 'login'
+          },
+          type: 'github'
+        },
+        name: {
+          options: {
+            property: 'name'
+          },
+          type: 'github'
+        }
+      })
+      staticman.siteConfig = mockConfig
+
+      staticman.gitUser = {
+        login: 'johndoe',
+        name: 'John Doe'
+      }
+
+      const data = mockHelpers.getFields()
+      const extendedData = staticman._applyGeneratedFields(data)
+
+      expect(extendedData).toEqual(Object.assign({}, data, {
+        name: 'John Doe',
+        username: 'johndoe'
+      }))
+    })
   })
 
   describe('field transforms', () => {
