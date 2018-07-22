@@ -1,5 +1,6 @@
 const mockHelpers = require('./../../helpers')
 const sampleData = require('./../../helpers/sampleData')
+const User = require('../../../lib/models/User')
 const yaml = require('js-yaml')
 
 let req
@@ -58,7 +59,7 @@ describe('GitHub interface', () => {
   test('throws error if no personal access token or OAuth token is provided', () => {
     const GitHub = require('./../../../lib/GitHub')
 
-    expect(() => new GitHub({})).toThrowError()
+    expect(() => new GitHub({})).toThrowError('Require an `oauthToken` or `token` option')
   })
 
   describe('readFile', () => {
@@ -351,15 +352,13 @@ describe('GitHub interface', () => {
       const githubInstance = new GitHub(req.params)
       const options = {
         content: 'This is a new file',
-        commitTitle: 'New Staticman data',
+        commitTitle: 'Add Staticman file',
         path: 'path/to/file.txt'
       }
 
       return githubInstance.writeFile(
         options.path,
-        options.content,
-        options.branch,
-        options.commitTitle
+        options.content
       ).then(response => {
         expect(mockReposCreateFile.mock.calls[0][0]).toEqual({
           owner: req.params.username,
@@ -515,6 +514,51 @@ describe('GitHub interface', () => {
       ).catch(err => {
         expect(err).toEqual({
           _smErrorCode: 'GITHUB_CREATING_PR'
+        })
+      })
+    })
+  })
+
+  describe('getCurrentUser', () => {
+    test('returns the current authenticated user', () => {
+      const mockUser = {
+        login: 'johndoe',
+        name: 'John Doe'
+      }
+
+      jest.mock('@octokit/rest', () =>
+        _ => ({
+          authenticate: jest.fn(),
+          users: {
+            get: () => Promise.resolve({data: mockUser})
+          }
+        })
+      )
+
+      const GitHub = require('./../../../lib/GitHub')
+      const githubInstance = new GitHub(req.params)
+
+      return githubInstance.getCurrentUser().then((user) => {
+        expect(user).toEqual(new User('github', 'johndoe', 'John Doe'))
+      })
+    })
+
+    test('throws an error if unable to retrieve the current unauthenticated user', () => {
+      jest.mock('@octokit/rest', () =>
+        _ => ({
+          authenticate: jest.fn(),
+          users: {
+            get: () => Promise.reject()
+          }
+        })
+      )
+
+      const GitHub = require('./../../../lib/GitHub')
+      const githubInstance = new GitHub(req.params)
+
+      return githubInstance.getCurrentUser().catch((err) => {
+        expect(err).toEqual({
+          _smErrorCode: 'GITHUB_GET_USER'
         })
       })
     })
