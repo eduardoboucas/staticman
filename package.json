@@ -1,6 +1,6 @@
 {
   "name": "staticman",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Static sites with superpowers",
   "main": "index.js",
   "scripts": {
