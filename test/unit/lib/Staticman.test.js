@@ -452,9 +452,25 @@ describe('Staticman interface', () => {
     })
   })
 
-  describe('authentication', () => {
+  describe('authentication ', () => {
     beforeEach(() => {
       mockConfig.set('auth.required', true)
+    })
+
+    test('returns false if `auth.required` config is false', () => {
+      mockConfig.set('auth.required', false)
+
+      const fields = mockHelpers.getFields()
+      const options = {}
+
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      staticman.fields = fields
+      staticman.options = options
+      staticman.siteConfig = mockConfig
+
+      return staticman._checkAuth().then(result => expect(result).toBeFalsy())
     })
 
     test('throws an error if `auth-token` field is missing', () => {
@@ -475,30 +491,11 @@ describe('Staticman interface', () => {
       })
     })
 
-    test('throws an error if `github-token` field is missing in v2 API', () => {
-      const fields = mockHelpers.getFields()
-      const options = {}
-
-      mockParameters.version = '2'
-
-      const Staticman = require('./../../../lib/Staticman')
-      const staticman = new Staticman(mockParameters)
-
-      staticman.fields = fields
-      staticman.options = options
-      staticman.siteConfig = mockConfig
-
-      return staticman._checkAuth().catch(err => {
-        expect(err).toEqual({
-          _smErrorCode: 'GITHUB_AUTH_TOKEN_MISSING'
-        })
-      })
-    })
-
     test('throws an error if unable to decrypt the `auth-token` option', () => {
       const fields = mockHelpers.getFields()
       const options = {
-        'auth-token': 'invalid token'
+        'auth-token': 'invalid token',
+        'auth-type': 'github'
       }
 
       const Staticman = require('./../../../lib/Staticman')
@@ -515,29 +512,7 @@ describe('Staticman interface', () => {
       })
     })
 
-    test('throws an error if unable to decrypt the `github-token` option in the v2 API', () => {
-      const fields = mockHelpers.getFields()
-      const options = {
-        'github-token': 'invalid token'
-      }
-
-      mockParameters.version = '2'
-
-      const Staticman = require('./../../../lib/Staticman')
-      const staticman = new Staticman(mockParameters)
-
-      staticman.fields = fields
-      staticman.options = options
-      staticman.siteConfig = mockConfig
-
-      return staticman._checkAuth().catch(err => {
-        expect(err).toEqual({
-          _smErrorCode: 'GITHUB_AUTH_TOKEN_INVALID'
-        })
-      })
-    })
-
-    test('authenticates with GitHub using OAuth access token', () => {
+    test('authenticates with GitHub by default using the OAuth access token', () => {
       const mockConstructor = jest.fn()
       const mockUser = new User('github', 'johndoe', 'johndoe@test.com', 'John Doe')
 
@@ -551,7 +526,7 @@ describe('Staticman interface', () => {
 
       const fields = mockHelpers.getFields()
       const options = {
-        'auth-token': mockHelpers.encrypt('test-token')
+        'auth-token': mockHelpers.encrypt('test-token'),
       }
 
       const Staticman = require('./../../../lib/Staticman')
@@ -568,7 +543,7 @@ describe('Staticman interface', () => {
       })
     })
 
-    test('authenticates with GitLab using OAuth access token', () => {
+    test('authenticates with GitLab (using `auth-type` option) using OAuth access token', () => {
       const mockConstructor = jest.fn()
       const mockUser = new User('gitlab', 'johndoe', 'johndoe@test.com', 'John Doe')
 
@@ -582,10 +557,9 @@ describe('Staticman interface', () => {
 
       const fields = mockHelpers.getFields()
       const options = {
-        'auth-token': mockHelpers.encrypt('test-token')
+        'auth-token': mockHelpers.encrypt('test-token'),
+        'auth-type': 'gitlab'
       }
-
-      mockParameters.service = 'gitlab'
 
       const Staticman = require('./../../../lib/Staticman')
       const staticman = new Staticman(mockParameters)
@@ -595,7 +569,7 @@ describe('Staticman interface', () => {
       staticman.siteConfig = mockConfig
 
       return staticman._checkAuth().then((result) => {
-        expect(mockConstructor.mock.calls[1][0]).toEqual({
+        expect(mockConstructor.mock.calls[0][0]).toEqual({
           oauthToken: 'test-token'
         })
       })
@@ -646,10 +620,9 @@ describe('Staticman interface', () => {
 
       const fields = mockHelpers.getFields()
       const options = {
-        'auth-token': mockHelpers.encrypt('test-token')
+        'auth-token': mockHelpers.encrypt('test-token'),
+        'auth-type': 'gitlab'
       }
-
-      mockParameters.service = 'gitlab'
 
       const Staticman = require('./../../../lib/Staticman')
       const staticman = new Staticman(mockParameters)
@@ -664,6 +637,72 @@ describe('Staticman interface', () => {
         expect(mockGetCurrentUser).toHaveBeenCalledTimes(1)
         expect(staticman.gitUser).toEqual(mockUser)
         expect(result).toBeTruthy()
+      })
+    })
+  })
+
+  describe('authentication v2', () => {
+    beforeEach(() => {
+      mockConfig.set('githubAuth.required', true)
+    })
+
+    test('returns false if `githubAuth.required` config is false', () => {
+      mockConfig.set('githubAuth.required', false)
+
+      const fields = mockHelpers.getFields()
+      const options = {}
+
+      mockParameters.version = '2'
+
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      staticman.fields = fields
+      staticman.options = options
+      staticman.siteConfig = mockConfig
+
+      return staticman._checkAuth().then(result => expect(result).toBeFalsy())
+    })
+
+    test('throws an error if `github-token` field is missing in v2 API', () => {
+      const fields = mockHelpers.getFields()
+      const options = {}
+
+      mockParameters.version = '2'
+
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      staticman.fields = fields
+      staticman.options = options
+      staticman.siteConfig = mockConfig
+
+      return staticman._checkAuth().catch(err => {
+        expect(err).toEqual({
+          _smErrorCode: 'GITHUB_AUTH_TOKEN_MISSING'
+        })
+      })
+    })
+
+    test('throws an error if unable to decrypt the `github-token` option in the v2 API', () => {
+      const fields = mockHelpers.getFields()
+      const options = {
+        'github-token': 'invalid token'
+      }
+
+      mockParameters.version = '2'
+
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      staticman.fields = fields
+      staticman.options = options
+      staticman.siteConfig = mockConfig
+
+      return staticman._checkAuth().catch(err => {
+        expect(err).toEqual({
+          _smErrorCode: 'GITHUB_AUTH_TOKEN_INVALID'
+        })
       })
     })
 
