@@ -523,6 +523,7 @@ describe('GitHub interface', () => {
     test('returns the current authenticated user', () => {
       const mockUser = {
         login: 'johndoe',
+        email: 'johndoe@test.com',
         name: 'John Doe'
       }
 
@@ -539,7 +540,7 @@ describe('GitHub interface', () => {
       const githubInstance = new GitHub(req.params)
 
       return githubInstance.getCurrentUser().then((user) => {
-        expect(user).toEqual(new User('github', 'johndoe', 'John Doe'))
+        expect(user).toEqual(new User('github', 'johndoe', 'johndoe@test.com', 'John Doe'))
       })
     })
 

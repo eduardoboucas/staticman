@@ -2,6 +2,7 @@ const auth = require('../../../controllers/auth')
 const helpers = require('./../../helpers')
 const nock = require('nock')
 const Staticman = require('./../../../lib/Staticman')
+const User = require('../../../lib/models/User')
 
 Staticman.prototype.getSiteConfig = function () {
   return Promise.resolve(helpers.getConfig())
@@ -22,7 +23,8 @@ describe('Auth controller', () => {
       const mockCode = '1q2w3e4r'
       const mockUser = {
         login: 'johndoe',
-        name: 'John Doe'
+        name: 'John Doe',
+        email: 'johndoe@test.com'
       }
 
       const siteConfig = helpers.getConfig()
@@ -55,7 +57,8 @@ describe('Auth controller', () => {
       return auth(reqWithQuery, res).then(result => {
         expect(res.send).toHaveBeenCalledTimes(1)
         expect(helpers.decrypt(res.send.mock.calls[0][0].accessToken)).toBe(mockAccessToken)
-        expect(res.send.mock.calls[0][0].user.username).toBe(mockUser.login)
+        expect(res.send.mock.calls[0][0].user)
+          .toEqual(new User('github', mockUser.login, mockUser.email, mockUser.name))
       })
     })
 
@@ -100,7 +103,7 @@ describe('Auth controller', () => {
       return auth(reqWithQuery, res).then(result => {
         expect(res.send).toHaveBeenCalledTimes(1)
         expect(helpers.decrypt(res.send.mock.calls[0][0].accessToken)).toBe(mockAccessToken)
-        expect(res.send.mock.calls[0][0].user.login).toBe(mockUser.login)
+        expect(res.send.mock.calls[0][0].user).toEqual(mockUser)
       })
     })
 
@@ -182,7 +185,8 @@ describe('Auth controller', () => {
       const mockCode = '1q2w3e4r'
       const mockUser = {
         username: 'johndoe',
-        name: 'John Doe'
+        name: 'John Doe',
+        email: 'johndoe@test.com'
       }
 
       const siteConfig = helpers.getConfig()
@@ -220,7 +224,8 @@ describe('Auth controller', () => {
       return auth(reqWithQuery, res).then(result => {
         expect(res.send).toHaveBeenCalledTimes(1)
         expect(helpers.decrypt(res.send.mock.calls[0][0].accessToken)).toBe(mockAccessToken)
-        expect(res.send.mock.calls[0][0].user.login).toBe(mockUser.login)
+        expect(res.send.mock.calls[0][0].user)
+          .toEqual(new User('gitlab', mockUser.username, mockUser.email, mockUser.name))
       })
     })
 

@@ -517,6 +517,7 @@ describe('GitLab interface', () => {
     test('returns the current authenticated user', () => {
       const mockUser = {
         username: 'johndoe',
+        email: 'johndoe@test.com',
         name: 'John Doe'
       }
 
@@ -536,7 +537,7 @@ describe('GitLab interface', () => {
       const gitlab = new GitLab(req.params)
 
       return gitlab.getCurrentUser().then((user) => {
-        expect(user).toEqual(new User('gitlab', 'johndoe', 'John Doe'))
+        expect(user).toEqual(new User('gitlab', 'johndoe', 'johndoe@test.com', 'John Doe'))
       })
     })
 

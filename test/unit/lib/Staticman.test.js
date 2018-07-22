@@ -495,7 +495,7 @@ describe('Staticman interface', () => {
       staticman.options = options
       staticman.siteConfig = mockConfig
 
-      const mockUser = new User('github', 'johndoe', 'John Doe')
+      const mockUser = new User('github', 'johndoe', 'johndoe@test.com', 'John Doe')
 
       return staticman._checkAuth().then((result) => {
         expect(mockGetCurrentUser).toHaveBeenCalledTimes(1)
@@ -529,7 +529,7 @@ describe('Staticman interface', () => {
       staticman.options = options
       staticman.siteConfig = mockConfig
 
-      const mockUser = new User('github', 'johndoe', 'John Doe')
+      const mockUser = new User('github', 'johndoe', 'johndoe@test.com', 'John Doe')
 
       return staticman._checkAuth().then((result) => {
         expect(mockGetCurrentUser).toHaveBeenCalledTimes(1)
@@ -1283,7 +1283,7 @@ describe('Staticman interface', () => {
     )
 
     test('authenticates user before creating file', () => {
-      const mockUser = new User('github', 'johndoe', 'John Doe')
+      const mockUser = new User('github', 'johndoe', 'johndoe@test.com', 'John Doe')
       const mockGetCurrentUser = jest.fn(() => Promise.resolve(mockUser))
 
       jest.mock('../../../lib/GitHub', () => {
