@@ -83,20 +83,17 @@ const schema = {
     clientId: {
       doc: 'The client ID to the GitHub Application used for GitHub OAuth.',
       format: 'EncryptedString',
-      default: null,
-      env: 'GITHUB_AUTH_CLIENT_ID'
+      default: null
     },
     clientSecret: {
       doc: 'The client secret to the GitHub Application used for GitHub OAuth.',
       format: 'EncryptedString',
-      default: null,
-      env: 'GITHUB_AUTH_CLIENT_SECRET'
+      default: null
     },
     redirectUri: {
       doc: 'The URL to redirect to after authenticating with GitHub.',
       format: String,
-      default: '',
-      env: 'GITHUB_AUTH_REDIRECT_URI'
+      default: ''
     },
     required: {
       doc: 'Whether GitHub Auth is required for an entry to be accepted. This is only included for backwards compatibility with the v2 API. For the v3 API, please use the `auth.required` option instead.',
@@ -108,20 +105,17 @@ const schema = {
     clientId: {
       doc: 'The client ID to the GitLab Application used for GitLab OAuth.',
       format: 'EncryptedString',
-      default: null,
-      env: 'GITLAB_AUTH_CLIENT_ID'
+      default: null
     },
     clientSecret: {
       doc: 'The client secret to the GitLab Application used for GitLab OAuth.',
       format: 'EncryptedString',
-      default: null,
-      env: 'GITLAB_AUTH_CLIENT_SECRET'
+      default: null
     },
     redirectUri: {
       doc: 'The URL to redirect to after authenticating with GitLab.',
       format: String,
-      default: '',
-      env: 'GITLAB_AUTH_REDIRECT_URI'
+      default: ''
     }
   },
   moderation: {
