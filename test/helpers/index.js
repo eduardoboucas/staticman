@@ -1,4 +1,5 @@
 const CatchAllApiMock = require('./CatchAllApiMock')
+const cloneDeep = require('lodash/cloneDeep')
 const config = require('./../../config')
 const objectPath = require('object-path')
 const markdownTable = require('markdown-table')
@@ -33,6 +34,9 @@ const parameters = {
   version: '3'
 }
 
+const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
+const siteConfig = SiteConfig(parsedConfig.comments, rsa)
+
 module.exports.baseUrl = ''
 
 module.exports.decrypt = text => {
@@ -48,13 +52,10 @@ module.exports.getCatchAllApiMock = callback => {
 }
 
 module.exports.getConfig = () => {
-  const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
+  const config = cloneDeep(siteConfig)
+  config.getRaw = key => objectPath.get(parsedConfig, `comments.${key}`)
 
-  const siteConfig = SiteConfig(parsedConfig.comments, rsa)
-
-  siteConfig.getRaw = key => objectPath.get(parsedConfig, `comments.${key}`)
-
-  return siteConfig
+  return config
 }
 
 module.exports.getConfigObject = () => {
