@@ -97,6 +97,11 @@ const schema = {
       format: String,
       default: '',
       env: 'GITHUB_AUTH_REDIRECT_URI'
+    },
+    required: {
+      doc: 'Whether GitHub Auth is required for an entry to be accepted. This is only included for backwards compatibility with the v2 API. For the v3 API, please use the `auth.required` option instead.',
+      format: Boolean,
+      default: false
     }
   },
   gitlabAuth: {
