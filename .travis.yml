@@ -5,4 +5,4 @@ cache:
 notifications:
   email: false
 node_js:
-- '6'
+- '8.11.3'
