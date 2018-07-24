@@ -500,7 +500,7 @@ describe('Process controller', () => {
         errorHandler.getErrorCode(data.err._smErrorCode)
       )
       expect(res.status.mock.calls.length).toBe(1)
-      expect(res.status.mock.calls[0][0]).toBe(404)
+      expect(res.status.mock.calls[0][0]).toBe(400)
     })
   })
 })
