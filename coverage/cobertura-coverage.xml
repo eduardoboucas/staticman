@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <!DOCTYPE coverage SYSTEM "http://cobertura.sourceforge.net/xml/coverage-04.dtd">
-<coverage lines-valid="786" lines-covered="686" line-rate="0.8728" branches-valid="360" branches-covered="278" branch-rate="0.7722" timestamp="1532282741852" complexity="0" version="0.1">
+<coverage lines-valid="786" lines-covered="686" line-rate="0.8728" branches-valid="360" branches-covered="278" branch-rate="0.7722" timestamp="1534078032699" complexity="0" version="0.1">
   <sources>
     <source>/home/nick/Development/Javascript/staticman</source>
   </sources>
@@ -191,34 +191,34 @@
           <methods>
             <method name="(anonymous_0)" hits="15" signature="()V">
               <lines>
-                <line number="195" hits="15"/>
+                <line number="189" hits="15"/>
               </lines>
             </method>
             <method name="(anonymous_1)" hits="105" signature="()V">
               <lines>
-                <line number="198" hits="105"/>
+                <line number="192" hits="105"/>
               </lines>
             </method>
             <method name="(anonymous_2)" hits="85" signature="()V">
               <lines>
-                <line number="199" hits="85"/>
+                <line number="193" hits="85"/>
               </lines>
             </method>
           </methods>
           <lines>
             <line number="3" hits="84" branch="false"/>
             <line number="5" hits="84" branch="false"/>
-            <line number="195" hits="84" branch="false"/>
-            <line number="196" hits="15" branch="false"/>
-            <line number="198" hits="105" branch="false"/>
-            <line number="200" hits="85" branch="false"/>
+            <line number="189" hits="84" branch="false"/>
+            <line number="190" hits="15" branch="false"/>
+            <line number="192" hits="105" branch="false"/>
+            <line number="194" hits="85" branch="false"/>
+            <line number="198" hits="15" branch="false"/>
+            <line number="200" hits="15" branch="false"/>
+            <line number="201" hits="15" branch="false"/>
+            <line number="202" hits="15" branch="false"/>
             <line number="204" hits="15" branch="false"/>
-            <line number="206" hits="15" branch="false"/>
-            <line number="207" hits="15" branch="false"/>
-            <line number="208" hits="15" branch="false"/>
-            <line number="210" hits="15" branch="false"/>
-            <line number="212" hits="0" branch="false"/>
-            <line number="216" hits="84" branch="false"/>
+            <line number="206" hits="0" branch="false"/>
+            <line number="210" hits="84" branch="false"/>
           </lines>
         </class>
       </classes>
