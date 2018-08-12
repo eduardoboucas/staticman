@@ -7,7 +7,7 @@ const path = require('path')
 const opts = {
   badgeFileName: 'coverage',
   destinationDir: __dirname,
-  istanbulReportFile: path.resolve(__dirname + '/../../coverage', 'cobertura-coverage.xml'),
+  istanbulReportFile: path.resolve(__dirname, '../../coverage', 'cobertura-coverage.xml'),
   thresholds: {
     excellent: 90, // overall percent >= excellent, green badge
     good: 60 // overall percent < excellent and >= good, yellow badge
@@ -21,16 +21,18 @@ coberturaBadger(opts, function parsingResults(err, badgeStatus) {
     console.log('An error occurred: ' + err.message)
   }
 
-  const readme = path.resolve(__dirname + '/../../README.md')
+  const readme = path.resolve(__dirname, '../../README.md')
   const badgeUrl = badgeStatus.url // e.g. http://img.shields.io/badge/coverage-60%-yellow.svg
 
   // open the README.md and add this url
-  fs.readFile(readme, {encoding: 'utf-8'}, function (err, body) {
-    body = body.replace(/(!\[coverage\]\()(.+?)(\))/g, function(whole, a, b, c) {
-      return a + badgeUrl
+  fs.readFile(readme, {encoding: 'utf-8'}, (err, body) => {
+    if (err) console.log(err.toString())
+
+    body = body.replace(/(!\[coverage\]\()(.+?)(\))/g, (whole, a, b, c) => {
+      return a + badgeUrl + c
     })
 
-    fs.writeFile(readme, body, {encoding: 'utf-8'}, function (err) {
+    fs.writeFile(readme, body, {encoding: 'utf-8'}, (err) => {
       if (err) console.log(err.toString())
 
       console.log('Coverage badge successfully added to ' + readme)

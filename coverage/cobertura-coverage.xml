@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <!DOCTYPE coverage SYSTEM "http://cobertura.sourceforge.net/xml/coverage-04.dtd">
-<coverage lines-valid="786" lines-covered="686" line-rate="0.8728" branches-valid="360" branches-covered="278" branch-rate="0.7722" timestamp="1534078032699" complexity="0" version="0.1">
+<coverage lines-valid="786" lines-covered="686" line-rate="0.8728" branches-valid="360" branches-covered="278" branch-rate="0.7722" timestamp="1534078804178" complexity="0" version="0.1">
   <sources>
     <source>/home/nick/Development/Javascript/staticman</source>
   </sources>
