@@ -1,8 +1,7 @@
 'use strict'
 
-const path = require('path')
-const config = require(path.join(__dirname, '/../config'))
-const GitHub = require(path.join(__dirname, '/../lib/GitHub'))
+const config = require('../config')
+const GitHub = require('../lib/GitHub')
 const Staticman = require('../lib/Staticman')
 
 module.exports = (repo, data) => {
@@ -14,45 +13,39 @@ module.exports = (repo, data) => {
     return
   }
 
-  const github = new GitHub()
+  const github = new GitHub({
+    username: data.repository.owner.login,
+    repository: data.repository.name,
+    token: config.get('githubToken')
+  })
 
-  github.authenticateWithToken(config.get('githubToken'))
-
-  return github.api.pullRequests.get({
-    user: data.repository.owner.login,
-    repo: data.repository.name,
-    number: data.number
-  }).then(response => {
-    if (response.head.ref.indexOf('staticman_')) {
+  return github.getReview(data.number).then((review) => {
+    if (review.sourceBranch.indexOf('staticman_')) {
       return null
     }
 
-    if (response.merged) {
-      const bodyMatch = response.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
+    if (review.state !== 'merged' && review.state !== 'closed') {
+      return null
+    }
+
+    if (review.state === 'merged') {
+      const bodyMatch = review.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
 
       if (bodyMatch && (bodyMatch.length === 2)) {
         try {
           const parsedBody = JSON.parse(bodyMatch[1])
           const staticman = new Staticman(parsedBody.parameters)
 
-          staticman.authenticate()
           staticman.setConfigPath(parsedBody.configPath)
-          staticman.processMerge(parsedBody.fields, parsedBody.options).catch(err => {
-            return Promise.reject(err)
-          })
+          staticman.processMerge(parsedBody.fields, parsedBody.options)
+            .catch(err => Promise.reject(err))
         } catch (err) {
           return Promise.reject(err)
         }
       }
     }
 
-    if (response.state === 'closed') {
-      return github.api.gitdata.deleteReference({
-        user: data.repository.owner.login,
-        repo: data.repository.name,
-        ref: 'heads/' + response.head.ref
-      })
-    }
+    return github.deleteBranch(review.sourceBranch)
   }).then(response => {
     if (ua) {
       ua.event('Hooks', 'Delete branch').send()

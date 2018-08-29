@@ -1,7 +1,6 @@
 'use strict'
 
 const convict = require('convict')
-const logger = require('./lib/Logger')
 
 const schema = {
   allowedFields: {
@@ -42,6 +41,13 @@ const schema = {
       default: 'comment'
     }
   },
+  auth: {
+    required: {
+      doc: 'Whether authentication is required for an entry to be accepted.',
+      format: Boolean,
+      default: false
+    }
+  },
   branch: {
     doc: 'Name of the branch being used within the GitHub repository.',
     format: String,
@@ -75,21 +81,41 @@ const schema = {
   },
   githubAuth: {
     clientId: {
-      doc: 'The client ID to the GitHub Application used for GitHub authentication.',
+      doc: 'The client ID to the GitHub Application used for GitHub OAuth.',
       format: 'EncryptedString',
-      default: null,
-      env: 'GITHUB_AUTH_CLIENT_ID'
+      default: null
     },
     clientSecret: {
-      doc: 'The client secret to the GitHub Application used for GitHub authentication.',
+      doc: 'The client secret to the GitHub Application used for GitHub OAuth.',
       format: 'EncryptedString',
-      default: null,
-      env: 'GITHUB_AUTH_CLIENT_SECRET'
+      default: null
+    },
+    redirectUri: {
+      doc: 'The URL to redirect to after authenticating with GitHub.',
+      format: String,
+      default: ''
     },
     required: {
-      doc: 'Whether GitHub Auth is required for an entry to be accepted.',
+      doc: 'Whether GitHub Auth is required for an entry to be accepted. This is only included for backwards compatibility with the v2 API. For the v3 API, please use the `auth.required` option instead.',
       format: Boolean,
       default: false
+    }
+  },
+  gitlabAuth: {
+    clientId: {
+      doc: 'The client ID to the GitLab Application used for GitLab OAuth.',
+      format: 'EncryptedString',
+      default: null
+    },
+    clientSecret: {
+      doc: 'The client secret to the GitLab Application used for GitLab OAuth.',
+      format: 'EncryptedString',
+      default: null
+    },
+    redirectUri: {
+      doc: 'The URL to redirect to after authenticating with GitLab.',
+      format: String,
+      default: ''
     }
   },
   moderation: {
@@ -174,17 +200,6 @@ module.exports = (data, rsa) => {
   try {
     config.load(data)
     config.validate()
-
-    // After loading config, check what `generatedFields` looks like - #176
-    logger.info(
-      JSON.stringify({
-        stage: 'config.load',
-        generatedFields: config.get('generatedFields')
-      }),
-      null,
-      2
-    )
-
 
     return config
   } catch (e) {

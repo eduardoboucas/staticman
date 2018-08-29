@@ -1,9 +1,6 @@
-const config = require('./../../../config')
 const helpers = require('./../../helpers')
-const githubToken = config.get('githubToken')
 const sampleData = require('./../../helpers/sampleData')
 
-let catchAllMock
 let mockAuthenticate
 let mockSetConfigPathFn
 let mockProcessMergeFn
@@ -27,42 +24,47 @@ beforeEach(() => {
   res = helpers.getMockResponse()
 
   jest.resetModules()
-  jest.unmock('github')  
+  jest.unmock('@octokit/rest')
 })
 
 describe('HandlePR controller', () => {
   test('ignores pull requests from branches not prefixed with `staticman_`', () => {
     const pr = {
       number: 123,
+      title: 'Some random PR',
+      body: 'Unrelated review body',
       head: {
         ref: 'some-other-branch'
       },
+      base: {
+        ref: 'master'
+      },
+      merged: false,
       repository: {
         name: req.params.repository,
         owner: {
           login: req.params.username
         }
-      }
+      },
+      state: 'open'
     }
-    const mockPullRequestsGet = jest.fn(() => Promise.resolve(pr))
+    const mockPullRequestsGet = jest.fn(() => Promise.resolve({data: pr}))
 
-    jest.mock('github', () => {
-      const GithubApi = function () {}
-
-      GithubApi.prototype.authenticate = jest.fn()
-      GithubApi.prototype.pullRequests = {
-        get: mockPullRequestsGet
-      }
-
-      return GithubApi
-    })
+    jest.mock('@octokit/rest', () =>
+      _ => ({
+        authenticate: jest.fn(),
+        pullRequests: {
+          get: mockPullRequestsGet
+        }
+      })
+    )
 
     const handlePR = require('./../../../controllers/handlePR')
 
     return handlePR(req.params.repository, pr).then(response => {
       expect(mockPullRequestsGet).toHaveBeenCalledTimes(1)
       expect(mockPullRequestsGet.mock.calls[0][0]).toEqual({
-        user: req.params.username,
+        owner: req.params.username,
         repo: req.params.repository,
         number: pr.number
       })
@@ -74,9 +76,13 @@ describe('HandlePR controller', () => {
     test('do nothing if PR body doesn\'t match template', () => {
       const pr = {
         number: 123,
+        title: 'Add Staticman data',
         body: sampleData.prBody2,
         head: {
           ref: 'staticman_1234567'
+        },
+        base: {
+          ref: 'master'
         },
         merged: true,
         repository: {
@@ -88,21 +94,19 @@ describe('HandlePR controller', () => {
         state: 'open'
       }
       const mockDeleteReference = jest.fn()
-      const mockPullRequestsGet = jest.fn(() => Promise.resolve(pr))
+      const mockPullRequestsGet = jest.fn(() => Promise.resolve({data: pr}))
 
-      jest.mock('github', () => {
-        const GithubApi = function () {}
-
-        GithubApi.prototype.authenticate = jest.fn()
-        GithubApi.prototype.pullRequests = {
-          get: mockPullRequestsGet
-        }
-        GithubApi.prototype.gitdata = {
-          deleteReference: mockDeleteReference
-        }
-
-        return GithubApi
-      })
+      jest.mock('@octokit/rest', () =>
+        _ => ({
+          authenticate: jest.fn(),
+          gitdata: {
+            deleteReference: mockDeleteReference
+          },
+          pullRequests: {
+            get: mockPullRequestsGet
+          }
+        })
+      )
 
       const handlePR = require('./../../../controllers/handlePR')
 
@@ -115,9 +119,13 @@ describe('HandlePR controller', () => {
     test('abort and return an error if `processMerge` fails', () => {
       const pr = {
         number: 123,
+        title: 'Add Staticman data',
         body: sampleData.prBody1,
         head: {
           ref: 'staticman_1234567'
+        },
+        base: {
+          ref: 'master'
         },
         merged: true,
         repository: {
@@ -128,18 +136,18 @@ describe('HandlePR controller', () => {
         },
         state: 'closed'
       }
-      const mockPullRequestsGet = jest.fn(() => Promise.resolve(pr))
+      const mockPullRequestsGet = jest.fn(() => Promise.resolve({
+        data: pr
+      }))
 
-      jest.mock('github', () => {
-        const GithubApi = function () {}
-
-        GithubApi.prototype.authenticate = jest.fn()
-        GithubApi.prototype.pullRequests = {
-          get: mockPullRequestsGet
-        }
-
-        return GithubApi
-      })
+      jest.mock('@octokit/rest', () =>
+        _ => ({
+          authenticate: jest.fn(),
+          pullRequests: {
+            get: mockPullRequestsGet
+          }
+        })
+      )
 
       const handlePR = require('./../../../controllers/handlePR')
       const errorMessage = 'some error'
@@ -159,9 +167,13 @@ describe('HandlePR controller', () => {
     test('delete the branch if the pull request is closed', () => {
       const pr = {
         number: 123,
+        title: 'Add Staticman data',
         body: sampleData.prBody1,
         head: {
           ref: 'staticman_1234567'
+        },
+        base: {
+          ref: 'master'
         },
         merged: true,
         repository: {
@@ -173,40 +185,38 @@ describe('HandlePR controller', () => {
         state: 'closed'
       }
       const mockDeleteReference = jest.fn()
-      const mockPullRequestsGet = jest.fn(() => Promise.resolve(pr))
+      const mockPullRequestsGet = jest.fn(() => Promise.resolve({data: pr}))
 
-      jest.mock('github', () => {
-        const GithubApi = function () {}
-
-        GithubApi.prototype.authenticate = jest.fn()
-        GithubApi.prototype.pullRequests = {
-          get: mockPullRequestsGet
-        }
-        GithubApi.prototype.gitdata = {
-          deleteReference: mockDeleteReference
-        }
-
-        return GithubApi
-      })
+      jest.mock('@octokit/rest', () =>
+        _ => ({
+          authenticate: jest.fn(),
+          gitdata: {
+            deleteReference: mockDeleteReference
+          },
+          pullRequests: {
+            get: mockPullRequestsGet
+          }
+        })
+      )
 
       const handlePR = require('./../../../controllers/handlePR')
 
       return handlePR(req.params.repository, pr).then(response => {
         expect(mockPullRequestsGet).toHaveBeenCalledTimes(1)
         expect(mockPullRequestsGet.mock.calls[0][0]).toEqual({
-          user: req.params.username,
+          owner: req.params.username,
           repo: req.params.repository,
           number: pr.number
-        })        
+        })
         expect(mockDeleteReference).toHaveBeenCalledTimes(1)
         expect(mockDeleteReference.mock.calls[0][0]).toEqual({
-          user: req.params.username,
+          owner: req.params.username,
           repo: req.params.repository,
           ref: `heads/${pr.head.ref}`
         })
         expect(mockSetConfigPathFn.mock.calls.length).toBe(1)
         expect(mockProcessMergeFn.mock.calls.length).toBe(1)
       })
-    }) 
+    })
   })
 })

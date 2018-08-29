@@ -1,7 +1,4 @@
-const config = require('./../../../config')
 const helpers = require('./../../helpers')
-const githubToken = config.get('githubToken')
-const nock = require('nock')
 
 let req, res
 
@@ -10,33 +7,33 @@ beforeEach(() => {
   res = helpers.getMockResponse()
 
   jest.resetModules()
-  jest.unmock('github')
+  jest.unmock('@octokit/rest')
 })
 
 describe('Connect controller', () => {
   test('accepts the invitation if one is found and replies with "OK!"', () => {
     const invitationId = 123
     const mockAcceptRepoInvite = jest.fn(() => Promise.resolve())
-    const mockGetRepoInvites = jest.fn(() => Promise.resolve([
-      {
-        id: invitationId,
-        repository: {
-          full_name: `${req.params.username}/${req.params.repository}`
+    const mockGetRepoInvites = jest.fn(() => Promise.resolve({
+      data: [
+        {
+          id: invitationId,
+          repository: {
+            full_name: `${req.params.username}/${req.params.repository}`
+          }
         }
-      }
-    ]))
+      ]
+    }))
 
-    jest.mock('github', () => {
-      const GithubApi = function () {}
-
-      GithubApi.prototype.authenticate = jest.fn()
-      GithubApi.prototype.users = {
-        acceptRepoInvite: mockAcceptRepoInvite,
-        getRepoInvites: mockGetRepoInvites
-      }
-
-      return GithubApi
-    })
+    jest.mock('@octokit/rest', () =>
+      _ => ({
+        authenticate: jest.fn(),
+        users: {
+          acceptRepoInvite: mockAcceptRepoInvite,
+          getRepoInvites: mockGetRepoInvites
+        }
+      })
+    )
 
     const connect = require('./../../../controllers/connect')
 
@@ -50,26 +47,26 @@ describe('Connect controller', () => {
   test('returns a 404 and an error message if a matching invitation is not found', () => {
     const invitationId = 123
     const mockAcceptRepoInvite = jest.fn(() => Promise.resolve())
-    const mockGetRepoInvites = jest.fn(() => Promise.resolve([
-      {
-        id: invitationId,
-        repository: {
-          full_name: `${req.params.username}/anotherrepo`
+    const mockGetRepoInvites = jest.fn(() => Promise.resolve({
+      data: [
+        {
+          id: invitationId,
+          repository: {
+            full_name: `${req.params.username}/anotherrepo`
+          }
         }
-      }
-    ]))
+      ]
+    }))
 
-    jest.mock('github', () => {
-      const GithubApi = function () {}
-
-      GithubApi.prototype.authenticate = jest.fn()
-      GithubApi.prototype.users = {
-        acceptRepoInvite: mockAcceptRepoInvite,
-        getRepoInvites: mockGetRepoInvites
-      }
-
-      return GithubApi
-    })
+    jest.mock('@octokit/rest', () =>
+      _ => ({
+        authenticate: jest.fn(),
+        users: {
+          acceptRepoInvite: mockAcceptRepoInvite,
+          getRepoInvites: mockGetRepoInvites
+        }
+      })
+    )
 
     const connect = require('./../../../controllers/connect')
 
@@ -82,23 +79,22 @@ describe('Connect controller', () => {
   })
 
   test('returns a 500 and an error message if the response from GitHub is invalid', () => {
-    const invitationId = 123
     const mockAcceptRepoInvite = jest.fn(() => Promise.resolve())
     const mockGetRepoInvites = jest.fn(() => Promise.resolve({
-      invalidProperty: 'invalidValue'
+      data: {
+        invalidProperty: 'invalidValue'
+      }
     }))
 
-    jest.mock('github', () => {
-      const GithubApi = function () {}
-
-      GithubApi.prototype.authenticate = jest.fn()
-      GithubApi.prototype.users = {
-        acceptRepoInvite: mockAcceptRepoInvite,
-        getRepoInvites: mockGetRepoInvites
-      }
-
-      return GithubApi
-    })
+    jest.mock('@octokit/rest', () =>
+      _ => ({
+        authenticate: jest.fn(),
+        users: {
+          acceptRepoInvite: mockAcceptRepoInvite,
+          getRepoInvites: mockGetRepoInvites
+        }
+      })
+    )
 
     const connect = require('./../../../controllers/connect')
 

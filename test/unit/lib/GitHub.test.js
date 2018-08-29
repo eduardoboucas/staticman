@@ -1,16 +1,17 @@
-const config = require('./../../../config')
 const mockHelpers = require('./../../helpers')
-const nock = require('nock')
 const sampleData = require('./../../helpers/sampleData')
+const User = require('../../../lib/models/User')
 const yaml = require('js-yaml')
 
-let req, res
+let req
+
+const btoa = contents => Buffer.from(contents).toString('base64')
 
 beforeEach(() => {
   jest.resetModules()
 
   req = mockHelpers.getMockRequest()
-  res = mockHelpers.getMockResponse()
+  req.params.token = 'test-token'
 })
 
 describe('GitHub interface', () => {
@@ -22,50 +23,43 @@ describe('GitHub interface', () => {
   })
 
   test('authenticates with the GitHub API using a personal access token', () => {
-    const token = config.get('githubToken')
+    jest.mock('@octokit/rest', () =>
+      _ => ({
+        authenticate: jest.fn()
+      })
+    )
+
     const GitHub = require('./../../../lib/GitHub')
     const githubInstance = new GitHub(req.params)
-    const spy = jest.spyOn(githubInstance.api, 'authenticate')
 
-    githubInstance.authenticateWithToken(token)
-
-    expect(spy.mock.calls[0][0]).toEqual({
-      type: 'oauth',
-      token
+    expect(githubInstance.api.authenticate.mock.calls[0][0]).toEqual({
+      type: 'token',
+      token: req.params.token
     })
   })
 
-  test('authenticates with the GitHub API using a temporary access code', () => {
-    const accessToken = 'asdfghjkl'
-    const clientId = '123456789'
-    const clientSecret = '1q2w3e4r5t6y7u8i9o'
-    const code = 'abcdefghijklmnopqrst'
-
-    nock(/github\.com/)
-      .post('/login/oauth/access_token')
-      .query({
-        client_id: clientId,
-        client_secret: clientSecret,
-        code
+  test('authenticates with the GitHub API using an OAuth token', () => {
+    jest.mock('@octokit/rest', () =>
+      _ => ({
+        authenticate: jest.fn()
       })
-      .reply(200, {
-        access_token: accessToken
-      })
+    )
 
     const GitHub = require('./../../../lib/GitHub')
-    const githubInstance = new GitHub(req.params)
-    const spy = jest.spyOn(githubInstance.api, 'authenticate')
 
-    return githubInstance.authenticateWithCode({
-      clientId,
-      clientSecret,
-      code
-    }).then(() => {
-      expect(spy.mock.calls[0][0]).toEqual({
-        type: 'token',
-        token: accessToken
-      })
+    const oauthToken = 'test-oauth-token'
+    const githubInstance = new GitHub(Object.assign({}, req.params, {oauthToken}))
+
+    expect(githubInstance.api.authenticate.mock.calls[0][0]).toEqual({
+      type: 'oauth',
+      token: oauthToken
     })
+  })
+
+  test('throws error if no personal access token or OAuth token is provided', () => {
+    const GitHub = require('./../../../lib/GitHub')
+
+    expect(() => new GitHub({})).toThrowError('Require an `oauthToken` or `token` option')
   })
 
   describe('readFile', () => {
@@ -73,26 +67,26 @@ describe('GitHub interface', () => {
       const fileContents = 'This is a text file!'
       const filePath = 'path/to/file.txt'
       const mockReposGetContent = jest.fn(() => Promise.resolve({
-        content: btoa(fileContents)
+        data: {
+          content: btoa(fileContents)
+        }
       }))
 
-      jest.mock('github', () => {
-        const GithubApi = function () {}
-
-        GithubApi.prototype.authenticate = jest.fn()
-        GithubApi.prototype.repos = {
-          getContent: mockReposGetContent
-        }
-
-        return GithubApi
-      })
+      jest.mock('@octokit/rest', () =>
+        _ => ({
+          authenticate: jest.fn(),
+          repos: {
+            getContent: mockReposGetContent
+          }
+        })
+      )
 
       const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
-      
+
       return githubInstance.readFile(filePath).then(contents => {
         expect(mockReposGetContent.mock.calls[0][0]).toEqual({
-          user: req.params.username,
+          owner: req.params.username,
           repo: req.params.repository,
           path: filePath,
           ref: req.params.branch
@@ -102,25 +96,23 @@ describe('GitHub interface', () => {
 
     test('returns an error if GitHub API call errors', () => {
       const filePath = 'path/to/file.yml'
-      const mockReposGetContent = jest.fn(() => Promise.reject())
+      const mockReposGetContent = jest.fn(() => Promise.reject()) // eslint-disable-line prefer-promise-reject-errors
 
-      jest.mock('github', () => {
-        const GithubApi = function () {}
-
-        GithubApi.prototype.authenticate = jest.fn()
-        GithubApi.prototype.repos = {
-          getContent: mockReposGetContent
-        }
-
-        return GithubApi
-      })
+      jest.mock('@octokit/rest', () =>
+        _ => ({
+          authenticate: jest.fn(),
+          repos: {
+            getContent: mockReposGetContent
+          }
+        })
+      )
 
       const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
 
       return githubInstance.readFile(filePath).catch(err => {
         expect(mockReposGetContent.mock.calls[0][0]).toEqual({
-          user: req.params.username,
+          owner: req.params.username,
           repo: req.params.repository,
           path: filePath,
           ref: req.params.branch
@@ -138,26 +130,26 @@ describe('GitHub interface', () => {
       `
       const filePath = 'path/to/file.yml'
       const mockReposGetContent = jest.fn(() => Promise.resolve({
-        content: btoa(fileContents)
+        data: {
+          content: btoa(fileContents)
+        }
       }))
 
-      jest.mock('github', () => {
-        const GithubApi = function () {}
-
-        GithubApi.prototype.authenticate = jest.fn()
-        GithubApi.prototype.repos = {
-          getContent: mockReposGetContent
-        }
-
-        return GithubApi
-      })
+      jest.mock('@octokit/rest', () =>
+        _ => ({
+          authenticate: jest.fn(),
+          repos: {
+            getContent: mockReposGetContent
+          }
+        })
+      )
 
       const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
 
       return githubInstance.readFile(filePath).catch(err => {
         expect(mockReposGetContent.mock.calls[0][0]).toEqual({
-          user: req.params.username,
+          owner: req.params.username,
           repo: req.params.repository,
           path: filePath,
           ref: req.params.branch
@@ -171,26 +163,26 @@ describe('GitHub interface', () => {
       const filePath = 'path/to/file.yml'
       const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
       const mockReposGetContent = jest.fn(() => Promise.resolve({
-        content: btoa(sampleData.config1)
+        data: {
+          content: btoa(sampleData.config1)
+        }
       }))
 
-      jest.mock('github', () => {
-        const GithubApi = function () {}
-
-        GithubApi.prototype.authenticate = jest.fn()
-        GithubApi.prototype.repos = {
-          getContent: mockReposGetContent
-        }
-
-        return GithubApi
-      })
+      jest.mock('@octokit/rest', () =>
+        _ => ({
+          authenticate: jest.fn(),
+          repos: {
+            getContent: mockReposGetContent
+          }
+        })
+      )
 
       const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
 
       return githubInstance.readFile(filePath).then(contents => {
         expect(mockReposGetContent.mock.calls[0][0]).toEqual({
-          user: req.params.username,
+          owner: req.params.username,
           repo: req.params.repository,
           path: filePath,
           ref: req.params.branch
@@ -205,25 +197,25 @@ describe('GitHub interface', () => {
         content: btoa(sampleData.config1)
       }
       const filePath = 'path/to/file.yml'
-      const mockReposGetContent = jest.fn(() => Promise.resolve(fileContents))
+      const mockReposGetContent = jest.fn(() => Promise.resolve({
+        data: fileContents
+      }))
 
-      jest.mock('github', () => {
-        const GithubApi = function () {}
-
-        GithubApi.prototype.authenticate = jest.fn()
-        GithubApi.prototype.repos = {
-          getContent: mockReposGetContent
-        }
-
-        return GithubApi
-      })
+      jest.mock('@octokit/rest', () =>
+        _ => ({
+          authenticate: jest.fn(),
+          repos: {
+            getContent: mockReposGetContent
+          }
+        })
+      )
 
       const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
 
       return githubInstance.readFile(filePath, true).then(response => {
         expect(mockReposGetContent.mock.calls[0][0]).toEqual({
-          user: req.params.username,
+          owner: req.params.username,
           repo: req.params.repository,
           path: filePath,
           ref: req.params.branch
@@ -231,32 +223,32 @@ describe('GitHub interface', () => {
         expect(response.content).toEqual(parsedConfig)
         expect(response.file).toEqual(fileContents)
       })
-    })  
+    })
 
     test('reads a JSON file and returns its parsed contents', () => {
       const filePath = 'path/to/file.json'
       const parsedConfig = yaml.safeLoad(sampleData.config2, 'utf8')
       const mockReposGetContent = jest.fn(() => Promise.resolve({
-        content: btoa(sampleData.config2)
+        data: {
+          content: btoa(sampleData.config2)
+        }
       }))
 
-      jest.mock('github', () => {
-        const GithubApi = function () {}
-
-        GithubApi.prototype.authenticate = jest.fn()
-        GithubApi.prototype.repos = {
-          getContent: mockReposGetContent
-        }
-
-        return GithubApi
-      })
+      jest.mock('@octokit/rest', () =>
+        _ => ({
+          authenticate: jest.fn(),
+          repos: {
+            getContent: mockReposGetContent
+          }
+        })
+      )
 
       const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
-      
+
       return githubInstance.readFile(filePath).then(contents => {
         expect(mockReposGetContent.mock.calls[0][0]).toEqual({
-          user: req.params.username,
+          owner: req.params.username,
           repo: req.params.repository,
           path: filePath,
           ref: req.params.branch
@@ -271,25 +263,25 @@ describe('GitHub interface', () => {
       }
       const filePath = 'path/to/file.json'
       const parsedConfig = yaml.safeLoad(sampleData.config2, 'utf8')
-      const mockReposGetContent = jest.fn(() => Promise.resolve(fileContents))
+      const mockReposGetContent = jest.fn(() => Promise.resolve({
+        data: fileContents
+      }))
 
-      jest.mock('github', () => {
-        const GithubApi = function () {}
-
-        GithubApi.prototype.authenticate = jest.fn()
-        GithubApi.prototype.repos = {
-          getContent: mockReposGetContent
-        }
-
-        return GithubApi
-      })
+      jest.mock('@octokit/rest', () =>
+        _ => ({
+          authenticate: jest.fn(),
+          repos: {
+            getContent: mockReposGetContent
+          }
+        })
+      )
 
       const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
 
       return githubInstance.readFile(filePath, true).then(response => {
         expect(mockReposGetContent.mock.calls[0][0]).toEqual({
-          user: req.params.username,
+          owner: req.params.username,
           repo: req.params.repository,
           path: filePath,
           ref: req.params.branch
@@ -307,62 +299,22 @@ describe('GitHub interface', () => {
         commitTitle: 'Adds a new file',
         content: 'This is a new file',
         path: 'path/to/file.txt'
-      }      
-      const mockReposCreateFile = jest.fn(() => Promise.resolve())
-
-      jest.mock('github', () => {
-        const GithubApi = function () {}
-
-        GithubApi.prototype.authenticate = jest.fn()
-        GithubApi.prototype.repos = {
-          createFile: mockReposCreateFile
-        }
-
-        return GithubApi
-      })
-
-      const GitHub = require('./../../../lib/GitHub')
-      const githubInstance = new GitHub(req.params)
-
-      return githubInstance.writeFile(
-        options.path,
-        options.content,
-        options.branch,
-        options.commitTitle
-      ).then(response => {    
-        expect(mockReposCreateFile).toHaveBeenCalledTimes(1)
-        expect(mockReposCreateFile.mock.calls[0][0]).toEqual({
-          user: req.params.username,
-          repo: req.params.repository,
-          path: options.path,
-          content: new Buffer(options.content).toString('base64'),
-          message: options.commitTitle,
-          branch: options.branch
-        })
-      })
-    })
-
-    test('creates a file using the branch present in the request, if one is not provided to the method, and the default commit title', () => {
-      const mockReposCreateFile = jest.fn(() => Promise.resolve())
-
-      jest.mock('github', () => {
-        const GithubApi = function () {}
-
-        GithubApi.prototype.authenticate = jest.fn()
-        GithubApi.prototype.repos = {
-          createFile: mockReposCreateFile
-        }
-
-        return GithubApi
-      })
-
-      const GitHub = require('./../../../lib/GitHub')
-      const githubInstance = new GitHub(req.params)
-      const options = {
-        content: 'This is a new file',
-        commitTitle: 'New Staticman data',
-        path: 'path/to/file.txt'
       }
+      const mockReposCreateFile = jest.fn(() => Promise.resolve({
+        data: null
+      }))
+
+      jest.mock('@octokit/rest', () =>
+        _ => ({
+          authenticate: jest.fn(),
+          repos: {
+            createFile: mockReposCreateFile
+          }
+        })
+      )
+
+      const GitHub = require('./../../../lib/GitHub')
+      const githubInstance = new GitHub(req.params)
 
       return githubInstance.writeFile(
         options.path,
@@ -370,11 +322,49 @@ describe('GitHub interface', () => {
         options.branch,
         options.commitTitle
       ).then(response => {
+        expect(mockReposCreateFile).toHaveBeenCalledTimes(1)
         expect(mockReposCreateFile.mock.calls[0][0]).toEqual({
-          user: req.params.username,
+          owner: req.params.username,
           repo: req.params.repository,
           path: options.path,
-          content: new Buffer(options.content).toString('base64'),
+          content: btoa(options.content),
+          message: options.commitTitle,
+          branch: options.branch
+        })
+      })
+    })
+
+    test('creates a file using the branch present in the request, if one is not provided to the method, and the default commit title', () => {
+      const mockReposCreateFile = jest.fn(() => Promise.resolve({
+        data: null
+      }))
+
+      jest.mock('@octokit/rest', () =>
+        _ => ({
+          authenticate: jest.fn(),
+          repos: {
+            createFile: mockReposCreateFile
+          }
+        })
+      )
+
+      const GitHub = require('./../../../lib/GitHub')
+      const githubInstance = new GitHub(req.params)
+      const options = {
+        content: 'This is a new file',
+        commitTitle: 'Add Staticman file',
+        path: 'path/to/file.txt'
+      }
+
+      return githubInstance.writeFile(
+        options.path,
+        options.content
+      ).then(response => {
+        expect(mockReposCreateFile.mock.calls[0][0]).toEqual({
+          owner: req.params.username,
+          repo: req.params.repository,
+          path: options.path,
+          content: btoa(options.content),
           message: options.commitTitle,
           branch: req.params.branch
         })
@@ -382,16 +372,14 @@ describe('GitHub interface', () => {
     })
 
     test('returns an error object if the save operation fails', () => {
-      jest.mock('github', () => {
-        const GithubApi = function () {}
-
-        GithubApi.prototype.authenticate = jest.fn()
-        GithubApi.prototype.repos = {
-          createFile: () => Promise.reject()
-        }
-
-        return GithubApi
-      })
+      jest.mock('@octokit/rest', () =>
+        _ => ({
+          authenticate: jest.fn(),
+          repos: {
+            createFile: () => Promise.reject()
+          }
+        })
+      )
 
       const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
@@ -415,7 +403,7 @@ describe('GitHub interface', () => {
     })
   })
 
-  describe('writeFileAndSendPR', () => {
+  describe('writeFileAndSendReview', () => {
     test('writes a file to a new branch and sends a PR to the base branch provided, using the given title and body for the commit/PR', () => {
       const options = {
         commitBody: 'This is a very cool file indeed...',
@@ -427,39 +415,45 @@ describe('GitHub interface', () => {
         sha: '7fd1a60b01f91b314f59955a4e4d4e80d8edf11d'
       }
       const mockCreatePullRequest = jest.fn(() => Promise.resolve({
-        number: 123
+        data: {
+          number: 123
+        }
       }))
       const mockCreateReference = jest.fn(() => Promise.resolve({
-        ref: `refs/heads/${options.newBranch}`
+        data: {
+          ref: `refs/heads/${options.newBranch}`
+        }
       }))
       const mockGetBranch = jest.fn(() => Promise.resolve({
-        commit: {
-          sha: options.sha
+        data: {
+          commit: {
+            sha: options.sha
+          }
         }
       }))
 
-      jest.mock('github', () => {
-        const GithubApi = function () {}
-
-        GithubApi.prototype.authenticate = jest.fn()
-        GithubApi.prototype.gitdata = {
-          createReference: mockCreateReference
-        }
-        GithubApi.prototype.pullRequests = {
-          create: mockCreatePullRequest
-        }
-        GithubApi.prototype.repos = {
-          createFile: () => Promise.resolve(),
-          getBranch: mockGetBranch
-        }
-
-        return GithubApi
-      })
+      jest.mock('@octokit/rest', () =>
+        _ => ({
+          authenticate: jest.fn(),
+          gitdata: {
+            createReference: mockCreateReference
+          },
+          repos: {
+            createFile: () => Promise.resolve({
+              data: null
+            }),
+            getBranch: mockGetBranch
+          },
+          pullRequests: {
+            create: mockCreatePullRequest
+          }
+        })
+      )
 
       const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
 
-      return githubInstance.writeFileAndSendPR(
+      return githubInstance.writeFileAndSendReview(
         options.path,
         options.content,
         options.newBranch,
@@ -467,7 +461,7 @@ describe('GitHub interface', () => {
         options.commitBody
       ).then(response => {
         expect(mockCreatePullRequest.mock.calls[0][0]).toEqual({
-          user: req.params.username,
+          owner: req.params.username,
           repo: req.params.repository,
           title: options.commitTitle,
           head: options.newBranch,
@@ -475,13 +469,13 @@ describe('GitHub interface', () => {
           body: options.commitBody
         })
         expect(mockCreateReference.mock.calls[0][0]).toEqual({
-          user: req.params.username,
+          owner: req.params.username,
           repo: req.params.repository,
           ref: `refs/heads/${options.newBranch}`,
           sha: options.sha
         })
         expect(mockGetBranch.mock.calls[0][0]).toEqual({
-          user: req.params.username,
+          owner: req.params.username,
           repo: req.params.repository,
           branch: req.params.branch
         })
@@ -489,17 +483,15 @@ describe('GitHub interface', () => {
     })
 
     test('returns an error if any of the API calls fail', () => {
-      jest.mock('github', () => {
-        const GithubApi = function () {}
-
-        GithubApi.prototype.authenticate = jest.fn()
-        GithubApi.prototype.repos = {
-          createFile: () => Promise.resolve(),
-          getBranch: () => Promise.reject()
-        }
-
-        return GithubApi
-      })
+      jest.mock('@octokit/rest', () =>
+        _ => ({
+          authenticate: jest.fn(),
+          repos: {
+            createFile: () => Promise.resolve(),
+            getBranch: () => Promise.reject()
+          }
+        })
+      )
 
       const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
@@ -513,7 +505,7 @@ describe('GitHub interface', () => {
         sha: '7fd1a60b01f91b314f59955a4e4d4e80d8edf11d'
       }
 
-      return githubInstance.writeFileAndSendPR(
+      return githubInstance.writeFileAndSendReview(
         options.path,
         options.content,
         options.newBranch,
@@ -522,6 +514,52 @@ describe('GitHub interface', () => {
       ).catch(err => {
         expect(err).toEqual({
           _smErrorCode: 'GITHUB_CREATING_PR'
+        })
+      })
+    })
+  })
+
+  describe('getCurrentUser', () => {
+    test('returns the current authenticated user', () => {
+      const mockUser = {
+        login: 'johndoe',
+        email: 'johndoe@test.com',
+        name: 'John Doe'
+      }
+
+      jest.mock('@octokit/rest', () =>
+        _ => ({
+          authenticate: jest.fn(),
+          users: {
+            get: () => Promise.resolve({data: mockUser})
+          }
+        })
+      )
+
+      const GitHub = require('./../../../lib/GitHub')
+      const githubInstance = new GitHub(req.params)
+
+      return githubInstance.getCurrentUser().then((user) => {
+        expect(user).toEqual(new User('github', 'johndoe', 'johndoe@test.com', 'John Doe'))
+      })
+    })
+
+    test('throws an error if unable to retrieve the current unauthenticated user', () => {
+      jest.mock('@octokit/rest', () =>
+        _ => ({
+          authenticate: jest.fn(),
+          users: {
+            get: () => Promise.reject()
+          }
+        })
+      )
+
+      const GitHub = require('./../../../lib/GitHub')
+      const githubInstance = new GitHub(req.params)
+
+      return githubInstance.getCurrentUser().catch((err) => {
+        expect(err).toEqual({
+          _smErrorCode: 'GITHUB_GET_USER'
         })
       })
     })

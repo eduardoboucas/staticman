@@ -12,15 +12,14 @@ module.exports = (req, res) => {
   const github = new GitHub({
     username: req.params.username,
     repository: req.params.repository,
-    branch: req.params.branch
+    branch: req.params.branch,
+    token: config.get('githubToken')
   })
 
-  github.authenticateWithToken(config.get('githubToken'))
+  return github.api.users.getRepoInvites({}).then(({data}) => {
+    let invitationId = null
 
-  return github.api.users.getRepoInvites({}).then(response => {
-    let invitationId
-
-    const invitation = response.some(invitation => {
+    const invitation = data.some(invitation => {
       if (invitation.repository.full_name === (req.params.username + '/' + req.params.repository)) {
         invitationId = invitation.id
 
@@ -30,7 +29,7 @@ module.exports = (req, res) => {
 
     if (invitation) {
       return github.api.users.acceptRepoInvite({
-        id: invitationId
+        invitation_id: invitationId
       })
     } else {
       res.status(404).send('Invitation not found')

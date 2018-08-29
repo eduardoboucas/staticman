@@ -3,7 +3,6 @@
 const path = require('path')
 const config = require(path.join(__dirname, '/../config'))
 const errorHandler = require('../lib/ErrorHandler')
-const logger = require('../lib/Logger')
 const reCaptcha = require('express-recaptcha')
 const Staticman = require('../lib/Staticman')
 const universalAnalytics = require('universal-analytics')
@@ -69,19 +68,6 @@ function process (staticman, req, res) {
   const fields = req.query.fields || req.body.fields
   const options = req.query.options || req.body.options || {}
 
-  logger.info(
-    JSON.stringify(
-      {
-        url: req.url,
-        fields,
-        options,
-        body: req.body 
-      }
-    ),
-    null,
-    2
-  )
-
   return staticman.processEntry(fields, options).then(data => {
     sendResponse(res, {
       redirect: data.redirect,
@@ -137,20 +123,17 @@ function sendResponse (res, data) {
 module.exports = (req, res, next) => {
   const staticman = new Staticman(req.params)
 
-  staticman.authenticate()
   staticman.setConfigPath()
   staticman.setIp(req.headers['x-forwarded-for'] || req.connection.remoteAddress)
   staticman.setUserAgent(req.headers['user-agent'])
 
-  return checkRecaptcha(staticman, req).then(usedRecaptcha => {
-    return process(staticman, req, res)
-  }).catch(err => {
-    return sendResponse(res, {
+  return checkRecaptcha(staticman, req)
+    .then(usedRecaptcha => process(staticman, req, res))
+    .catch(err => sendResponse(res, {
       err,
       redirect: req.body.options && req.body.options.redirect,
       redirectError: req.body.options && req.body.options.redirectError
-    })
-  })
+    }))
 }
 
 module.exports.checkRecaptcha = checkRecaptcha
