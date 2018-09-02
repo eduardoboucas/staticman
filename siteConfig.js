@@ -156,6 +156,18 @@ const schema = {
       format: 'EncryptedString',
       default: ''
     }
+  },
+  referer: {
+    enabled: {
+      doc: 'Set to `true` to enable redirect back to referer page',
+      format: Boolean,
+      default: false
+    },
+    postfix: {
+      doc: 'Append this string to the referer to build the redirect adress',
+      format: String,
+      default: ''
+    }
   }
 }
 

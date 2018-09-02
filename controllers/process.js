@@ -68,6 +68,8 @@ function process (staticman, req, res) {
   const fields = req.query.fields || req.body.fields
   const options = req.query.options || req.body.options || {}
 
+  options.referer = req.headers.referer
+
   return staticman.processEntry(fields, options).then(data => {
     sendResponse(res, {
       redirect: data.redirect,
