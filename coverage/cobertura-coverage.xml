@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <!DOCTYPE coverage SYSTEM "http://cobertura.sourceforge.net/xml/coverage-04.dtd">
-<coverage lines-valid="786" lines-covered="686" line-rate="0.8728" branches-valid="360" branches-covered="278" branch-rate="0.7722" timestamp="1536783029286" complexity="0" version="0.1">
+<coverage lines-valid="786" lines-covered="686" line-rate="0.8728" branches-valid="360" branches-covered="278" branch-rate="0.7722" timestamp="1536784015619" complexity="0" version="0.1">
   <sources>
     <source>/home/nick/Development/Javascript/staticman</source>
   </sources>
@@ -669,9 +669,9 @@
                 <line number="10" hits="20"/>
               </lines>
             </method>
-            <method name="(anonymous_1)" hits="61" signature="()V">
+            <method name="(anonymous_1)" hits="64" signature="()V">
               <lines>
-                <line number="13" hits="61"/>
+                <line number="13" hits="64"/>
               </lines>
             </method>
             <method name="(anonymous_2)" hits="10" signature="()V">
@@ -778,12 +778,12 @@
             <line number="7" hits="53" branch="false"/>
             <line number="8" hits="53" branch="false"/>
             <line number="10" hits="53" branch="false"/>
-            <line number="14" hits="61" branch="false"/>
-            <line number="16" hits="61" branch="false"/>
-            <line number="25" hits="61" branch="true" condition-coverage="100% (2/2)"/>
+            <line number="14" hits="64" branch="false"/>
+            <line number="16" hits="64" branch="false"/>
+            <line number="25" hits="64" branch="true" condition-coverage="100% (2/2)"/>
             <line number="26" hits="4" branch="false"/>
-            <line number="30" hits="57" branch="true" condition-coverage="100% (2/2)"/>
-            <line number="31" hits="56" branch="false"/>
+            <line number="30" hits="60" branch="true" condition-coverage="100% (2/2)"/>
+            <line number="31" hits="59" branch="false"/>
             <line number="36" hits="1" branch="false"/>
             <line number="41" hits="10" branch="false"/>
             <line number="48" hits="1" branch="false"/>
@@ -815,9 +815,9 @@
         </class>
         <class name="GitLab.js" filename="lib/GitLab.js" line-rate="0.8649" branch-rate="0.6923">
           <methods>
-            <method name="(anonymous_0)" hits="24" signature="()V">
+            <method name="(anonymous_0)" hits="21" signature="()V">
               <lines>
-                <line number="11" hits="24"/>
+                <line number="11" hits="21"/>
               </lines>
             </method>
             <method name="(anonymous_1)" hits="15" signature="()V">
@@ -928,11 +928,11 @@
             <line number="6" hits="47" branch="false"/>
             <line number="7" hits="47" branch="false"/>
             <line number="8" hits="47" branch="false"/>
-            <line number="12" hits="24" branch="false"/>
-            <line number="14" hits="24" branch="true" condition-coverage="100% (2/2)"/>
+            <line number="12" hits="21" branch="false"/>
+            <line number="14" hits="21" branch="true" condition-coverage="100% (2/2)"/>
             <line number="15" hits="3" branch="false"/>
-            <line number="19" hits="21" branch="true" condition-coverage="100% (2/2)"/>
-            <line number="20" hits="20" branch="false"/>
+            <line number="19" hits="18" branch="true" condition-coverage="100% (2/2)"/>
+            <line number="20" hits="17" branch="false"/>
             <line number="25" hits="1" branch="false"/>
             <line number="30" hits="15" branch="true" condition-coverage="75% (3/4)"/>
             <line number="31" hits="15" branch="false"/>
@@ -1093,8 +1093,8 @@
             <line number="4" hits="77" branch="false"/>
             <line number="6" hits="77" branch="false"/>
             <line number="7" hits="99" branch="true" condition-coverage="100% (2/2)"/>
-            <line number="9" hits="8" branch="false"/>
-            <line number="11" hits="91" branch="false"/>
+            <line number="9" hits="5" branch="false"/>
+            <line number="11" hits="94" branch="false"/>
           </lines>
         </class>
         <class name="Logger.js" filename="lib/Logger.js" line-rate="0" branch-rate="0">

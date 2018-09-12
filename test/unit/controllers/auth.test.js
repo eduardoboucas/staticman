@@ -18,17 +18,10 @@ beforeEach(() => {
 
 describe('Auth controller', () => {
   describe('GitHub', () => {
-    test('authenticates to GitHub with the given code and returns the authenticated user', () => {
-      const mockAccessToken = 'qwertyuiop'
-      const mockCode = '1q2w3e4r'
-      const mockUser = {
-        login: 'johndoe',
-        name: 'John Doe',
-        email: 'johndoe@test.com'
-      }
+    const siteConfig = helpers.getConfig()
+    const mockCode = '1q2w3e4r'
 
-      const siteConfig = helpers.getConfig()
-
+    const oauthRequest =
       nock(/github\.com/)
         .post('/login/oauth/access_token')
         .query({
@@ -37,6 +30,16 @@ describe('Auth controller', () => {
           code: mockCode,
           redirect_uri: siteConfig.get('githubAuth.redirectUri')
         })
+
+    test('authenticates to GitHub with the given code and returns the authenticated user', () => {
+      const mockAccessToken = 'qwertyuiop'
+      const mockUser = {
+        login: 'johndoe',
+        name: 'John Doe',
+        email: 'johndoe@test.com'
+      }
+
+      oauthRequest
         .reply(200, {
           access_token: mockAccessToken
         })
@@ -65,21 +68,11 @@ describe('Auth controller', () => {
 
     test('authenticates to GitHub with the given code and returns the original GitHub user when using v2 API', () => {
       const mockAccessToken = 'qwertyuiop'
-      const mockCode = '1q2w3e4r'
       const mockUser = {
         login: 'johndoe'
       }
 
-      const siteConfig = helpers.getConfig()
-
-      nock(/github\.com/)
-        .post('/login/oauth/access_token')
-        .query({
-          client_id: siteConfig.get('githubAuth.clientId'),
-          client_secret: siteConfig.get('githubAuth.clientSecret'),
-          code: mockCode,
-          redirect_uri: siteConfig.get('githubAuth.redirectUri')
-        })
+      oauthRequest
         .reply(200, {
           access_token: mockAccessToken
         })
@@ -93,7 +86,6 @@ describe('Auth controller', () => {
 
       const reqWithQuery = Object.assign({}, req, {
         params: {
-          service: 'github',
           version: '2'
         },
         query: {
@@ -110,25 +102,12 @@ describe('Auth controller', () => {
     })
 
     test('returns a 401 response when unable to get an access token from GitHub', () => {
-      const mockCode = '1q2w3e4r'
-      const siteConfig = helpers.getConfig()
-
-      nock(/github\.com/)
-        .post('/login/oauth/access_token')
-        .query({
-          client_id: siteConfig.get('githubAuth.clientId'),
-          client_secret: siteConfig.get('githubAuth.clientSecret'),
-          code: mockCode,
-          redirect_uri: siteConfig.get('githubAuth.redirectUri')
-        })
+      oauthRequest
         .reply(401, {
           error: 'invalid_code'
         })
 
       const reqWithQuery = Object.assign({}, req, {
-        params: {
-          service: 'github'
-        },
         query: {
           code: mockCode
         }
@@ -183,17 +162,10 @@ describe('Auth controller', () => {
   })
 
   describe('GitLab', () => {
-    test('authenticates to GitLab with the given code and returns the authenticated user', () => {
-      const mockAccessToken = 'qwertyuiop'
-      const mockCode = '1q2w3e4r'
-      const mockUser = {
-        username: 'johndoe',
-        name: 'John Doe',
-        email: 'johndoe@test.com'
-      }
+    const siteConfig = helpers.getConfig()
+    const mockCode = '1q2w3e4r'
 
-      const siteConfig = helpers.getConfig()
-
+    const oauthRequest =
       nock(/gitlab\.com/)
         .post('/oauth/token')
         .query({
@@ -203,6 +175,16 @@ describe('Auth controller', () => {
           grant_type: 'authorization_code',
           redirect_uri: siteConfig.get('gitlabAuth.redirectUri')
         })
+
+    test('authenticates to GitLab with the given code and returns the authenticated user', () => {
+      const mockAccessToken = 'qwertyuiop'
+      const mockUser = {
+        username: 'johndoe',
+        name: 'John Doe',
+        email: 'johndoe@test.com'
+      }
+
+      oauthRequest
         .reply(200, {
           access_token: mockAccessToken
         })
@@ -216,9 +198,6 @@ describe('Auth controller', () => {
         .reply(200, mockUser)
 
       const reqWithQuery = Object.assign({}, req, {
-        params: {
-          service: 'gitlab'
-        },
         query: {
           code: mockCode,
           provider: 'gitlab'
@@ -234,26 +213,12 @@ describe('Auth controller', () => {
     })
 
     test('returns a 401 response when unable to get an access token from GitLab', () => {
-      const mockCode = '1q2w3e4r'
-      const siteConfig = helpers.getConfig()
-
-      nock(/gitlab\.com/)
-        .post('/oauth/token')
-        .query({
-          client_id: siteConfig.get('gitlabAuth.clientId'),
-          client_secret: siteConfig.get('gitlabAuth.clientSecret'),
-          code: mockCode,
-          grant_type: 'authorization_code',
-          redirect_uri: siteConfig.get('gitlabAuth.redirectUri')
-        })
+      oauthRequest
         .reply(401, {
           error: 'invalid_code'
         })
 
       const reqWithQuery = Object.assign({}, req, {
-        params: {
-          service: 'gitlab'
-        },
         query: {
           code: mockCode,
           provider: 'gitlab'
@@ -269,19 +234,8 @@ describe('Auth controller', () => {
 
     test('returns a 401 response when an incorrect access token is used for the GitLab API', () => {
       const mockAccessToken = 'qwertyuiop'
-      const mockCode = '1q2w3e4r'
 
-      const siteConfig = helpers.getConfig()
-
-      nock(/gitlab\.com/)
-        .post('/oauth/token')
-        .query({
-          client_id: siteConfig.get('gitlabAuth.clientId'),
-          client_secret: siteConfig.get('gitlabAuth.clientSecret'),
-          code: mockCode,
-          grant_type: 'authorization_code',
-          redirect_uri: siteConfig.get('gitlabAuth.redirectUri')
-        })
+      oauthRequest
         .reply(200, {
           access_token: mockAccessToken
         })
@@ -297,9 +251,6 @@ describe('Auth controller', () => {
         })
 
       const reqWithQuery = Object.assign({}, req, {
-        params: {
-          service: 'gitlab'
-        },
         query: {
           code: mockCode,
           provider: 'gitlab'
