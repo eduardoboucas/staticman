@@ -11,7 +11,7 @@ module.exports = (req, res) => {
 
   let requestAccessToken
 
-  switch (req.params.service) {
+  switch (req.query.provider) {
     case 'gitlab':
       requestAccessToken = siteConfig =>
         oauth.requestGitLabAccessToken(
@@ -34,12 +34,12 @@ module.exports = (req, res) => {
   return staticman.getSiteConfig()
     .then(requestAccessToken)
     .then((accessToken) => {
-      const git = gitFactory.create(req.params.service, {
+      const git = gitFactory.create(req.query.provider, {
         oauthToken: accessToken
       })
 
       // TODO: Simplify this when v2 support is dropped.
-      const getUser = req.params.version === '2' && req.params.service === 'github'
+      const getUser = req.params.version === '2' && req.query.provider === 'github'
         ? git.api.users.get({}).then(({data}) => data)
         : git.getCurrentUser()
 

@@ -50,7 +50,8 @@ describe('Auth controller', () => {
 
       const reqWithQuery = Object.assign({}, req, {
         query: {
-          code: mockCode
+          code: mockCode,
+          provider: 'github'
         }
       })
 
@@ -96,7 +97,8 @@ describe('Auth controller', () => {
           version: '2'
         },
         query: {
-          code: mockCode
+          code: mockCode,
+          provider: 'github'
         }
       })
 
@@ -167,7 +169,8 @@ describe('Auth controller', () => {
 
       const reqWithQuery = Object.assign({}, req, {
         query: {
-          code: mockCode
+          code: mockCode,
+          provider: 'github'
         }
       })
 
@@ -217,7 +220,8 @@ describe('Auth controller', () => {
           service: 'gitlab'
         },
         query: {
-          code: mockCode
+          code: mockCode,
+          provider: 'gitlab'
         }
       })
 
@@ -251,7 +255,8 @@ describe('Auth controller', () => {
           service: 'gitlab'
         },
         query: {
-          code: mockCode
+          code: mockCode,
+          provider: 'gitlab'
         }
       })
 
@@ -296,7 +301,8 @@ describe('Auth controller', () => {
           service: 'gitlab'
         },
         query: {
-          code: mockCode
+          code: mockCode,
+          provider: 'gitlab'
         }
       })
 
