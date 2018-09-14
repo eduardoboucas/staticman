@@ -103,5 +103,6 @@ Would you like to contribute to Staticman? That's great! Here's how:
 - [BinaryMist](https://binarymist.io/blog) ([Source](https://github.com/binarymist/BinaryMistBlog))
 - [La ruta de la cebada](https://larutadelacebada.com) ([Source](https://github.com/lasocial/larutadelacebada.github.io))
 - [Gatsby Central](https://www.gatsbycentral.com) ([Source](https://github.com/GatsbyCentral/gatsbycentral.com))
+- [Minimal Hugo GitLab Pages running on Staticman v3](https://vincenttam.gitlab.io/test-hugo-staticman) ([Source](https://gitlab.com/VincentTam/test-hugo-staticman))
 
 Are you using Staticman? [Let us know!](https://github.com/eduardoboucas/staticman/edit/master/README.md)
