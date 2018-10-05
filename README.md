@@ -104,5 +104,6 @@ Would you like to contribute to Staticman? That's great! Here's how:
 - [La ruta de la cebada](https://larutadelacebada.com) ([Source](https://github.com/lasocial/larutadelacebada.github.io))
 - [Gatsby Central](https://www.gatsbycentral.com) ([Source](https://github.com/GatsbyCentral/gatsbycentral.com))
 - [Minimal Hugo GitLab Pages running on Staticman v3](https://vincenttam.gitlab.io/test-hugo-staticman) ([Source](https://gitlab.com/VincentTam/test-hugo-staticman))
+- [Minimal Jekyll GitHub Pages running on Staticman v3](https://git.io/smdemo) ([Source](https://github.com/VincentTam/TestStaticmanLab))
 
 Are you using Staticman? [Let us know!](https://github.com/eduardoboucas/staticman/edit/master/README.md)
