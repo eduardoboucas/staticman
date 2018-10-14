@@ -105,5 +105,6 @@ Would you like to contribute to Staticman? That's great! Here's how:
 - [Gatsby Central](https://www.gatsbycentral.com) ([Source](https://github.com/GatsbyCentral/gatsbycentral.com))
 - [Minimal Hugo GitLab Pages running on Staticman v3](https://vincenttam.gitlab.io/test-hugo-staticman) ([Source](https://gitlab.com/VincentTam/test-hugo-staticman))
 - [Minimal Jekyll GitHub Pages running on Staticman v3](https://git.io/smdemo) ([Source](https://github.com/VincentTam/TestStaticmanLab))
+- [Ultima IV—Advent of the Trinity](https://cambragol.github.io/ultima-IV-trinity/articles/first-post) ([Source](https://github.com/cambragol/ultima-IV-trinity))
 
 Are you using Staticman? [Let us know!](https://github.com/eduardoboucas/staticman/edit/master/README.md)
