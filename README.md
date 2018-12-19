@@ -103,5 +103,6 @@ Would you like to contribute to Staticman? That's great! Here's how:
 - [BinaryMist](https://binarymist.io/blog) ([Source](https://github.com/binarymist/BinaryMistBlog))
 - [La ruta de la cebada](https://larutadelacebada.com) ([Source](https://github.com/lasocial/larutadelacebada.github.io))
 - [Gatsby Central](https://www.gatsbycentral.com) ([Source](https://github.com/GatsbyCentral/gatsbycentral.com))
+- [vRandomBites](https://vrandombites.co.uk) ([Source](https://github.com/ricardonadao/ricardonadao.github.io))
 
 Are you using Staticman? [Let us know!](https://github.com/eduardoboucas/staticman/edit/master/README.md)
