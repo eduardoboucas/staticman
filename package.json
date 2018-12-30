@@ -23,7 +23,7 @@
   },
   "homepage": "https://github.com/eduardoboucas/staticman#readme",
   "dependencies": {
-    "@dadi/logger": "^1.3.0",
+    "@dadi/logger": "^1.4.1",
     "@octokit/rest": "^16.3.2",
     "akismet": "^1.0.0",
     "body-parser": "^1.17.x",
@@ -35,7 +35,7 @@
     "express-recaptcha": "^2.1.0",
     "gitlab": "^3.5.1",
     "js-yaml": "^3.10.0",
-    "mailgun-js": "^0.7.13",
+    "mailgun-js": "^0.22.0",
     "markdown-table": "^1.0.0",
     "md5": "^2.1.0",
     "moment": "^2.18.1",
@@ -43,7 +43,7 @@
     "object-path": "^0.11.1",
     "request-promise": "^4.2.2",
     "sha1": "^1.1.1",
-    "slug": "^0.9.1",
+    "slug": "^0.9.3",
     "universal-analytics": "^0.4.2",
     "uuid": "^3.3.2"
   },
