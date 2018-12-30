@@ -1394,6 +1394,8 @@ describe('Staticman interface', () => {
     })
 
     test('validates fields, throwing an error if validation fails', () => {
+      jest.unmock('../../../lib/GitHub') // otherwise git.writeFile is undefined on first run
+
       const Staticman = require('./../../../lib/Staticman')
       const staticman = new Staticman(mockParameters)
       const fields = mockHelpers.getFields()

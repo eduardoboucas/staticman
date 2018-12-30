@@ -4,8 +4,8 @@ const nock = require('nock')
 const Staticman = require('./../../../lib/Staticman')
 const User = require('../../../lib/models/User')
 
-Staticman.prototype.getSiteConfig = function () {
-  return Promise.resolve(helpers.getConfig())
+Staticman.prototype.getSiteConfig = async function () {
+  return helpers.getConfig()
 }
 
 let req

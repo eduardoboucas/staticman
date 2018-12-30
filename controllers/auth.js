@@ -5,7 +5,7 @@ const oauth = require('../lib/OAuth')
 const RSA = require('../lib/RSA')
 const Staticman = require('../lib/Staticman')
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
   const staticman = new Staticman(req.params)
   staticman.setConfigPath()
 
@@ -31,34 +31,31 @@ module.exports = (req, res) => {
         )
   }
 
-  return staticman.getSiteConfig()
-    .then(requestAccessToken)
-    .then((accessToken) => {
-      const git = gitFactory.create(req.params.service, {
-        oauthToken: accessToken
-      })
-
-      // TODO: Simplify this when v2 support is dropped.
-      const getUser = req.params.version === '2' && req.params.service === 'github'
-        ? git.api.users.getAuthenticated({}).then(({data}) => data)
-        : git.getCurrentUser()
-
-      return getUser
-        .then((user) => {
-          res.send({
-            accessToken: RSA.encrypt(accessToken),
-            user
-          })
-        })
+  try {
+    const siteConfig = await staticman.getSiteConfig()
+    const accessToken = await requestAccessToken(siteConfig)
+    const git = gitFactory.create(req.params.service, {
+      oauthToken: accessToken
     })
-    .catch((err) => {
-      console.log('ERR:', err)
 
-      const statusCode = err.statusCode || 401
+    // TODO: Simplify this when v2 support is dropped.
+    const getUser = req.params.version === '2' && req.params.service === 'github'
+      ? git.api.users.getAuthenticated({}).then(({data}) => data)
+      : git.getCurrentUser()
 
-      res.status(statusCode).send({
-        statusCode,
-        message: err.message
-      })
+    const user = await getUser
+    res.send({
+      accessToken: RSA.encrypt(accessToken),
+      user
     })
+  } catch (err) {
+    console.log('ERR:', err)
+
+    const statusCode = err.statusCode || 401
+
+    res.status(statusCode).send({
+      statusCode,
+      message: err.message
+    })
+  }
 }
