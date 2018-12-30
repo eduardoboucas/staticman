@@ -720,7 +720,7 @@ describe('Staticman interface', () => {
           return {
             api: {
               users: {
-                get: mockGetCurrentUser
+                getAuthenticated: mockGetCurrentUser
               }
             }
           }

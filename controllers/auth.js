@@ -40,7 +40,7 @@ module.exports = (req, res) => {
 
       // TODO: Simplify this when v2 support is dropped.
       const getUser = req.params.version === '2' && req.params.service === 'github'
-        ? git.api.users.get({}).then(({data}) => data)
+        ? git.api.users.getAuthenticated({}).then(({data}) => data)
         : git.getCurrentUser()
 
       return getUser
