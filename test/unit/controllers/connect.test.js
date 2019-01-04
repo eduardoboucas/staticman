@@ -28,9 +28,9 @@ describe('Connect controller', () => {
     jest.mock('@octokit/rest', () =>
       _ => ({
         authenticate: jest.fn(),
-        users: {
-          acceptRepoInvite: mockAcceptRepoInvite,
-          getRepoInvites: mockGetRepoInvites
+        repos: {
+          acceptInvitation: mockAcceptRepoInvite,
+          listInvitationsForAuthenticatedUser: mockGetRepoInvites
         }
       })
     )
@@ -61,9 +61,9 @@ describe('Connect controller', () => {
     jest.mock('@octokit/rest', () =>
       _ => ({
         authenticate: jest.fn(),
-        users: {
-          acceptRepoInvite: mockAcceptRepoInvite,
-          getRepoInvites: mockGetRepoInvites
+        repos: {
+          acceptInvitation: mockAcceptRepoInvite,
+          listInvitationsForAuthenticatedUser: mockGetRepoInvites
         }
       })
     )
@@ -89,9 +89,9 @@ describe('Connect controller', () => {
     jest.mock('@octokit/rest', () =>
       _ => ({
         authenticate: jest.fn(),
-        users: {
-          acceptRepoInvite: mockAcceptRepoInvite,
-          getRepoInvites: mockGetRepoInvites
+        repos: {
+          acceptInvitation: mockAcceptRepoInvite,
+          listInvitationsForAuthenticatedUser: mockGetRepoInvites
         }
       })
     )

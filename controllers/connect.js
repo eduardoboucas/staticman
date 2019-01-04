@@ -16,7 +16,7 @@ module.exports = (req, res) => {
     token: config.get('githubToken')
   })
 
-  return github.api.users.getRepoInvites({}).then(({data}) => {
+  return github.api.repos.listInvitationsForAuthenticatedUser({}).then(({data}) => {
     let invitationId = null
 
     const invitation = data.some(invitation => {
@@ -28,7 +28,7 @@ module.exports = (req, res) => {
     })
 
     if (invitation) {
-      return github.api.users.acceptRepoInvite({
+      return github.api.repos.acceptInvitation({
         invitation_id: invitationId
       })
     } else {
