@@ -6,7 +6,7 @@
   "scripts": {
     "prestart": "if [ ! -d node_modules ]; then npm install; fi",
     "start": "node index.js",
-    "test": "standard && jest && node test/utils/coverage.js",
+    "test": "standard && jest",
     "test-dev": "TEST_DEV=true jest --watch"
   },
   "engines": {
