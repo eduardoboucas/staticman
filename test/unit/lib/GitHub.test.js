@@ -66,7 +66,7 @@ describe('GitHub interface', () => {
     test('reads a file and returns its contents', () => {
       const fileContents = 'This is a text file!'
       const filePath = 'path/to/file.txt'
-      const mockReposGetContent = jest.fn(() => Promise.resolve({
+      const mockReposGetContents = jest.fn(() => Promise.resolve({
         data: {
           content: btoa(fileContents)
         }
@@ -76,7 +76,7 @@ describe('GitHub interface', () => {
         _ => ({
           authenticate: jest.fn(),
           repos: {
-            getContent: mockReposGetContent
+            getContents: mockReposGetContents
           }
         })
       )
@@ -85,7 +85,7 @@ describe('GitHub interface', () => {
       const githubInstance = new GitHub(req.params)
 
       return githubInstance.readFile(filePath).then(contents => {
-        expect(mockReposGetContent.mock.calls[0][0]).toEqual({
+        expect(mockReposGetContents.mock.calls[0][0]).toEqual({
           owner: req.params.username,
           repo: req.params.repository,
           path: filePath,
@@ -96,13 +96,13 @@ describe('GitHub interface', () => {
 
     test('returns an error if GitHub API call errors', () => {
       const filePath = 'path/to/file.yml'
-      const mockReposGetContent = jest.fn(() => Promise.reject()) // eslint-disable-line prefer-promise-reject-errors
+      const mockReposGetContents = jest.fn(() => Promise.reject()) // eslint-disable-line prefer-promise-reject-errors
 
       jest.mock('@octokit/rest', () =>
         _ => ({
           authenticate: jest.fn(),
           repos: {
-            getContent: mockReposGetContent
+            getContents: mockReposGetContents
           }
         })
       )
@@ -111,7 +111,7 @@ describe('GitHub interface', () => {
       const githubInstance = new GitHub(req.params)
 
       return githubInstance.readFile(filePath).catch(err => {
-        expect(mockReposGetContent.mock.calls[0][0]).toEqual({
+        expect(mockReposGetContents.mock.calls[0][0]).toEqual({
           owner: req.params.username,
           repo: req.params.repository,
           path: filePath,
@@ -129,7 +129,7 @@ describe('GitHub interface', () => {
         baz
       `
       const filePath = 'path/to/file.yml'
-      const mockReposGetContent = jest.fn(() => Promise.resolve({
+      const mockReposGetContents = jest.fn(() => Promise.resolve({
         data: {
           content: btoa(fileContents)
         }
@@ -139,7 +139,7 @@ describe('GitHub interface', () => {
         _ => ({
           authenticate: jest.fn(),
           repos: {
-            getContent: mockReposGetContent
+            getContents: mockReposGetContents
           }
         })
       )
@@ -148,7 +148,7 @@ describe('GitHub interface', () => {
       const githubInstance = new GitHub(req.params)
 
       return githubInstance.readFile(filePath).catch(err => {
-        expect(mockReposGetContent.mock.calls[0][0]).toEqual({
+        expect(mockReposGetContents.mock.calls[0][0]).toEqual({
           owner: req.params.username,
           repo: req.params.repository,
           path: filePath,
@@ -162,7 +162,7 @@ describe('GitHub interface', () => {
     test('reads a YAML file and returns its parsed contents', () => {
       const filePath = 'path/to/file.yml'
       const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
-      const mockReposGetContent = jest.fn(() => Promise.resolve({
+      const mockReposGetContents = jest.fn(() => Promise.resolve({
         data: {
           content: btoa(sampleData.config1)
         }
@@ -172,7 +172,7 @@ describe('GitHub interface', () => {
         _ => ({
           authenticate: jest.fn(),
           repos: {
-            getContent: mockReposGetContent
+            getContents: mockReposGetContents
           }
         })
       )
@@ -181,7 +181,7 @@ describe('GitHub interface', () => {
       const githubInstance = new GitHub(req.params)
 
       return githubInstance.readFile(filePath).then(contents => {
-        expect(mockReposGetContent.mock.calls[0][0]).toEqual({
+        expect(mockReposGetContents.mock.calls[0][0]).toEqual({
           owner: req.params.username,
           repo: req.params.repository,
           path: filePath,
@@ -197,7 +197,7 @@ describe('GitHub interface', () => {
         content: btoa(sampleData.config1)
       }
       const filePath = 'path/to/file.yml'
-      const mockReposGetContent = jest.fn(() => Promise.resolve({
+      const mockReposGetContents = jest.fn(() => Promise.resolve({
         data: fileContents
       }))
 
@@ -205,7 +205,7 @@ describe('GitHub interface', () => {
         _ => ({
           authenticate: jest.fn(),
           repos: {
-            getContent: mockReposGetContent
+            getContents: mockReposGetContents
           }
         })
       )
@@ -214,7 +214,7 @@ describe('GitHub interface', () => {
       const githubInstance = new GitHub(req.params)
 
       return githubInstance.readFile(filePath, true).then(response => {
-        expect(mockReposGetContent.mock.calls[0][0]).toEqual({
+        expect(mockReposGetContents.mock.calls[0][0]).toEqual({
           owner: req.params.username,
           repo: req.params.repository,
           path: filePath,
@@ -228,7 +228,7 @@ describe('GitHub interface', () => {
     test('reads a JSON file and returns its parsed contents', () => {
       const filePath = 'path/to/file.json'
       const parsedConfig = yaml.safeLoad(sampleData.config2, 'utf8')
-      const mockReposGetContent = jest.fn(() => Promise.resolve({
+      const mockReposGetContents = jest.fn(() => Promise.resolve({
         data: {
           content: btoa(sampleData.config2)
         }
@@ -238,7 +238,7 @@ describe('GitHub interface', () => {
         _ => ({
           authenticate: jest.fn(),
           repos: {
-            getContent: mockReposGetContent
+            getContents: mockReposGetContents
           }
         })
       )
@@ -247,7 +247,7 @@ describe('GitHub interface', () => {
       const githubInstance = new GitHub(req.params)
 
       return githubInstance.readFile(filePath).then(contents => {
-        expect(mockReposGetContent.mock.calls[0][0]).toEqual({
+        expect(mockReposGetContents.mock.calls[0][0]).toEqual({
           owner: req.params.username,
           repo: req.params.repository,
           path: filePath,
@@ -263,7 +263,7 @@ describe('GitHub interface', () => {
       }
       const filePath = 'path/to/file.json'
       const parsedConfig = yaml.safeLoad(sampleData.config2, 'utf8')
-      const mockReposGetContent = jest.fn(() => Promise.resolve({
+      const mockReposGetContents = jest.fn(() => Promise.resolve({
         data: fileContents
       }))
 
@@ -271,7 +271,7 @@ describe('GitHub interface', () => {
         _ => ({
           authenticate: jest.fn(),
           repos: {
-            getContent: mockReposGetContent
+            getContents: mockReposGetContents
           }
         })
       )
@@ -280,7 +280,7 @@ describe('GitHub interface', () => {
       const githubInstance = new GitHub(req.params)
 
       return githubInstance.readFile(filePath, true).then(response => {
-        expect(mockReposGetContent.mock.calls[0][0]).toEqual({
+        expect(mockReposGetContents.mock.calls[0][0]).toEqual({
           owner: req.params.username,
           repo: req.params.repository,
           path: filePath,
@@ -531,7 +531,7 @@ describe('GitHub interface', () => {
         _ => ({
           authenticate: jest.fn(),
           users: {
-            get: () => Promise.resolve({data: mockUser})
+            getAuthenticated: () => Promise.resolve({data: mockUser})
           }
         })
       )
@@ -549,7 +549,7 @@ describe('GitHub interface', () => {
         _ => ({
           authenticate: jest.fn(),
           users: {
-            get: () => Promise.reject()
+            getAuthenticated: () => Promise.reject()
           }
         })
       )

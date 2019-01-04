@@ -9,6 +9,12 @@ const schema = {
     format: Array,
     default: []
   },
+  allowedOrigins: {
+    doc: 'When allowedOrigins is defined, only requests sent from one of the domains listed will be accepted.',
+    docExample: 'allowedOrigins: ["localhost", "eduardoboucas.com"]',
+    default: [],
+    format: Array
+  },
   akismet: {
     enabled: {
       doc: 'Whether to use Akismet to check entries for spam. This requires an Akismet account to be configured in the Staticman API instance being used.',
