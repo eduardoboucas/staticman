@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
   try {
     const { data } = await github.api.repos.listInvitationsForAuthenticatedUser({})
 
-    const invitation = Array.isArray(data) && data.some(({ repository }) => repository.full_name === req.params.username + '/' + req.params.repository)
+    const invitation = Array.isArray(data) && data.find(({ repository }) => repository.full_name === req.params.username + '/' + req.params.repository)
 
     if (!invitation) {
       return res.status(404).send('Invitation not found')

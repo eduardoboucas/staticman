@@ -34,7 +34,9 @@ class StaticmanAPI {
   initialiseBruteforceProtection () {
     const store = new ExpressBrute.MemoryStore()
 
-    this.bruteforce = new ExpressBrute(store)
+    this.bruteforce = process.env.NODE_ENV !== 'test' ? new ExpressBrute(store) : {
+      prevent: (req, res, next) => next()
+    }
   }
 
   initialiseCORS () {
