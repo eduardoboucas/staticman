@@ -78,7 +78,7 @@ describe('Connect controller', () => {
     })
   })
 
-  test('returns a 500 and an error message if the response from GitHub is invalid', () => {
+  test('returns a 404 and an error message if the response from GitHub is invalid', () => {
     const mockAcceptRepoInvite = jest.fn(() => Promise.resolve())
     const mockGetRepoInvites = jest.fn(() => Promise.resolve({
       data: {
@@ -101,8 +101,8 @@ describe('Connect controller', () => {
     return connect(req, res).then(response => {
       expect(mockGetRepoInvites).toHaveBeenCalledTimes(1)
       expect(mockAcceptRepoInvite).not.toHaveBeenCalled()
-      expect(res.send.mock.calls[0][0]).toBe('Error')
-      expect(res.status.mock.calls[0][0]).toBe(500)
+      expect(res.send.mock.calls[0][0]).toBe('Invitation not found')
+      expect(res.status.mock.calls[0][0]).toBe(404)
     })
   })
 })

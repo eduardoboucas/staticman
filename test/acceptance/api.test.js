@@ -19,6 +19,8 @@ beforeAll(done => {
 
 afterAll(done => {
   server.close()
+
+  done()
 })
 
 describe('Connect endpoint', () => {

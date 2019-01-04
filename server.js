@@ -180,11 +180,15 @@ StaticmanAPI.prototype.requireParams = function (params) {
 }
 
 StaticmanAPI.prototype.start = function (callback) {
-  const callbackFn = typeof callback === 'function'
-    ? callback.call(this, config.get('port'))
-    : null
+  this.instance = this.server.listen(config.get('port'), port => {
+    if (typeof callback === 'function') {
+      callback(port)
+    }
+  })
+}
 
-  this.server.listen(config.get('port'), callbackFn)
+StaticmanAPI.prototype.close = function () {
+  this.instance.close()
 }
 
 module.exports = StaticmanAPI
