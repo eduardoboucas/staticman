@@ -43,7 +43,9 @@ module.exports = (repo, data) => {
           }))
         }
         if (response.state === 'closed') {
-          Promise.all(queue).then(() => staticman.processClose(parsedBody.fields, parsedBody.options, response.head.ref))
+          Promise.all(queue).then(() => {
+            return staticman.processClose(parsedBody.fields, parsedBody.options, response.head.ref)
+          })
           return github.api.gitdata.deleteReference({
             user: data.repository.owner.login,
             repo: data.repository.name,
