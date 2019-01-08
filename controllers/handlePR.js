@@ -31,20 +31,21 @@ module.exports = (repo, data) => {
     if (review.state === 'merged') {
       const bodyMatch = review.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
 
+      let queue = []
       if (bodyMatch && (bodyMatch.length === 2)) {
         try {
           const parsedBody = JSON.parse(bodyMatch[1])
           const staticman = new Staticman(parsedBody.parameters)
 
-          staticman.setConfigPath(parsedBody.configPath)
-          staticman.processMerge(parsedBody.fields, parsedBody.options)
-            .catch(err => Promise.reject(err))
+            staticman.setConfigPath(parsedBody.configPath)
+            queue.push(staticman.processMerge(parsedBody.fields, parsedBody.options)
+              .catch(err => Promise.reject(err)))
         } catch (err) {
           return Promise.reject(err)
         }
       }
     }
-
+    Promise.all(queue).then(() => staticman.processClose(parsedBody.fields, parsedBody.options, review.sourceBranch))
     return github.deleteBranch(review.sourceBranch)
   }).then(response => {
     if (ua) {
