@@ -29,6 +29,7 @@ module.exports = async (repo, data) => {
       return null
     }
 
+    let queue = []
     if (review.state === 'merged') {
       const bodyMatch = review.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
 
@@ -38,12 +39,14 @@ module.exports = async (repo, data) => {
           const staticman = await new Staticman(parsedBody.parameters)
 
           staticman.setConfigPath(parsedBody.configPath)
-          staticman.processMerge(parsedBody.fields, parsedBody.options)
+          queue.push(staticman.processMerge(parsedBody.fields, parsedBody.options, review.sourceBranch))
         } catch (err) {
           return Promise.reject(err)
         }
       }
     }
+
+    Promise.all(queue).then(() => staticman.processClose(parsedBody.fields, parsedBody.options, review.sourceBranch))
 
     if (ua) {
       ua.event('Hooks', 'Delete branch').send()
