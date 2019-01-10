@@ -28,25 +28,25 @@ module.exports = (repo, data) => {
       return null
     }
 
-    let queue = []
-    if (review.state === 'merged') {
-      const bodyMatch = review.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
+    const bodyMatch = review.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
 
-      if (bodyMatch && (bodyMatch.length === 2)) {
-        try {
-          const parsedBody = JSON.parse(bodyMatch[1])
-          const staticman = new Staticman(parsedBody.parameters)
+    if (bodyMatch && (bodyMatch.length === 2)) {
+      try {
+        const parsedBody = JSON.parse(bodyMatch[1])
+        const staticman = new Staticman(parsedBody.parameters)
 
-            staticman.setConfigPath(parsedBody.configPath)
-            queue.push(staticman.processMerge(parsedBody.fields, parsedBody.options)
-              .catch(err => Promise.reject(err)))
-        } catch (err) {
-          return Promise.reject(err)
+        staticman.setConfigPath(parsedBody.configPath)
+        let queue = []
+        if (review.state === 'merged') {
+          queue.push(staticman.processMerge(parsedBody.fields, parsedBody.options)
+            .catch(err => Promise.reject(err)))
         }
+        Promise.all(queue).then(() => staticman.processClose(parsedBody.fields, parsedBody.options, review.sourceBranch))
+      } catch (err) {
+        return Promise.reject(err)
       }
     }
     
-    Promise.all(queue).then(() => staticman.processClose(parsedBody.fields, parsedBody.options, review.sourceBranch))
     return github.deleteBranch(review.sourceBranch)
   }).then(response => {
     if (ua) {
