@@ -46,7 +46,7 @@ module.exports = (repo, data) => {
         return Promise.reject(err)
       }
     }
-    
+
     return github.deleteBranch(review.sourceBranch)
   }).then(response => {
     if (ua) {

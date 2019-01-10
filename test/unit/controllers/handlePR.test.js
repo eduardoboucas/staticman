@@ -4,6 +4,7 @@ const sampleData = require('./../../helpers/sampleData')
 let mockAuthenticate
 let mockSetConfigPathFn
 let mockProcessMergeFn
+let mockProcessCloseFn
 let req
 let res
 
@@ -12,7 +13,8 @@ jest.mock('./../../../lib/Staticman', () => {
   return jest.fn(parameters => ({
     authenticate: mockAuthenticate,
     setConfigPath: mockSetConfigPathFn,
-    processMerge: mockProcessMergeFn
+    processMerge: mockProcessMergeFn,
+    processClose: mockProcessCloseFn
   }))
 })
 
@@ -20,6 +22,7 @@ beforeEach(() => {
   mockAuthenticate = jest.fn()
   mockSetConfigPathFn = jest.fn()
   mockProcessMergeFn = jest.fn(() => Promise.resolve(true))
+  mockProcessCloseFn = jest.fn(() => Promise.resolve(true))
   req = helpers.getMockRequest()
   res = helpers.getMockResponse()
 
