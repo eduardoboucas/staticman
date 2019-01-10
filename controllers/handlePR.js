@@ -28,10 +28,10 @@ module.exports = (repo, data) => {
       return null
     }
 
+    let queue = []
     if (review.state === 'merged') {
       const bodyMatch = review.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
 
-      let queue = []
       if (bodyMatch && (bodyMatch.length === 2)) {
         try {
           const parsedBody = JSON.parse(bodyMatch[1])
@@ -45,6 +45,7 @@ module.exports = (repo, data) => {
         }
       }
     }
+    
     Promise.all(queue).then(() => staticman.processClose(parsedBody.fields, parsedBody.options, review.sourceBranch))
     return github.deleteBranch(review.sourceBranch)
   }).then(response => {
