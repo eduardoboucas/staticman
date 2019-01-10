@@ -4,6 +4,7 @@ const Review = require('../../../lib/models/Review')
 
 let mockSetConfigPathFn
 let mockProcessMergeFn
+let mockProcessCloseFn
 let req
 
 // Mock Staticman module
@@ -11,7 +12,8 @@ jest.mock('../../../lib/Staticman', () => {
   return jest.fn().mockImplementation(() => {
     return {
       setConfigPath: mockSetConfigPathFn,
-      processMerge: mockProcessMergeFn
+      processMerge: mockProcessMergeFn,
+      processClose: mockProcessCloseFn
     }
   })
 })
@@ -19,6 +21,7 @@ jest.mock('../../../lib/Staticman', () => {
 beforeEach(() => {
   mockSetConfigPathFn = jest.fn()
   mockProcessMergeFn = jest.fn()
+  mockProcessCloseFn = jest.fn()
   req = helpers.getMockRequest()
   res = helpers.getMockResponse()
 
