@@ -70,7 +70,7 @@ const schema = {
     doc: 'ID of the GitHub App.',
     format: String,
     default: null,
-    env: 'GITHUB_INTEGRATION_ID'
+    env: 'GITHUB_APP_ID'
   },
   githubPrivateKey: {
     doc: 'Private key for the GitHub App.',
