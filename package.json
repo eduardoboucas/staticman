@@ -35,6 +35,7 @@
     "express-recaptcha": "^2.1.0",
     "gitlab": "^3.5.1",
     "js-yaml": "^3.10.0",
+    "jsonwebtoken": "^8.4.0",
     "mailgun-js": "^0.7.13",
     "markdown-table": "^1.0.0",
     "md5": "^2.1.0",

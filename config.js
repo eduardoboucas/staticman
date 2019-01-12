@@ -66,11 +66,17 @@ const schema = {
     default: 'https://api.github.com',
     env: 'GITHUB_BASE_URL'
   },
-  githubToken: {
-    doc: 'Access token to the GitHub account being used to push files with.',
+  githubAppID: {
+    doc: 'ID of the GitHub App.',
     format: String,
     default: null,
-    env: 'GITHUB_TOKEN'
+    env: 'GITHUB_INTEGRATION_ID'
+  },
+  githubPrivateKey: {
+    doc: 'Private key for the GitHub App.',
+    format: String,
+    default: null,
+    env: 'GITHUB_PRIVATE_KEY'
   },
   gitlabAccessTokenUri: {
     doc: 'URI for the GitLab authentication provider.',
