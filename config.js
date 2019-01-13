@@ -60,23 +60,29 @@ const schema = {
     default: 'https://github.com/login/oauth/access_token',
     env: 'GITHUB_ACCESS_TOKEN_URI'
   },
-  githubBaseUrl: {
-    doc: 'Base URL for the GitHub API.',
-    format: String,
-    default: 'https://api.github.com',
-    env: 'GITHUB_BASE_URL'
-  },
   githubAppID: {
     doc: 'ID of the GitHub App.',
     format: String,
     default: null,
     env: 'GITHUB_APP_ID'
   },
+  githubBaseUrl: {
+    doc: 'Base URL for the GitHub API.',
+    format: String,
+    default: 'https://api.github.com',
+    env: 'GITHUB_BASE_URL'
+  },
   githubPrivateKey: {
     doc: 'Private key for the GitHub App.',
     format: String,
     default: null,
     env: 'GITHUB_PRIVATE_KEY'
+  },
+  githubToken: {
+    doc: 'Access token to the GitHub account (legacy)',
+    format: String,
+    default: null,
+    env: 'GITHUB_TOKEN'
   },
   gitlabAccessTokenUri: {
     doc: 'URI for the GitLab authentication provider.',

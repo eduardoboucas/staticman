@@ -35,7 +35,8 @@ module.exports = (req, res) => {
     .then(requestAccessToken)
     .then((accessToken) => {
       const git = gitFactory.create(req.params.service, {
-        oauthToken: accessToken
+        oauthToken: accessToken,
+        version: req.params.version
       })
 
       // TODO: Simplify this when v2 support is dropped.
