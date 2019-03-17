@@ -146,6 +146,11 @@ const schema = {
       format: 'EncryptedString',
       default: null
     },
+    apiHost: {
+      doc: 'Mailgun API host',
+      format: String,
+      default: 'api.mailgun.net'
+    },
     domain: {
       doc: 'Mailgun domain',
       format: 'EncryptedString',

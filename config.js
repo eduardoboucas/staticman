@@ -35,6 +35,12 @@ const schema = {
       default: null,
       env: 'EMAIL_API_KEY'
     },
+    apiHost: {
+      doc: 'Mailgun API host URL to be used for email notifications. Will be overridden by a `notifications.apiHost` parameter in the site config, if one is set.',
+      format: String,
+      default: 'api.mailgun.net',
+      env: 'EMAIL_API_HOST'
+    },
     domain: {
       doc: 'Domain to be used with Mailgun for email notifications. Will be overridden by a `notifications.domain` parameter in the site config, if one is set.',
       format: String,

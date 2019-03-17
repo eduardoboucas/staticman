@@ -52,6 +52,9 @@ comments:
     # Enable notifications
     #enabled: true
 
+    # Mailgun API host URL. If in EU-Region, use 'api.eu.mailgun.net'
+    #apiHost: "api.mailgun.net"
+
     # (!) ENCRYPTED
     #
     # Mailgun API key
