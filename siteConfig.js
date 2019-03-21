@@ -162,6 +162,11 @@ const schema = {
     format: String,
     default: 'Dear human,\n\nHere\'s a new entry for your approval. :tada:\n\nMerge the pull request to accept it, or close it to send it away.\n\n:heart: Your friend [Staticman](https://staticman.net) :muscle:\n\n---\n'
   },
+  pullRequestTable: {
+    doc: 'Whether to include fields and contents table in pull request body or not.',
+    format: Boolean,
+    default: true
+  },
   requiredFields: {
     doc: 'An array with the names of the fields that must be supplies as part of an entry. If any of these is not present, the entry will be discarded and an error will be thrown.',
     format: Array,

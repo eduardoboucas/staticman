@@ -910,6 +910,20 @@ describe('Staticman interface', () => {
       expect(pullRequestBody).toBe(mockConfig.get('pullRequestBody') + fieldsTable)
     })
 
+    test('generates a PR body with the message set in config without the table listing fields and their values', () => {
+      const fields = mockHelpers.getFields()
+      const Staticman = require('./../../../lib/Staticman')
+      const staticman = new Staticman(mockParameters)
+
+      mockConfig.set('pullRequestTable', false)
+      mockConfig.set('notifications.enabled', false)
+      staticman.siteConfig = mockConfig
+
+      const pullRequestBody = staticman._generateReviewBody(fields)
+
+      expect(pullRequestBody).toBe(mockConfig.get('pullRequestBody'))
+    })
+
     test('adds an HTML comment containing notification settings if `notifications.enabled` is set to `true`', () => {
       const req = mockHelpers.getMockRequest()
       const configObject = {
