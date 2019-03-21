@@ -13,6 +13,9 @@ comments:
   # listed will be accepted.
   allowedOrigins: ["localhost", "eduardoboucas.com"]
 
+  auth:
+    required: false
+
   # (*) REQUIRED
   #
   # Name of the branch being used. Must match the one sent in the URL of the
@@ -66,11 +69,17 @@ comments:
   reCaptcha:
     enabled: true
     siteKey: "123456789"
-    secret: "@reCaptchaSecret@"
+    secret: "DTK5WxH6117ez/piZpmkvyAtieYWlu60+SApt9hFRMfNs4WBC0mvRtsW9Jmhz4fJYDcIX18wKHV6KYh3PXYN3d/pozCskwwkuJq0qHJQHrTycjgrGS5mti4QgrMYP0rq2p5hMTgPL/UK0lwkxuRRcxnvxqRlkZHMv6o/CUkZOVnkJ8lGqWa8uJAEIv/9rd6Bm12+F1ezLJZ+LogebHEDpyJWz9kwum9bFBQqZbun+43rxzJBQmAGQEWZ4hshY2aLSAyBpr/pjSDUwRGtwoBh8Ee1qKNuMzY0XVUOn+dcHrkpQotmKL4TMFQN4slo/lVKmfXW5N6t9vdP/lGmIiVXdw=="
 
   githubAuth:
     clientId: "L4M3LIshioHbe3j+vMxEbGlCGDhyIcQF2jhmVOUp8DqC+RqNgvZSQp7qYYmjPPoyjFCVOsu5aHwcD1FkMlEaxLTqYOYUeq49Wb6uxePTBycmW14JI6fiM/PYTm6nqKH5fB/7wnohVgK+/1IVAF6DA7UAs0Ju+srlnqEbn30f84sySOeR+V6t9aF7OiF9DsGedsTfVrfj8opptwQe7nycsxQaTxvmwgQgP9FrDYH+PGy/3ThpQsPj+/Mnvbnn7PMJEJlZFtGZsMWWcE2anJlJ7fbHKNPNNg6l2qosh6/kMTrloCU6wA67ouai0OFiNR+gyQaqUiL3NMgN4k39nZuwOg=="
-    clientSecret: "0anSY5FBW+YF8BuFRRYxKX0yjDGU8/HhdirQMh+xFOEIvBQ8n/PdYi3qv2p4ngpFo5gb3PY2W6oWvHYLGgbFFse3YvzP5cbKRG0BN90hanlpVwmtAsapC7UepvOOUmNCRKHJ/pYICYcleUX/xGRiTugl9rcVw1MLg7kxcCuEMWcsBc9qCA9YHRcN3ucP+rT9x/2hLMiUmv3glYYZNgyQ3x1iqpOuTAIMeIkxMQo83vxGR57fpAx4+Yn1+hALhSl3sGaesUZhY9Py/OEZDFVWiN9RvrM4ND0IcfqyaQ4DuRPu2g8Es5fbmgSQoqkNPOcHT2+40pDbz3FPgz6QJou+pQ=="`
+    clientSecret: "0anSY5FBW+YF8BuFRRYxKX0yjDGU8/HhdirQMh+xFOEIvBQ8n/PdYi3qv2p4ngpFo5gb3PY2W6oWvHYLGgbFFse3YvzP5cbKRG0BN90hanlpVwmtAsapC7UepvOOUmNCRKHJ/pYICYcleUX/xGRiTugl9rcVw1MLg7kxcCuEMWcsBc9qCA9YHRcN3ucP+rT9x/2hLMiUmv3glYYZNgyQ3x1iqpOuTAIMeIkxMQo83vxGR57fpAx4+Yn1+hALhSl3sGaesUZhY9Py/OEZDFVWiN9RvrM4ND0IcfqyaQ4DuRPu2g8Es5fbmgSQoqkNPOcHT2+40pDbz3FPgz6QJou+pQ=="
+    redirectUri: "https://my-test-site.com"
+    
+  gitlabAuth:
+    clientId: "Rr9d1XmVVMe8ogldH6rBtdGhf49c29ldwcBVsiMn6DLRAiYWmHY08eKC6xLnP6mXwMe/qCHJ6JMKURDODL8Yjm+nQf09zynkIRCr4J7tRHh4bPAYXPG+W1+TK7l8QD4gC+WXamxJiggwGCaDtNylI1QQhbKtevv7n/T+Iq98rBj8SLxxpi3qR0oZeN/zsoQsDYgzZ+HgvA3hY+5H897ijx1oBjoTsfI1Sfx8Qqix/QLZoXorOUJyEo+83WWvTEgo8X3OyFbXGZ758Kw6A7fcHxu8oVAjDvtFJFiwrDb4iBz9rffx7llZXjkcjzYzfwFcjG7mzZnfYgn9WcCwO7zlsA=="
+    clientSecret: "1zzjCrOZQ9dVs1p/WLgT8Lvwez3EKd1tp3D+7P5uGlEdqP1RN7kQvcaqOmOpm5SIY6g+yKJQGZq9G/IqUoKdsZDhA2VGYGXVzETU6eB48AL0OXlFumhjzJoGAXpnqDWzfevglkVuAkivBv6o9S1r/FL1GydwlRwWcYU6NNJjjkB04A00B4s0J7FRR3VFRxpJqDznHgXgT32E2+F3s6enh9/aErqi9uqn+iVtw7gvbd9PN1ejlo95R3BVNKUxNi2Dn4BbsH3MjQG4DyuzX8BiS9Nb+Xt+CwLygTT/i4C5Aj+KkMjAEiYOyttFbk3jkvYVXJ1XtW+taloBVPYCHgDzmg=="
+    redirectUri: "https://my-test-site-2.com"`
 
 module.exports.config2 = `{
   "comments": {

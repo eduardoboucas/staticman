@@ -12,15 +12,14 @@ module.exports = (req, res) => {
   const github = new GitHub({
     username: req.params.username,
     repository: req.params.repository,
-    branch: req.params.branch
+    branch: req.params.branch,
+    token: config.get('githubToken')
   })
 
-  github.authenticateWithToken(config.get('githubToken'))
+  return github.api.repos.listInvitationsForAuthenticatedUser({}).then(({data}) => {
+    let invitationId = null
 
-  return github.api.users.getRepoInvites({}).then(response => {
-    let invitationId
-
-    const invitation = response.some(invitation => {
+    const invitation = Array.isArray(data) && data.some(invitation => {
       if (invitation.repository.full_name === (req.params.username + '/' + req.params.repository)) {
         invitationId = invitation.id
 
@@ -28,24 +27,24 @@ module.exports = (req, res) => {
       }
     })
 
-    if (invitation) {
-      return github.api.users.acceptRepoInvite({
-        id: invitationId
-      })
-    } else {
-      res.status(404).send('Invitation not found')
+    if (!invitation) {
+      return res.status(404).send('Invitation not found')
     }
-  }).then(response => {
-    res.send('OK!')
 
-    if (ua) {
-      ua.event('Repositories', 'Connect').send()
-    }
-  }).catch(err => { // eslint-disable-line handle-callback-err
-    res.status(500).send('Error')
+    return github.api.repos.acceptInvitation({
+      invitation_id: invitationId
+    }).then(response => {
+      res.send('OK!')
 
-    if (ua) {
-      ua.event('Repositories', 'Connect error').send()
-    }
+      if (ua) {
+        ua.event('Repositories', 'Connect').send()
+      }
+    }).catch(err => { // eslint-disable-line handle-callback-err
+      res.status(500).send('Error')
+
+      if (ua) {
+        ua.event('Repositories', 'Connect error').send()
+      }
+    })
   })
 }

@@ -11,7 +11,7 @@ const StaticmanAPI = function () {
   this.controllers = {
     connect: require('./controllers/connect'),
     encrypt: require('./controllers/encrypt'),
-    githubAuth: require('./controllers/githubAuth'),
+    auth: require('./controllers/auth'),
     handlePR: require('./controllers/handlePR'),
     home: require('./controllers/home'),
     process: require('./controllers/process')
@@ -71,20 +71,30 @@ StaticmanAPI.prototype.initialiseRoutes = function () {
     this.controllers.process
   )
 
+  this.server.post(
+    '/v:version/entry/:service/:username/:repository/:branch/:property',
+    this.bruteforce.prevent,
+    this.requireApiVersion([3]),
+    this.requireService(['github', 'gitlab']),
+    this.requireParams(['fields']),
+    this.controllers.process
+  )
+
   // Route: encrypt
   this.server.get(
     '/v:version/encrypt/:text',
     this.bruteforce.prevent,
-    this.requireApiVersion([2]),
+    this.requireApiVersion([2, 3]),
     this.controllers.encrypt
   )
 
-  // Route: GitHub auth
+  // Route: oauth
   this.server.get(
-    '/v:version/auth/github/:username/:repository/:branch/:property',
+    '/v:version/auth/:service/:username/:repository/:branch/:property',
     this.bruteforce.prevent,
-    this.requireApiVersion([2]),
-    this.controllers.githubAuth
+    this.requireApiVersion([2, 3]),
+    this.requireService(['github', 'gitlab']),
+    this.controllers.auth
   )
 
   // Route: root
@@ -111,9 +121,24 @@ StaticmanAPI.prototype.requireApiVersion = function (versions) {
     })
 
     if (!versionMatch) {
-      return res.status(500).send({
+      return res.status(400).send({
         success: false,
         errorCode: 'INVALID_VERSION'
+      })
+    }
+
+    return next()
+  }
+}
+
+StaticmanAPI.prototype.requireService = function (services) {
+  return (req, res, next) => {
+    const serviceMatch = services.some(service => service === req.params.service)
+
+    if (!serviceMatch) {
+      return res.status(400).send({
+        success: false,
+        errorCode: 'INVALID_SERVICE'
       })
     }
 
@@ -147,11 +172,15 @@ StaticmanAPI.prototype.requireParams = function (params) {
 }
 
 StaticmanAPI.prototype.start = function (callback) {
-  const callbackFn = typeof callback === 'function'
-    ? callback.call(this, config.get('port'))
-    : null
+  this.instance = this.server.listen(config.get('port'), () => {
+    if (typeof callback === 'function') {
+      callback(config.get('port'))
+    }
+  })
+}
 
-  this.server.listen(config.get('port'), callbackFn)
+StaticmanAPI.prototype.close = function () {
+  this.instance.close()
 }
 
 module.exports = StaticmanAPI

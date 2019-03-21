@@ -54,11 +54,53 @@ const schema = {
     default: 'development',
     env: 'NODE_ENV'
   },
+  githubAccessTokenUri: {
+    doc: 'URI for the GitHub authentication provider.',
+    format: String,
+    default: 'https://github.com/login/oauth/access_token',
+    env: 'GITHUB_ACCESS_TOKEN_URI'
+  },
+  githubAppID: {
+    doc: 'ID of the GitHub App.',
+    format: String,
+    default: null,
+    env: 'GITHUB_APP_ID'
+  },
+  githubBaseUrl: {
+    doc: 'Base URL for the GitHub API.',
+    format: String,
+    default: 'https://api.github.com',
+    env: 'GITHUB_BASE_URL'
+  },
+  githubPrivateKey: {
+    doc: 'Private key for the GitHub App.',
+    format: String,
+    default: null,
+    env: 'GITHUB_PRIVATE_KEY'
+  },
   githubToken: {
-    doc: 'Access token to the GitHub account being used to push files with.',
+    doc: 'Access token to the GitHub account (legacy)',
     format: String,
     default: null,
     env: 'GITHUB_TOKEN'
+  },
+  gitlabAccessTokenUri: {
+    doc: 'URI for the GitLab authentication provider.',
+    format: String,
+    default: 'https://gitlab.com/oauth/token',
+    env: 'GITLAB_ACCESS_TOKEN_URI'
+  },
+  gitlabBaseUrl: {
+    doc: 'Base URL for the GitLab API.',
+    format: String,
+    default: 'https://gitlab.com',
+    env: 'GITLAB_BASE_URL'
+  },
+  gitlabToken: {
+    doc: 'Access token to the GitLab account being used to push files with.',
+    format: String,
+    default: null,
+    env: 'GITLAB_TOKEN'
   },
   port: {
     doc: 'The port to bind the application to.',

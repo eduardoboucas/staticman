@@ -9,6 +9,12 @@ const schema = {
     format: Array,
     default: []
   },
+  allowedOrigins: {
+    doc: 'When allowedOrigins is defined, only requests sent from one of the domains listed will be accepted.',
+    docExample: 'allowedOrigins: ["localhost", "eduardoboucas.com"]',
+    default: [],
+    format: Array
+  },
   akismet: {
     enabled: {
       doc: 'Whether to use Akismet to check entries for spam. This requires an Akismet account to be configured in the Staticman API instance being used.',
@@ -39,6 +45,13 @@ const schema = {
       doc: 'Type of entry to be sent to Akismet',
       format: String,
       default: 'comment'
+    }
+  },
+  auth: {
+    required: {
+      doc: 'Whether authentication is required for an entry to be accepted.',
+      format: Boolean,
+      default: false
     }
   },
   branch: {
@@ -74,21 +87,41 @@ const schema = {
   },
   githubAuth: {
     clientId: {
-      doc: 'The client ID to the GitHub Application used for GitHub authentication.',
+      doc: 'The client ID to the GitHub Application used for GitHub OAuth.',
       format: 'EncryptedString',
-      default: null,
-      env: 'GITHUB_AUTH_CLIENT_ID'
+      default: null
     },
     clientSecret: {
-      doc: 'The client secret to the GitHub Application used for GitHub authentication.',
+      doc: 'The client secret to the GitHub Application used for GitHub OAuth.',
       format: 'EncryptedString',
-      default: null,
-      env: 'GITHUB_AUTH_CLIENT_SECRET'
+      default: null
+    },
+    redirectUri: {
+      doc: 'The URL to redirect to after authenticating with GitHub.',
+      format: String,
+      default: ''
     },
     required: {
-      doc: 'Whether GitHub Auth is required for an entry to be accepted.',
+      doc: 'Whether GitHub Auth is required for an entry to be accepted. This is only included for backwards compatibility with the v2 API. For the v3 API, please use the `auth.required` option instead.',
       format: Boolean,
       default: false
+    }
+  },
+  gitlabAuth: {
+    clientId: {
+      doc: 'The client ID to the GitLab Application used for GitLab OAuth.',
+      format: 'EncryptedString',
+      default: null
+    },
+    clientSecret: {
+      doc: 'The client secret to the GitLab Application used for GitLab OAuth.',
+      format: 'EncryptedString',
+      default: null
+    },
+    redirectUri: {
+      doc: 'The URL to redirect to after authenticating with GitLab.',
+      format: String,
+      default: ''
     }
   },
   moderation: {

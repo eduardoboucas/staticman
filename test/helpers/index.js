@@ -1,9 +1,10 @@
 const CatchAllApiMock = require('./CatchAllApiMock')
+const cloneDeep = require('lodash/cloneDeep')
 const config = require('./../../config')
 const objectPath = require('object-path')
 const markdownTable = require('markdown-table')
 const NodeRSA = require('node-rsa')
-const request = require('request-promise-native')
+const request = require('request-promise')
 const sampleData = require('./sampleData')
 const SiteConfig = require('./../../siteConfig')
 const yaml = require('js-yaml')
@@ -30,10 +31,13 @@ const parameters = {
   property: 'comments',
   repository: 'foobar',
   username: 'johndoe',
-  version: 'v2'
+  version: '3'
 }
 
-module.exports.baseUrl = 
+const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
+const siteConfig = SiteConfig(parsedConfig.comments, rsa)
+
+module.exports.baseUrl = ''
 
 module.exports.decrypt = text => {
   return rsa.decrypt(text, 'utf8')
@@ -48,19 +52,10 @@ module.exports.getCatchAllApiMock = callback => {
 }
 
 module.exports.getConfig = () => {
-  const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
-  const reCaptchaSecret = rsa.encrypt('This is a nice little secret', 'base64')
+  const config = cloneDeep(siteConfig)
+  config.getRaw = key => objectPath.get(parsedConfig, `comments.${key}`)
 
-  // For some reason, node-rsa is failing the tests if the secret is encrypted
-  // beforehand. As a workaround, we generate a new secret when we retrieve the
-  // config object. We can still obtain its raw value with `getRaw().
-  parsedConfig.comments.reCaptcha.secret = reCaptchaSecret
-
-  const siteConfig = SiteConfig(parsedConfig.comments, rsa)
-
-  siteConfig.getRaw = key => objectPath.get(parsedConfig, `comments.${key}`)
-
-  return siteConfig
+  return config
 }
 
 module.exports.getConfigObject = () => {
@@ -91,7 +86,7 @@ module.exports.getMockRequest = () => {
     headers: {
       'x-forwarded-for': '123.456.78.9'
     },
-    params: parameters
+    params: Object.assign({}, parameters)
   }
 }
 
@@ -109,7 +104,7 @@ module.exports.getMockResponse = () => {
   }
 }
 
-module.exports.getParameters = () => parameters
+module.exports.getParameters = () => Object.assign({}, parameters)
 
 module.exports.getParsedConfig = () => {
   return yaml.safeLoad(sampleData.config1, 'utf8')
