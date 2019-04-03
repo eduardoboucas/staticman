@@ -1,7 +1,7 @@
 {
   "version": 2,
   "env": {
-    "NODE_ENV": "production",
+    "NODE_ENV": "development",
     "GITHUB_TOKEN": "@staticman-github-token",
     "RSA_PRIVATE_KEY": "@staticman-rsa-private-key",
     "PORT": "80"
