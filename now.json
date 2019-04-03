@@ -1,5 +1,6 @@
 {
   "version": 2,
+  
   "env": {
     "NODE_ENV": "production",
     "GITHUB_TOKEN": "@staticman-github-token",
