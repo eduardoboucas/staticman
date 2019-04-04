@@ -1,9 +1,14 @@
 {
   "version": 2,
   "env": {
-    "NODE_ENV": "development",
+    "NODE_ENV": "production",
     "GITHUB_TOKEN": "@staticman-github-token",
-    "RSA_PRIVATE_KEY": "@staticman-rsa-private-key",
-    "PORT": "80"
-  }
+    "RSA_PRIVATE_KEY": "@staticman-rsa-private-key"
+  },
+  "builds": [
+    { "src": "index.js", "use": "@now/node-server" }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/index.js" }
+  ]
 }
