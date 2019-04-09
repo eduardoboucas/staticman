@@ -172,9 +172,9 @@ StaticmanAPI.prototype.requireParams = function (params) {
 }
 
 StaticmanAPI.prototype.start = function (callback) {
-  this.instance = this.server.listen(config.get('port'), () => {
+  this.instance = this.server.listen(config.get('port'), config.get('host'), () => {
     if (typeof callback === 'function') {
-      callback(config.get('port'))
+      callback(config.get('port'), config.get('host'))
     }
   })
 }

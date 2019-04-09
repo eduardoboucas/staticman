@@ -102,6 +102,12 @@ const schema = {
     default: null,
     env: 'GITLAB_TOKEN'
   },
+  host: {
+    doc: 'The host to bind the application to.',
+    format: String,
+    default: null,
+    env: 'HOST'
+  },
   port: {
     doc: 'The port to bind the application to.',
     format: 'port',
