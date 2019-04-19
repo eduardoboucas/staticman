@@ -436,7 +436,7 @@ describe('GitHub interface', () => {
         _ => ({
           authenticate: jest.fn(),
           gitdata: {
-            createReference: mockCreateReference
+            createRef: mockCreateReference
           },
           repos: {
             createFile: () => Promise.resolve({

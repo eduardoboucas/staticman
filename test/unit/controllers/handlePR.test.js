@@ -100,7 +100,7 @@ describe('HandlePR controller', () => {
         _ => ({
           authenticate: jest.fn(),
           gitdata: {
-            deleteReference: mockDeleteReference
+            deleteRef: mockDeleteReference
           },
           pullRequests: {
             get: mockPullRequestsGet
@@ -191,7 +191,7 @@ describe('HandlePR controller', () => {
         _ => ({
           authenticate: jest.fn(),
           gitdata: {
-            deleteReference: mockDeleteReference
+            deleteRef: mockDeleteReference
           },
           pullRequests: {
             get: mockPullRequestsGet
