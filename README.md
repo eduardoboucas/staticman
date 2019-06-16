@@ -77,4 +77,4 @@ Would you like to contribute to Staticman? That's great! Here's how:
 ## Useful links
 
 - [Improving Static Comments with Jekyll & Staticman](https://mademistakes.com/articles/improving-jekyll-static-comments/)
-- [Hugo + Staticman: Nested Replies and E-mail Notifications](https://networkhobo.com/2017/12/30/hugo---staticman-nested-replies-and-e-mail-notifications/)
+- [Hugo + Staticman: Nested Replies and E-mail Notifications](https://networkhobo.com/2017/12/30/hugo-staticman-nested-replies-and-e-mail-notifications/)
