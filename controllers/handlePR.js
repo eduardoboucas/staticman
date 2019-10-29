@@ -7,7 +7,9 @@ const Staticman = require('../lib/Staticman')
 module.exports = (repo, data) => {
   const ua = config.get('analytics.uaTrackingId')
     ? require('universal-analytics')(config.get('analytics.uaTrackingId'))
-    : null
+    : null;
+
+  data = JSON.parse(data.payload);
 
   if (!data.number) {
     return
