@@ -13,7 +13,8 @@ module.exports = (req, res) => {
     username: req.params.username,
     repository: req.params.repository,
     branch: req.params.branch,
-    token: config.get('githubToken')
+    token: config.get('githubToken'),
+    version: req.params.version
   })
 
   return github.api.repos.listInvitationsForAuthenticatedUser({}).then(({data}) => {
