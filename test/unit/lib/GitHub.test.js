@@ -1,8 +1,9 @@
-const GitHub = require('./../../../lib/GitHub')
 const mockHelpers = require('./../../helpers')
 const sampleData = require('./../../helpers/sampleData')
 const User = require('../../../lib/models/User')
 const yaml = require('js-yaml')
+const GitHub = require('./../../../lib/GitHub')
+const nock = require('nock')
 
 let req
 
@@ -12,54 +13,46 @@ beforeEach(() => {
   jest.resetModules()
 
   req = mockHelpers.getMockRequest()
-  req.params.token = 'test-token'
 })
 
 describe('GitHub interface', () => {
   test('initialises the GitHub API wrapper', () => {
-    req.params.version = 3
     const githubInstance = new GitHub(req.params)
-
     expect(githubInstance.api).toBeDefined()
   })
 
-  test('authenticates with the GitHub API using a personal access token', () => {
-    jest.mock('@octokit/rest', () =>
-      _ => ({
-        authenticate: jest.fn()
-      })
-    )
-
-    const GitHub = require('./../../../lib/GitHub')
-    const githubInstance = new GitHub(req.params)
-
-    expect(githubInstance.api.authenticate.mock.calls[0][0]).toEqual({
-      type: 'token',
-      token: req.params.token
+  test('authenticates with the GitHub API using a personal access token', async () => {
+    const scope = nock((/api\.github\.com/), {
+      reqheaders: {
+        authorization: 'token '.concat('1q2w3e4r')
+      }
     })
+      .get('/user/repository_invitations')
+      .reply(200)
+
+    const githubInstance = new GitHub(req.params)
+    await githubInstance.api.repos.listInvitationsForAuthenticatedUser();
+    expect(scope.isDone()).toBe(true)
   })
 
-  test('authenticates with the GitHub API using an OAuth token', () => {
-    jest.mock('@octokit/rest', () =>
-      _ => ({
-        authenticate: jest.fn()
-      })
-    )
-
-    const GitHub = require('./../../../lib/GitHub')
-
-    const oauthToken = 'test-oauth-token'
-    const githubInstance = new GitHub(Object.assign({}, req.params, {oauthToken}))
-
-    expect(githubInstance.api.authenticate.mock.calls[0][0]).toEqual({
-      type: 'oauth',
-      token: oauthToken
+  test('authenticates with the GitHub API using an OAuth token', async () => {
+    const scope = nock((/api\.github\.com/), {
+      reqheaders: {
+        authorization: 'token '.concat('test-oauth-token')
+      }
     })
+      .get('/user/repository_invitations')
+      .reply(200)
+
+    const githubInstance = new GitHub({
+      ...req.params,
+      oauthToken: 'test-oauth-token'
+    })
+    await githubInstance.api.repos.listInvitationsForAuthenticatedUser();
+    expect(scope.isDone()).toBe(true)
   })
 
   test('throws error if no personal access token or OAuth token is provided', () => {
-    const GitHub = require('./../../../lib/GitHub')
-
     expect(() => new GitHub({})).toThrowError('Require an `oauthToken` or `token` option')
   })
 
@@ -405,7 +398,7 @@ describe('GitHub interface', () => {
   })
 
   describe('writeFileAndSendReview', () => {
-    test('writes a file to a new branch and sends a PR to the base branch provided, using the given title and body for the commit/PR', () => {
+    test('writes a file to a new branch and sends a PR to the base branch provided, using the given title and body for the commit/PR', async () => {
       const options = {
         commitBody: 'This is a very cool file indeed...',
         commitTitle: 'Adds a new file',
@@ -415,73 +408,65 @@ describe('GitHub interface', () => {
         path: 'path/to/file.txt',
         sha: '7fd1a60b01f91b314f59955a4e4d4e80d8edf11d'
       }
-      const mockCreatePullRequest = jest.fn(() => Promise.resolve({
-        data: {
-          number: 123
+
+      const branchScope = nock((/api\.github\.com/), {
+        reqheaders: {
+          authorization: 'token '.concat('1q2w3e4r')
         }
-      }))
-      const mockCreateReference = jest.fn(() => Promise.resolve({
-        data: {
-          ref: `refs/heads/${options.newBranch}`
-        }
-      }))
-      const mockGetBranch = jest.fn(() => Promise.resolve({
-        data: {
+      })
+        .get('/repos/johndoe/foobar/branches/master')
+        .reply(200, {
           commit: {
             sha: options.sha
           }
-        }
-      }))
-
-      jest.mock('@octokit/rest', () =>
-        _ => ({
-          authenticate: jest.fn(),
-          gitdata: {
-            createReference: mockCreateReference
-          },
-          repos: {
-            createFile: () => Promise.resolve({
-              data: null
-            }),
-            getBranch: mockGetBranch
-          },
-          pullRequests: {
-            create: mockCreatePullRequest
-          }
         })
-      )
 
-      const GitHub = require('./../../../lib/GitHub')
+      const refsScope = nock((/api\.github\.com/), {
+        reqheaders: {
+          authorization: 'token '.concat('1q2w3e4r')
+        }
+      })
+        .post('/repos/johndoe/foobar/git/refs')
+        .reply(200, {
+          ref: `refs/heads/${options.newBranch}`
+        })
+
+      const fileScope = nock((/api\.github\.com/), {
+        reqheaders: {
+          authorization: 'token '.concat('1q2w3e4r')
+        }
+      })
+        .put('/repos/johndoe/foobar/contents/path/to/file.txt')
+        .reply(200, {
+          number: 123
+        })
+
+      const pullScope = nock((/api\.github\.com/), {
+        reqheaders: {
+          authorization: 'token '.concat('1q2w3e4r')
+        }
+      })
+        .post('/repos/johndoe/foobar/pulls')
+        .reply(200, {
+          id: 1
+        })
+
       const githubInstance = new GitHub(req.params)
 
-      return githubInstance.writeFileAndSendReview(
+      await githubInstance.writeFileAndSendReview(
         options.path,
         options.content,
         options.newBranch,
         options.commitTitle,
         options.commitBody
-      ).then(response => {
-        expect(mockCreatePullRequest.mock.calls[0][0]).toEqual({
-          owner: req.params.username,
-          repo: req.params.repository,
-          title: options.commitTitle,
-          head: options.newBranch,
-          base: req.params.branch,
-          body: options.commitBody
-        })
-        expect(mockCreateReference.mock.calls[0][0]).toEqual({
-          owner: req.params.username,
-          repo: req.params.repository,
-          ref: `refs/heads/${options.newBranch}`,
-          sha: options.sha
-        })
-        expect(mockGetBranch.mock.calls[0][0]).toEqual({
-          owner: req.params.username,
-          repo: req.params.repository,
-          branch: req.params.branch
-        })
-      })
-    })
+      )
+
+      // TODO: revaluate this
+      expect(branchScope.isDone()).toBe(true)
+      expect(refsScope.isDone()).toBe(true)
+      expect(fileScope.isDone()).toBe(true)
+      expect(pullScope.isDone()).toBe(true)
+})
 
     test('returns an error if any of the API calls fail', () => {
       jest.mock('@octokit/rest', () =>

@@ -10,14 +10,14 @@ const SiteConfig = require('./../../siteConfig')
 const yaml = require('js-yaml')
 
 // Disable console.log() for tests
-if (process.env.TEST_DEV !== 'true') {
-  console.debug = console.log
-  console.log = jest.fn()
-  console.warn = jest.fn()
-}
+// if (process.env.TEST_DEV !== 'true') {
+//   console.debug = console.log
+//   console.log = jest.fn()
+//   console.warn = jest.fn()
+// }
 
 const rsa = new NodeRSA()
-rsa.importKey(config.get('rsaPrivateKey'))
+rsa.importKey(config.get('rsaPrivateKey'), 'private')
 
 const fields = {
   name: 'Eduardo Bouças',
