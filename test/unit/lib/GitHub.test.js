@@ -1,3 +1,4 @@
+const GitHub = require('./../../../lib/GitHub')
 const mockHelpers = require('./../../helpers')
 const sampleData = require('./../../helpers/sampleData')
 const User = require('../../../lib/models/User')
@@ -16,7 +17,7 @@ beforeEach(() => {
 
 describe('GitHub interface', () => {
   test('initialises the GitHub API wrapper', () => {
-    const GitHub = require('./../../../lib/GitHub')
+    req.params.version = 3
     const githubInstance = new GitHub(req.params)
 
     expect(githubInstance.api).toBeDefined()

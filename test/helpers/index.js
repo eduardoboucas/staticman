@@ -31,7 +31,7 @@ const parameters = {
   property: 'comments',
   repository: 'foobar',
   username: 'johndoe',
-  version: '3'
+  version: '2'
 }
 
 const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
