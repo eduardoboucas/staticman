@@ -7,7 +7,8 @@
     "prestart": "if [ ! -d node_modules ]; then npm install; fi",
     "start": "node index.js",
     "test": "standard && jest",
-    "test-dev": "TEST_DEV=true jest --watch"
+    "test-dev": "TEST_DEV=true jest --watch",
+    "debug": "nodemon --inspect index.js"
   },
   "engines": {
     "node": ">=8.11.3"
@@ -24,7 +25,9 @@
   "homepage": "https://github.com/eduardoboucas/staticman#readme",
   "dependencies": {
     "@dadi/logger": "^1.3.0",
-    "@octokit/rest": "16.34.1",
+    "@octokit/app": "^4.1.0",
+    "@octokit/request": "^5.3.1",
+    "@octokit/rest": "^16.34.1",
     "akismet": "^1.0.0",
     "body-parser": "^1.17.x",
     "bunyan-slack": "0.0.10",
@@ -41,6 +44,7 @@
     "md5": "^2.1.0",
     "moment": "^2.18.1",
     "node-rsa": "^0.4.2",
+    "nodemon": "^1.19.4",
     "object-path": "^0.11.1",
     "request-promise": "^4.2.2",
     "sha1": "^1.1.1",
