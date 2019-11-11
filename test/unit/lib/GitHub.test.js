@@ -57,232 +57,150 @@ describe('GitHub interface', () => {
   })
 
   describe('readFile', () => {
-    test('reads a file and returns its contents', () => {
-      const fileContents = 'This is a text file!'
-      const filePath = 'path/to/file.txt'
-      const mockReposGetContents = jest.fn(() => Promise.resolve({
-        data: {
-          content: btoa(fileContents)
-        }
-      }))
-
-      jest.mock('@octokit/rest', () =>
-        _ => ({
-          authenticate: jest.fn(),
-          repos: {
-            getContents: mockReposGetContents
-          }
-        })
-      )
-
-      const GitHub = require('./../../../lib/GitHub')
-      const githubInstance = new GitHub(req.params)
-
-      return githubInstance.readFile(filePath).then(contents => {
-        expect(mockReposGetContents.mock.calls[0][0]).toEqual({
-          owner: req.params.username,
-          repo: req.params.repository,
-          path: filePath,
-          ref: req.params.branch
-        })
-      })
-    })
-
-    test('returns an error if GitHub API call errors', () => {
-      const filePath = 'path/to/file.yml'
-      const mockReposGetContents = jest.fn(() => Promise.reject()) // eslint-disable-line prefer-promise-reject-errors
-
-      jest.mock('@octokit/rest', () =>
-        _ => ({
-          authenticate: jest.fn(),
-          repos: {
-            getContents: mockReposGetContents
-          }
-        })
-      )
-
-      const GitHub = require('./../../../lib/GitHub')
-      const githubInstance = new GitHub(req.params)
-
-      return githubInstance.readFile(filePath).catch(err => {
-        expect(mockReposGetContents.mock.calls[0][0]).toEqual({
-          owner: req.params.username,
-          repo: req.params.repository,
-          path: filePath,
-          ref: req.params.branch
-        })
-        expect(err).toEqual({
-          _smErrorCode: 'GITHUB_READING_FILE'
-        })
-      })
-    })
-
-    test('returns an error if parsing fails for the given file', () => {
-      const fileContents = `
-        foo: "bar"
-        baz
-      `
-      const filePath = 'path/to/file.yml'
-      const mockReposGetContents = jest.fn(() => Promise.resolve({
-        data: {
-          content: btoa(fileContents)
-        }
-      }))
-
-      jest.mock('@octokit/rest', () =>
-        _ => ({
-          authenticate: jest.fn(),
-          repos: {
-            getContents: mockReposGetContents
-          }
-        })
-      )
-
-      const GitHub = require('./../../../lib/GitHub')
-      const githubInstance = new GitHub(req.params)
-
-      return githubInstance.readFile(filePath).catch(err => {
-        expect(mockReposGetContents.mock.calls[0][0]).toEqual({
-          owner: req.params.username,
-          repo: req.params.repository,
-          path: filePath,
-          ref: req.params.branch
-        })
-        expect(err._smErrorCode).toBe('PARSING_ERROR')
-        expect(err.message).toBeDefined()
-      })
-    })
-
-    test('reads a YAML file and returns its parsed contents', () => {
+    test('reads a file and returns its contents', async () => {
       const filePath = 'path/to/file.yml'
       const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
-      const mockReposGetContents = jest.fn(() => Promise.resolve({
-        data: {
+      
+      const scope = nock((/api\.github\.com/), {
+        reqheaders: {
+          authorization: 'token '.concat('1q2w3e4r')
+        }
+      })
+        .get('/repos/johndoe/foobar/contents/path/to/file.yml?ref=master')
+        .reply(200, {
           content: btoa(sampleData.config1)
-        }
-      }))
-
-      jest.mock('@octokit/rest', () =>
-        _ => ({
-          authenticate: jest.fn(),
-          repos: {
-            getContents: mockReposGetContents
-          }
         })
-      )
 
-      const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
 
-      return githubInstance.readFile(filePath).then(contents => {
-        expect(mockReposGetContents.mock.calls[0][0]).toEqual({
-          owner: req.params.username,
-          repo: req.params.repository,
-          path: filePath,
-          ref: req.params.branch
-        })
-        expect(contents).toEqual(parsedConfig)
-      })
+      const contents = await githubInstance.readFile(filePath)
+      expect(contents).toEqual(parsedConfig)
+      expect(scope.isDone()).toBe(true)
     })
 
-    test('reads a YAML file and returns its parsed and raw contents if `getFullResponse` is `true`', () => {
-      const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
-      const fileContents = {
-        content: btoa(sampleData.config1)
-      }
+    test('returns an error if GitHub API call errors', async () => {
       const filePath = 'path/to/file.yml'
-      const mockReposGetContents = jest.fn(() => Promise.resolve({
-        data: fileContents
-      }))
+      const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
+      
+      const scope = nock((/api\.github\.com/), {
+        reqheaders: {
+          authorization: 'token '.concat('1q2w3e4r')
+        }
+      })
+        .get('/repos/johndoe/foobar/contents/path/to/file.yml?ref=master')
+        .replyWithError('Error encountered oh no')
 
-      jest.mock('@octokit/rest', () =>
-        _ => ({
-          authenticate: jest.fn(),
-          repos: {
-            getContents: mockReposGetContents
-          }
-        })
-      )
-
-      const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
 
-      return githubInstance.readFile(filePath, true).then(response => {
-        expect(mockReposGetContents.mock.calls[0][0]).toEqual({
-          owner: req.params.username,
-          repo: req.params.repository,
-          path: filePath,
-          ref: req.params.branch
-        })
-        expect(response.content).toEqual(parsedConfig)
-        expect(response.file).toEqual(fileContents)
-      })
+      try {
+        await githubInstance.readFile(filePath)
+      } catch (err) {
+        expect(err._smErrorCode).toEqual('GITHUB_READING_FILE')
+      }
+      
+      expect(scope.isDone()).toBe(true)
     })
 
-    test('reads a JSON file and returns its parsed contents', () => {
+    test('returns an error if parsing fails for the given file', async () => {
+      const filePath = 'path/to/file.yml'
+      const githubInstance = new GitHub(req.params)
+
+      try { 
+        await githubInstance.readFile(filePath) 
+      } catch (err) {
+        expect(err._smErrorCode).toEqual('PARSING_ERROR')
+        expect(err.message).toBeDefined()
+      }
+    })
+
+    test('reads a YAML file and returns its parsed contents', async () => {
+      const filePath = 'path/to/file.yml'
+      const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
+
+      const scope = nock((/api\.github\.com/), {
+        reqheaders: {
+          authorization: 'token '.concat('1q2w3e4r')
+        }
+      })
+        .get('/repos/johndoe/foobar/contents/path/to/file.yml?ref=master')
+        .reply(200, {
+          content: btoa(sampleData.config1)
+        })
+
+      const githubInstance = new GitHub(req.params)
+
+      const contents = await githubInstance.readFile(filePath)
+      expect(contents).toEqual(parsedConfig)
+      expect(scope.isDone()).toBe(true)
+    })
+
+    test('reads a YAML file and returns its parsed and raw contents if `getFullResponse` is `true`', async () => {
+      const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
+      const filePath = 'path/to/file.yml'
+      
+      const scope = nock((/api\.github\.com/), {
+        reqheaders: {
+          authorization: 'token '.concat('1q2w3e4r')
+        }
+      })
+        .get('/repos/johndoe/foobar/contents/path/to/file.yml?ref=master')
+        .reply(200, {
+          content: btoa(sampleData.config1)
+        })
+
+      const githubInstance = new GitHub(req.params)
+
+      const response = await githubInstance.readFile(filePath, true)
+
+      expect(response.content).toEqual(parsedConfig)
+      expect(scope.isDone()).toBe(true)
+    })
+
+    test('reads a JSON file and returns its parsed contents', async () => {
       const filePath = 'path/to/file.json'
       const parsedConfig = yaml.safeLoad(sampleData.config2, 'utf8')
-      const mockReposGetContents = jest.fn(() => Promise.resolve({
-        data: {
-          content: btoa(sampleData.config2)
+
+      const scope = nock((/api\.github\.com/), {
+        reqheaders: {
+          authorization: 'token '.concat('1q2w3e4r')
         }
-      }))
-
-      jest.mock('@octokit/rest', () =>
-        _ => ({
-          authenticate: jest.fn(),
-          repos: {
-            getContents: mockReposGetContents
-          }
+      })
+        .get('/repos/johndoe/foobar/contents/path/to/file.json?ref=master')
+        .reply(200, {
+          content: btoa(sampleData.config2)
         })
-      )
 
-      const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
 
-      return githubInstance.readFile(filePath).then(contents => {
-        expect(mockReposGetContents.mock.calls[0][0]).toEqual({
-          owner: req.params.username,
-          repo: req.params.repository,
-          path: filePath,
-          ref: req.params.branch
-        })
-        expect(contents).toEqual(parsedConfig)
-      })
+      const contents = await githubInstance.readFile(filePath)
+
+      expect(contents).toEqual(parsedConfig)
+      expect(scope.isDone()).toBe(true)
     })
 
-    test('reads a JSON file and returns its parsed and raw contents if `getFullResponse` is `true`', () => {
+    test('reads a JSON file and returns its parsed and raw contents if `getFullResponse` is `true`', async () => {
       const fileContents = {
         content: btoa(sampleData.config2)
       }
       const filePath = 'path/to/file.json'
       const parsedConfig = yaml.safeLoad(sampleData.config2, 'utf8')
-      const mockReposGetContents = jest.fn(() => Promise.resolve({
-        data: fileContents
-      }))
-
-      jest.mock('@octokit/rest', () =>
-        _ => ({
-          authenticate: jest.fn(),
-          repos: {
-            getContents: mockReposGetContents
-          }
+     
+      const scope = nock((/api\.github\.com/), {
+        reqheaders: {
+          authorization: 'token '.concat('1q2w3e4r')
+        }
+      })
+        .get('/repos/johndoe/foobar/contents/path/to/file.json?ref=master')
+        .reply(200, {
+          content: btoa(sampleData.config2)
         })
-      )
 
-      const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
 
-      return githubInstance.readFile(filePath, true).then(response => {
-        expect(mockReposGetContents.mock.calls[0][0]).toEqual({
-          owner: req.params.username,
-          repo: req.params.repository,
-          path: filePath,
-          ref: req.params.branch
-        })
-        expect(response.content).toEqual(parsedConfig)
-        expect(response.file).toEqual(fileContents)
-      })
+      const response = await githubInstance.readFile(filePath, true)
+      expect(response.content).toEqual(parsedConfig)
+      expect(response.file).toEqual(fileContents)
+      expect(scope.isDone()).toBe(true)
     })
   })
 
@@ -366,16 +284,16 @@ describe('GitHub interface', () => {
 
       try {
         await githubInstance.writeFile(
-        options.path,
-        options.content,
-        options.branch,
-        options.commitTitle
-      )
-        } catch (err) {
-          expect(err).toEqual({
-            _smErrorCode: 'GITHUB_WRITING_FILE'
-          })
-        }
+          options.path,
+          options.content,
+          options.branch,
+          options.commitTitle
+        )
+      } catch (err) {
+        expect(err).toEqual({
+          _smErrorCode: 'GITHUB_WRITING_FILE'
+        })
+      }
 
       expect(scope.isDone()).toBe(true)
     })
@@ -445,26 +363,16 @@ describe('GitHub interface', () => {
         options.commitBody
       )
 
-      // TODO: revaluate this
-      expect(branchScope.isDone()).toBe(true)
-      expect(refsScope.isDone()).toBe(true)
-      expect(fileScope.isDone()).toBe(true)
-      expect(pullScope.isDone()).toBe(true)
-})
+      setTimeout(() =>{
+        expect(branchScope.isDone()).toBe(true)
+        expect(refsScope.isDone()).toBe(true)
+        expect(fileScope.isDone()).toBe(true)
+        expect(pullScope.isDone()).toBe(true)
+      })
+    })
 
-    test('returns an error if any of the API calls fail', () => {
-      jest.mock('@octokit/rest', () =>
-        _ => ({
-          authenticate: jest.fn(),
-          repos: {
-            createFile: () => Promise.resolve(),
-            getBranch: () => Promise.reject()
-          }
-        })
-      )
-
-      const GitHub = require('./../../../lib/GitHub')
-      const githubInstance = new GitHub(req.params)
+    // TODO: Figure out why this works with no mocks
+    test('returns an error if any of the API calls fail', async () => {
       const options = {
         commitBody: '',
         commitTitle: 'Add Staticman file',
@@ -475,63 +383,69 @@ describe('GitHub interface', () => {
         sha: '7fd1a60b01f91b314f59955a4e4d4e80d8edf11d'
       }
 
-      return githubInstance.writeFileAndSendReview(
-        options.path,
-        options.content,
-        options.newBranch,
-        options.commitTitle,
-        options.commitBody
-      ).catch(err => {
-        expect(err).toEqual({
-          _smErrorCode: 'GITHUB_CREATING_PR'
-        })
+      const scope = nock((/api\.github\.com/), {
+        reqheaders: {
+          authorization: 'token '.concat('1q2w3e4r')
+        }
       })
+        .get('/repos/johndoe/foobar/branches/master')
+        .replyWithError('An error, oh no.')
+
+      const githubInstance = new GitHub(req.params)
+
+      try {
+        await githubInstance.writeFileAndSendReview(
+          options.path,
+          options.content,
+          options.newBranch,
+          options.commitTitle,
+          options.commitBody
+        )
+      } catch(err) {
+        expect(err._smErrorCode).toEqual('GITHUB_CREATING_PR')
+      }
+      expect(scope.isDone()).toBe(true)
     })
   })
 
   describe('getCurrentUser', () => {
-    test('returns the current authenticated user', () => {
-      const mockUser = {
-        login: 'johndoe',
-        email: 'johndoe@test.com',
-        name: 'John Doe'
-      }
-
-      jest.mock('@octokit/rest', () =>
-        _ => ({
-          authenticate: jest.fn(),
-          users: {
-            getAuthenticated: () => Promise.resolve({data: mockUser})
-          }
+    test('returns the current authenticated user', async () => {
+      const scope = nock((/api\.github\.com/), {
+        reqheaders: {
+          authorization: 'token '.concat('1q2w3e4r')
+        }
+      })
+        .get('/user')
+        .reply(200, {
+          login: 'johndoe',
+          email: 'johndoe@test.com',
+          name: 'John Doe'
         })
-      )
 
-      const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
 
-      return githubInstance.getCurrentUser().then((user) => {
-        expect(user).toEqual(new User('github', 'johndoe', 'johndoe@test.com', 'John Doe'))
-      })
+      const user = await githubInstance.getCurrentUser()
+      expect(user).toEqual(new User('github', 'johndoe', 'johndoe@test.com', 'John Doe'))
+      expect(scope.isDone()).toBe(true)
     })
 
-    test('throws an error if unable to retrieve the current unauthenticated user', () => {
-      jest.mock('@octokit/rest', () =>
-        _ => ({
-          authenticate: jest.fn(),
-          users: {
-            getAuthenticated: () => Promise.reject()
-          }
-        })
-      )
+    test('throws an error if unable to retrieve the current unauthenticated user', async () => {
+      const scope = nock((/api\.github\.com/), {
+        reqheaders: {
+          authorization: 'token '.concat('1q2w3e4r')
+        }
+      })
+        .get('/user')
+        .replyWithError('Oops, an error')
 
-      const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
 
-      return githubInstance.getCurrentUser().catch((err) => {
-        expect(err).toEqual({
-          _smErrorCode: 'GITHUB_GET_USER'
-        })
-      })
+      try{
+        await githubInstance.getCurrentUser()
+      } catch (err) {
+        expect(err._smErrorCode).toEqual('GITHUB_GET_USER')
+      }
+      expect(scope.isDone()).toBe(true)
     })
   })
 })
