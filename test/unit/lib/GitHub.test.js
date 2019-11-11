@@ -287,96 +287,64 @@ describe('GitHub interface', () => {
   })
 
   describe('writeFile', () => {
-    test('creates a file on the given branch using the commit title provided', () => {
+    test('creates a file on the given branch using the commit title provided', async () => {
       const options = {
         branch: 'master',
         commitTitle: 'Adds a new file',
         content: 'This is a new file',
         path: 'path/to/file.txt'
       }
-      const mockReposCreateFile = jest.fn(() => Promise.resolve({
-        data: null
-      }))
 
-      jest.mock('@octokit/rest', () =>
-        _ => ({
-          authenticate: jest.fn(),
-          repos: {
-            createFile: mockReposCreateFile
-          }
+      const scope = nock((/api\.github\.com/), {
+        reqheaders: {
+          authorization: 'token '.concat('1q2w3e4r')
+        }
+      })
+        .put('/repos/johndoe/foobar/contents/path/to/file.txt')
+        .reply(200, {
+          number: 123
         })
-      )
 
-      const GitHub = require('./../../../lib/GitHub')
       const githubInstance = new GitHub(req.params)
 
-      return githubInstance.writeFile(
+      await githubInstance.writeFile(
         options.path,
         options.content,
         options.branch,
         options.commitTitle
-      ).then(response => {
-        expect(mockReposCreateFile).toHaveBeenCalledTimes(1)
-        expect(mockReposCreateFile.mock.calls[0][0]).toEqual({
-          owner: req.params.username,
-          repo: req.params.repository,
-          path: options.path,
-          content: btoa(options.content),
-          message: options.commitTitle,
-          branch: options.branch
-        })
-      })
-    })
-
-    test('creates a file using the branch present in the request, if one is not provided to the method, and the default commit title', () => {
-      const mockReposCreateFile = jest.fn(() => Promise.resolve({
-        data: null
-      }))
-
-      jest.mock('@octokit/rest', () =>
-        _ => ({
-          authenticate: jest.fn(),
-          repos: {
-            createFile: mockReposCreateFile
-          }
-        })
       )
 
-      const GitHub = require('./../../../lib/GitHub')
-      const githubInstance = new GitHub(req.params)
+      expect(scope.isDone()).toBe(true)
+    })
+
+    test('creates a file using the branch present in the request, if one is not provided to the method, and the default commit title', async () => {
       const options = {
         content: 'This is a new file',
         commitTitle: 'Add Staticman file',
         path: 'path/to/file.txt'
       }
 
-      return githubInstance.writeFile(
+      const scope = nock((/api\.github\.com/), {
+        reqheaders: {
+          authorization: 'token '.concat('1q2w3e4r')
+        }
+      })
+        .put('/repos/johndoe/foobar/contents/path/to/file.txt')
+        .reply(200, {
+          number: 123
+        })
+
+      const githubInstance = new GitHub(req.params)
+
+      await githubInstance.writeFile(
         options.path,
         options.content
-      ).then(response => {
-        expect(mockReposCreateFile.mock.calls[0][0]).toEqual({
-          owner: req.params.username,
-          repo: req.params.repository,
-          path: options.path,
-          content: btoa(options.content),
-          message: options.commitTitle,
-          branch: req.params.branch
-        })
-      })
-    })
-
-    test('returns an error object if the save operation fails', () => {
-      jest.mock('@octokit/rest', () =>
-        _ => ({
-          authenticate: jest.fn(),
-          repos: {
-            createFile: () => Promise.reject()
-          }
-        })
       )
 
-      const GitHub = require('./../../../lib/GitHub')
-      const githubInstance = new GitHub(req.params)
+      expect(scope.isDone()).toBe(true)
+    })
+
+    test('returns an error object if the save operation fails', async () => {
       const options = {
         branch: 'master',
         commitTitle: 'Adds a new file',
@@ -384,16 +352,32 @@ describe('GitHub interface', () => {
         path: 'path/to/file.txt'
       }
 
-      return githubInstance.writeFile(
+      const scope = nock((/api\.github\.com/), {
+        reqheaders: {
+          authorization: 'token '.concat('1q2w3e4r')
+        }
+      })
+        .put('/repos/johndoe/foobar/contents/path/to/file.txt')
+        .reply(200, {
+          number: 123
+        })
+
+      const githubInstance = new GitHub(req.params)
+
+      try {
+        await githubInstance.writeFile(
         options.path,
         options.content,
         options.branch,
         options.commitTitle
-      ).catch(err => {
-        expect(err).toEqual({
-          _smErrorCode: 'GITHUB_WRITING_FILE'
-        })
-      })
+      )
+        } catch (err) {
+          expect(err).toEqual({
+            _smErrorCode: 'GITHUB_WRITING_FILE'
+          })
+        }
+
+      expect(scope.isDone()).toBe(true)
     })
   })
 
