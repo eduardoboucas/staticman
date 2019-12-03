@@ -70,6 +70,10 @@
     "coverageReporters": [
       "cobertura"
     ],
+    "moduleDirectories": [
+      "node_modules",
+      "<rootDir>"
+    ],
     "testMatch": [
       "*/**/test/acceptance/**/*.test.js",
       "*/**/test/unit/**/*.test.js"

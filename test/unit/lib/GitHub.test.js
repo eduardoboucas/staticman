@@ -4,6 +4,7 @@ const User = require('../../../lib/models/User')
 const yaml = require('js-yaml')
 const GitHub = require('./../../../lib/GitHub')
 const nock = require('nock')
+const config = require('../../../config')
 
 let req
 
@@ -11,13 +12,14 @@ const btoa = contents => Buffer.from(contents).toString('base64')
 
 beforeEach(() => {
   jest.resetModules()
+  jest.restoreAllMocks()
 
   req = mockHelpers.getMockRequest()
 })
 
 describe('GitHub interface', () => {
-  test('initialises the GitHub API wrapper', () => {
-    const githubInstance = new GitHub(req.params)
+  test('initialises the GitHub API wrapper', async () => {
+    const githubInstance = await new GitHub(req.params)
     expect(githubInstance.api).toBeDefined()
   })
 
@@ -30,7 +32,7 @@ describe('GitHub interface', () => {
       .get('/user/repository_invitations')
       .reply(200)
 
-    const githubInstance = new GitHub(req.params)
+    const githubInstance = await new GitHub(req.params)
     await githubInstance.api.repos.listInvitationsForAuthenticatedUser();
     expect(scope.isDone()).toBe(true)
   })
@@ -44,7 +46,7 @@ describe('GitHub interface', () => {
       .get('/user/repository_invitations')
       .reply(200)
 
-    const githubInstance = new GitHub({
+    const githubInstance = await new GitHub({
       ...req.params,
       oauthToken: 'test-oauth-token'
     })
@@ -52,15 +54,21 @@ describe('GitHub interface', () => {
     expect(scope.isDone()).toBe(true)
   })
 
-  test('throws error if no personal access token or OAuth token is provided', () => {
-    expect(() => new GitHub({})).toThrowError('Require an `oauthToken` or `token` option')
+  test('throws error if no personal access token or OAuth token is provided', async () => {
+    jest.spyOn(config, 'get').mockImplementation(() => null)
+    expect.assertions(1)
+    try {
+      await new GitHub({})
+    } catch (e) {
+      expect(e.message).toBe('Require an `oauthToken` or `token` option')
+    }
   })
 
   describe('readFile', () => {
     test('reads a file and returns its contents', async () => {
       const filePath = 'path/to/file.yml'
       const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
-      
+
       const scope = nock((/api\.github\.com/), {
         reqheaders: {
           authorization: 'token '.concat('1q2w3e4r')
@@ -71,7 +79,7 @@ describe('GitHub interface', () => {
           content: btoa(sampleData.config1)
         })
 
-      const githubInstance = new GitHub(req.params)
+      const githubInstance = await new GitHub(req.params)
 
       const contents = await githubInstance.readFile(filePath)
       expect(contents).toEqual(parsedConfig)
@@ -81,7 +89,7 @@ describe('GitHub interface', () => {
     test('returns an error if GitHub API call errors', async () => {
       const filePath = 'path/to/file.yml'
       const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
-      
+
       const scope = nock((/api\.github\.com/), {
         reqheaders: {
           authorization: 'token '.concat('1q2w3e4r')
@@ -90,23 +98,23 @@ describe('GitHub interface', () => {
         .get('/repos/johndoe/foobar/contents/path/to/file.yml?ref=master')
         .replyWithError('Error encountered oh no')
 
-      const githubInstance = new GitHub(req.params)
+      const githubInstance = await new GitHub(req.params)
 
       try {
         await githubInstance.readFile(filePath)
       } catch (err) {
         expect(err._smErrorCode).toEqual('GITHUB_READING_FILE')
       }
-      
+
       expect(scope.isDone()).toBe(true)
     })
 
     test('returns an error if parsing fails for the given file', async () => {
       const filePath = 'path/to/file.yml'
-      const githubInstance = new GitHub(req.params)
+      const githubInstance = await new GitHub(req.params)
 
-      try { 
-        await githubInstance.readFile(filePath) 
+      try {
+        await githubInstance.readFile(filePath)
       } catch (err) {
         expect(err._smErrorCode).toEqual('PARSING_ERROR')
         expect(err.message).toBeDefined()
@@ -127,7 +135,7 @@ describe('GitHub interface', () => {
           content: btoa(sampleData.config1)
         })
 
-      const githubInstance = new GitHub(req.params)
+      const githubInstance = await new GitHub(req.params)
 
       const contents = await githubInstance.readFile(filePath)
       expect(contents).toEqual(parsedConfig)
@@ -137,7 +145,7 @@ describe('GitHub interface', () => {
     test('reads a YAML file and returns its parsed and raw contents if `getFullResponse` is `true`', async () => {
       const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
       const filePath = 'path/to/file.yml'
-      
+
       const scope = nock((/api\.github\.com/), {
         reqheaders: {
           authorization: 'token '.concat('1q2w3e4r')
@@ -148,7 +156,7 @@ describe('GitHub interface', () => {
           content: btoa(sampleData.config1)
         })
 
-      const githubInstance = new GitHub(req.params)
+      const githubInstance = await new GitHub(req.params)
 
       const response = await githubInstance.readFile(filePath, true)
 
@@ -170,7 +178,7 @@ describe('GitHub interface', () => {
           content: btoa(sampleData.config2)
         })
 
-      const githubInstance = new GitHub(req.params)
+      const githubInstance = await new GitHub(req.params)
 
       const contents = await githubInstance.readFile(filePath)
 
@@ -184,7 +192,7 @@ describe('GitHub interface', () => {
       }
       const filePath = 'path/to/file.json'
       const parsedConfig = yaml.safeLoad(sampleData.config2, 'utf8')
-     
+
       const scope = nock((/api\.github\.com/), {
         reqheaders: {
           authorization: 'token '.concat('1q2w3e4r')
@@ -195,7 +203,7 @@ describe('GitHub interface', () => {
           content: btoa(sampleData.config2)
         })
 
-      const githubInstance = new GitHub(req.params)
+      const githubInstance = await new GitHub(req.params)
 
       const response = await githubInstance.readFile(filePath, true)
       expect(response.content).toEqual(parsedConfig)
@@ -223,7 +231,7 @@ describe('GitHub interface', () => {
           number: 123
         })
 
-      const githubInstance = new GitHub(req.params)
+      const githubInstance = await new GitHub(req.params)
 
       await githubInstance.writeFile(
         options.path,
@@ -252,7 +260,7 @@ describe('GitHub interface', () => {
           number: 123
         })
 
-      const githubInstance = new GitHub(req.params)
+      const githubInstance = await new GitHub(req.params)
 
       await githubInstance.writeFile(
         options.path,
@@ -280,7 +288,7 @@ describe('GitHub interface', () => {
           number: 123
         })
 
-      const githubInstance = new GitHub(req.params)
+      const githubInstance = await new GitHub(req.params)
 
       try {
         await githubInstance.writeFile(
@@ -353,7 +361,7 @@ describe('GitHub interface', () => {
           id: 1
         })
 
-      const githubInstance = new GitHub(req.params)
+      const githubInstance = await new GitHub(req.params)
 
       await githubInstance.writeFileAndSendReview(
         options.path,
@@ -363,7 +371,7 @@ describe('GitHub interface', () => {
         options.commitBody
       )
 
-      setTimeout(() =>{
+      setTimeout(() => {
         expect(branchScope.isDone()).toBe(true)
         expect(refsScope.isDone()).toBe(true)
         expect(fileScope.isDone()).toBe(true)
@@ -391,7 +399,7 @@ describe('GitHub interface', () => {
         .get('/repos/johndoe/foobar/branches/master')
         .replyWithError('An error, oh no.')
 
-      const githubInstance = new GitHub(req.params)
+      const githubInstance = await new GitHub(req.params)
 
       try {
         await githubInstance.writeFileAndSendReview(
@@ -401,7 +409,7 @@ describe('GitHub interface', () => {
           options.commitTitle,
           options.commitBody
         )
-      } catch(err) {
+      } catch (err) {
         expect(err._smErrorCode).toEqual('GITHUB_CREATING_PR')
       }
       expect(scope.isDone()).toBe(true)
@@ -422,7 +430,7 @@ describe('GitHub interface', () => {
           name: 'John Doe'
         })
 
-      const githubInstance = new GitHub(req.params)
+      const githubInstance = await new GitHub(req.params)
 
       const user = await githubInstance.getCurrentUser()
       expect(user).toEqual(new User('github', 'johndoe', 'johndoe@test.com', 'John Doe'))
@@ -438,9 +446,9 @@ describe('GitHub interface', () => {
         .get('/user')
         .replyWithError('Oops, an error')
 
-      const githubInstance = new GitHub(req.params)
+      const githubInstance = await new GitHub(req.params)
 
-      try{
+      try {
         await githubInstance.getCurrentUser()
       } catch (err) {
         expect(err._smErrorCode).toEqual('GITHUB_GET_USER')

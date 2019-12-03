@@ -4,7 +4,7 @@ const config = require('../config')
 const GitHub = require('../lib/GitHub')
 const Staticman = require('../lib/Staticman')
 
-module.exports = (repo, data) => {
+module.exports = async (repo, data) => {
   const ua = config.get('analytics.uaTrackingId')
     ? require('universal-analytics')(config.get('analytics.uaTrackingId'))
     : null
@@ -13,13 +13,13 @@ module.exports = (repo, data) => {
     return
   }
 
-  const github = new GitHub({
+  const github = await new GitHub({
     username: data.repository.owner.login,
     repository: data.repository.name,
     token: config.get('githubToken')
   })
 
-  return github.getReview(data.number).then((review) => {
+  return github.getReview(data.number).then(async (review) => {
     if (review.sourceBranch.indexOf('staticman_')) {
       return null
     }
@@ -34,7 +34,7 @@ module.exports = (repo, data) => {
       if (bodyMatch && (bodyMatch.length === 2)) {
         try {
           const parsedBody = JSON.parse(bodyMatch[1])
-          const staticman = new Staticman(parsedBody.parameters)
+          const staticman = await new Staticman(parsedBody.parameters)
 
           staticman.setConfigPath(parsedBody.configPath)
           staticman.processMerge(parsedBody.fields, parsedBody.options)
