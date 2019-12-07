@@ -10,7 +10,9 @@ Staticman is a Node.js application that receives user-generated content and uplo
 
 It consists of a small web service that handles the `POST` requests from your forms, runs various forms of validation and manipulation defined by you and finally pushes them to your repository as data files. You can choose to enable moderation, which means files will be pushed to a separate branch and a pull request will be created for your approval, or disable it completely, meaning that files will be pushed to the main branch automatically.
 
-You can download and run the Staticman API on your own infrastructure. The easiest way to get a personal Staticman API instance up and running is to use the free tier of Heroku. If deploying to Heroku you may skip to *[Deploying to Heroku](#deploying-to-heroku)*.
+You can download and run the Staticman API on your own infrastructure. The easiest way to get a personal Staticman API instance up and running is to use the free tier of Heroku. If deploying to Heroku you can simply click the button below.
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
 ## Requirements
 
@@ -46,18 +48,6 @@ You can download and run the Staticman API on your own infrastructure. The easie
 Each environment, determined by the `NODE_ENV` environment variable, requires its own configuration file. When you're ready to push your Staticman API live, create a `config.production.json` file before deploying.
 
 Check [this guide](docs/docker.md) if you're using Docker.
-
-## Deploying to Heroku
-
-1. Fork this repository
-1. Log in to [Heroku](https://www.heroku.com)
-1. Select `New` then `Create new app`
-1. Name your app whatever you would like and select `Create app`
-1. Select `GitHub` as your deployment method and select your Staticman fork from step 1.
-1. Select `Enable Automatic Deployments` or deploy manually
-1. Select the `Settings` tab then click `Reveal Config Vars`
-1. Enter your config values. For the most basic staticman setup, enter your GitHub access token, SSH private key, and port number. Click [here](https://staticman.net/docs/api) for the list of available configuration parameters.
-
 
 ## Setting up a repository
 
