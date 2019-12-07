@@ -113,6 +113,8 @@ function sendResponse (res, data) {
     }
 
     payload.errorCode = errorCode
+  } else if (error) {
+    payload.rawError = data.err.toString()
   } else {
     payload.fields = data.fields
   }
