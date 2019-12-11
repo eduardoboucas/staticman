@@ -1,5 +1,3 @@
-'use strict'
-
 const bodyParser = require('body-parser')
 const config = require('./config')
 const express = require('express')
@@ -7,180 +5,186 @@ const ExpressBrute = require('express-brute')
 const GithubWebHook = require('express-github-webhook')
 const objectPath = require('object-path')
 
-const StaticmanAPI = function () {
-  this.controllers = {
-    connect: require('./controllers/connect'),
-    encrypt: require('./controllers/encrypt'),
-    auth: require('./controllers/auth'),
-    handlePR: require('./controllers/handlePR'),
-    home: require('./controllers/home'),
-    process: require('./controllers/process')
+class StaticmanAPI {
+  constructor () {
+    return (async () => {
+      this.controllers = {
+        connect: require('./controllers/connect'),
+        encrypt: require('./controllers/encrypt'),
+        auth: require('./controllers/auth'),
+        handlePR: require('./controllers/handlePR'),
+        home: require('./controllers/home'),
+        process: require('./controllers/process')
+      }
+
+      this.server = express()
+      this.server.use(bodyParser.json())
+      this.server.use(bodyParser.urlencoded({
+        extended: true
+        // type: '*'
+      }))
+
+      this.initialiseWebhookHandler()
+      this.initialiseCORS()
+      this.initialiseBruteforceProtection()
+      this.initialiseRoutes()
+
+      return this
+    })()
   }
 
-  this.server = express()
-  this.server.use(bodyParser.json())
-  this.server.use(bodyParser.urlencoded({
-    extended: true
-    // type: '*'
-  }))
+  initialiseBruteforceProtection () {
+    const store = new ExpressBrute.MemoryStore()
 
-  this.initialiseWebhookHandler()
-  this.initialiseCORS()
-  this.initialiseBruteforceProtection()
-  this.initialiseRoutes()
-}
+    this.bruteforce = new ExpressBrute(store)
+  }
 
-StaticmanAPI.prototype.initialiseBruteforceProtection = function () {
-  const store = new ExpressBrute.MemoryStore()
+  initialiseCORS () {
+    this.server.use((req, res, next) => {
+      res.header('Access-Control-Allow-Origin', '*')
+      res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
 
-  this.bruteforce = new ExpressBrute(store)
-}
+      next()
+    })
+  }
 
-StaticmanAPI.prototype.initialiseCORS = function () {
-  this.server.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*')
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+  initialiseRoutes () {
+    // Route: connect
+    this.server.get(
+      '/v:version/connect/:username/:repository',
+      this.bruteforce.prevent,
+      this.requireApiVersion([1, 2]),
+      this.controllers.connect
+    )
 
-    next()
-  })
-}
+    // Route: process
+    this.server.post(
+      '/v:version/entry/:username/:repository/:branch',
+      this.bruteforce.prevent,
+      this.requireApiVersion([1, 2]),
+      this.requireParams(['fields']),
+      this.controllers.process
+    )
 
-StaticmanAPI.prototype.initialiseRoutes = function () {
-  // Route: connect
-  this.server.get(
-    '/v:version/connect/:username/:repository',
-    this.bruteforce.prevent,
-    this.requireApiVersion([1, 2]),
-    this.controllers.connect
-  )
+    this.server.post(
+      '/v:version/entry/:username/:repository/:branch/:property',
+      this.bruteforce.prevent,
+      this.requireApiVersion([2]),
+      this.requireParams(['fields']),
+      this.controllers.process
+    )
 
-  // Route: process
-  this.server.post(
-    '/v:version/entry/:username/:repository/:branch',
-    this.bruteforce.prevent,
-    this.requireApiVersion([1, 2]),
-    this.requireParams(['fields']),
-    this.controllers.process
-  )
+    this.server.post(
+      '/v:version/entry/:service/:username/:repository/:branch/:property',
+      this.bruteforce.prevent,
+      this.requireApiVersion([3]),
+      this.requireService(['github', 'gitlab']),
+      this.requireParams(['fields']),
+      this.controllers.process
+    )
 
-  this.server.post(
-    '/v:version/entry/:username/:repository/:branch/:property',
-    this.bruteforce.prevent,
-    this.requireApiVersion([2]),
-    this.requireParams(['fields']),
-    this.controllers.process
-  )
+    // Route: encrypt
+    this.server.get(
+      '/v:version/encrypt/:text',
+      this.bruteforce.prevent,
+      this.requireApiVersion([2, 3]),
+      this.controllers.encrypt
+    )
 
-  this.server.post(
-    '/v:version/entry/:service/:username/:repository/:branch/:property',
-    this.bruteforce.prevent,
-    this.requireApiVersion([3]),
-    this.requireService(['github', 'gitlab']),
-    this.requireParams(['fields']),
-    this.controllers.process
-  )
+    // Route: oauth
+    this.server.get(
+      '/v:version/auth/:service/:username/:repository/:branch/:property',
+      this.bruteforce.prevent,
+      this.requireApiVersion([2, 3]),
+      this.requireService(['github', 'gitlab']),
+      this.controllers.auth
+    )
 
-  // Route: encrypt
-  this.server.get(
-    '/v:version/encrypt/:text',
-    this.bruteforce.prevent,
-    this.requireApiVersion([2, 3]),
-    this.controllers.encrypt
-  )
+    // Route: root
+    this.server.get(
+      '/',
+      this.controllers.home
+    )
+  }
 
-  // Route: oauth
-  this.server.get(
-    '/v:version/auth/:service/:username/:repository/:branch/:property',
-    this.bruteforce.prevent,
-    this.requireApiVersion([2, 3]),
-    this.requireService(['github', 'gitlab']),
-    this.controllers.auth
-  )
-
-  // Route: root
-  this.server.get(
-    '/',
-    this.controllers.home
-  )
-}
-
-StaticmanAPI.prototype.initialiseWebhookHandler = function () {
-  const webhookHandler = GithubWebHook({
-    path: '/v1/webhook'
-  })
-
-  webhookHandler.on('pull_request', this.controllers.handlePR)
-
-  this.server.use(webhookHandler)
-}
-
-StaticmanAPI.prototype.requireApiVersion = function (versions) {
-  return (req, res, next) => {
-    const versionMatch = versions.some(version => {
-      return version.toString() === req.params.version
+  initialiseWebhookHandler () {
+    const webhookHandler = GithubWebHook({
+      path: '/v1/webhook'
     })
 
-    if (!versionMatch) {
-      return res.status(400).send({
-        success: false,
-        errorCode: 'INVALID_VERSION'
-      })
-    }
+    webhookHandler.on('pull_request', this.controllers.handlePR)
 
-    return next()
+    this.server.use(webhookHandler)
   }
-}
 
-StaticmanAPI.prototype.requireService = function (services) {
-  return (req, res, next) => {
-    const serviceMatch = services.some(service => service === req.params.service)
-
-    if (!serviceMatch) {
-      return res.status(400).send({
-        success: false,
-        errorCode: 'INVALID_SERVICE'
+  requireApiVersion (versions) {
+    return (req, res, next) => {
+      const versionMatch = versions.some(version => {
+        return version.toString() === req.params.version
       })
+
+      if (!versionMatch) {
+        return res.status(400).send({
+          success: false,
+          errorCode: 'INVALID_VERSION'
+        })
+      }
+
+      return next()
     }
-
-    return next()
   }
-}
 
-StaticmanAPI.prototype.requireParams = function (params) {
-  return function (req, res, next) {
-    let missingParams = []
+  requireService (services) {
+    return (req, res, next) => {
+      const serviceMatch = services.some(service => service === req.params.service)
 
-    params.forEach(param => {
-      if (
-        objectPath.get(req.query, param) === undefined &&
-        objectPath.get(req.body, param) === undefined
-      ) {
-        missingParams.push(param)
+      if (!serviceMatch) {
+        return res.status(400).send({
+          success: false,
+          errorCode: 'INVALID_SERVICE'
+        })
+      }
+
+      return next()
+    }
+  }
+
+  requireParams (params) {
+    return function (req, res, next) {
+      let missingParams = []
+
+      params.forEach(param => {
+        if (
+          objectPath.get(req.query, param) === undefined &&
+          objectPath.get(req.body, param) === undefined
+        ) {
+          missingParams.push(param)
+        }
+      })
+
+      if (missingParams.length) {
+        return res.status(500).send({
+          success: false,
+          errorCode: 'MISSING_PARAMS',
+          data: missingParams
+        })
+      }
+
+      return next()
+    }
+  }
+
+  start (callback) {
+    this.instance = this.server.listen(config.get('port'), () => {
+      if (typeof callback === 'function') {
+        callback(config.get('port'))
       }
     })
-
-    if (missingParams.length) {
-      return res.status(500).send({
-        success: false,
-        errorCode: 'MISSING_PARAMS',
-        data: missingParams
-      })
-    }
-
-    return next()
   }
-}
 
-StaticmanAPI.prototype.start = function (callback) {
-  this.instance = this.server.listen(config.get('port'), () => {
-    if (typeof callback === 'function') {
-      callback(config.get('port'))
-    }
-  })
-}
-
-StaticmanAPI.prototype.close = function () {
-  this.instance.close()
+  close () {
+    this.instance.close()
+  }
 }
 
 module.exports = StaticmanAPI

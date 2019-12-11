@@ -10,7 +10,9 @@ Staticman is a Node.js application that receives user-generated content and uplo
 
 It consists of a small web service that handles the `POST` requests from your forms, runs various forms of validation and manipulation defined by you and finally pushes them to your repository as data files. You can choose to enable moderation, which means files will be pushed to a separate branch and a pull request will be created for your approval, or disable it completely, meaning that files will be pushed to the main branch automatically.
 
-You can download and run the Staticman API on your own infrastructure, or you can simply use the public instance of the Staticman API for free. If using the public instance, you can skip to *[Setting up repository](#setting-up-a-repository)*.
+You can download and run the Staticman API on your own infrastructure. The easiest way to get a personal Staticman API instance up and running is to use the free tier of Heroku. If deploying to Heroku you can simply click the button below.
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
 ## Requirements
 
@@ -56,8 +58,6 @@ To add Staticman to a repository, you need to add the bot as a collaborator with
 ```
 http://your-staticman-url/v2/connect/GITHUB-USERNAME/GITHUB-REPOSITORY
 ```
-
-If you're using the public instance, the account you want to add is [staticmanapp](https://github.com/staticmanapp) and the URL is https://api.staticman.net/v2/connect/GITHUB-USERNAME/GITHUB-REPOSITORY.
 
 ## Site configuration
 

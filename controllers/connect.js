@@ -4,19 +4,26 @@ const path = require('path')
 const config = require(path.join(__dirname, '/../config'))
 const GitHub = require(path.join(__dirname, '/../lib/GitHub'))
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
   const ua = config.get('analytics.uaTrackingId')
     ? require('universal-analytics')(config.get('analytics.uaTrackingId'))
     : null
 
-  const github = new GitHub({
+  const github = await new GitHub({
     username: req.params.username,
     repository: req.params.repository,
     branch: req.params.branch,
-    token: config.get('githubToken')
+    token: config.get('githubToken'),
+    version: req.params.version
   })
 
-  return github.api.repos.listInvitationsForAuthenticatedUser({}).then(({data}) => {
+  const isAppAuth = config.get('githubAppID') && config.get('githubPrivateKey')
+
+  if (isAppAuth) {
+    return res.send('OK!')
+  }
+
+  return github.api.repos.listInvitationsForAuthenticatedUser({}).then(({ data }) => {
     let invitationId = null
 
     const invitation = Array.isArray(data) && data.some(invitation => {
