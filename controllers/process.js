@@ -113,6 +113,8 @@ function sendResponse (res, data) {
     }
 
     payload.errorCode = errorCode
+  } else if (error) {
+    payload.rawError = data.err.toString()
   } else {
     payload.fields = data.fields
   }
@@ -120,8 +122,8 @@ function sendResponse (res, data) {
   res.status(statusCode).send(payload)
 }
 
-module.exports = (req, res, next) => {
-  const staticman = new Staticman(req.params)
+module.exports = async (req, res, next) => {
+  const staticman = await new Staticman(req.params)
 
   staticman.setConfigPath()
   staticman.setIp(req.headers['x-forwarded-for'] || req.connection.remoteAddress)

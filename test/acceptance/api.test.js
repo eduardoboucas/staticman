@@ -11,8 +11,8 @@ const btoa = contents => Buffer.from(contents).toString('base64')
 
 let server
 
-beforeAll(done => {
-  server = new StaticmanAPI()
+beforeAll(async (done) => {
+  server = await new StaticmanAPI()
 
   server.start(done)
 })

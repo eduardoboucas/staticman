@@ -1,0 +1,8 @@
+{
+    "name": "Staticman",
+    "description": "A Node.js application that enables dynamic content as part of a fully static website.",
+    "repository": "https://github.com/eduardoboucas/staticman/",
+    "logo": "https://staticman.net/assets/images/staticman-avatar.png",
+    "keywords": ["node", "express", "static", "staticman", "github-pages"]
+  }
+  
