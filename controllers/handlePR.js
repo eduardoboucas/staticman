@@ -16,7 +16,7 @@ module.exports = async (repo, data) => {
   const github = await new GitHub({
     username: data.repository.owner.login,
     repository: data.repository.name,
-    token: config.get('githubToken')
+    version: '1'
   })
 
   return github.getReview(data.number).then(async (review) => {
