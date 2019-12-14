@@ -2,6 +2,8 @@ const mockHelpers = require('./../../helpers')
 const sampleData = require('./../../helpers/sampleData')
 const User = require('../../../lib/models/User')
 const yaml = require('js-yaml')
+const GitLab = require('../../../lib/GitLab')
+const config = require('../../../config')
 
 let req
 
@@ -9,6 +11,7 @@ const btoa = contents => Buffer.from(contents).toString('base64')
 
 beforeEach(() => {
   jest.resetModules()
+  jest.restoreAllMocks()
 
   req = mockHelpers.getMockRequest()
   req.params.token = 'test-token'
@@ -16,7 +19,6 @@ beforeEach(() => {
 
 describe('GitLab interface', () => {
   test('initialises the GitLab API wrapper', () => {
-    const GitLab = require('./../../../lib/GitLab')
     const gitlab = new GitLab(req.params)
 
     expect(gitlab.api).toBeDefined()
@@ -33,13 +35,13 @@ describe('GitLab interface', () => {
         }
       }
     })
-
+ 
     const GitLab = require('./../../../lib/GitLab')
     const gitlab = new GitLab(req.params) // eslint-disable-line no-unused-vars
 
     expect(mockConstructor.mock.calls[0][0]).toEqual({
       url: 'https://gitlab.com',
-      token: req.params.token
+      token: 'r4e3w2q1'
     })
   })
 
@@ -67,7 +69,7 @@ describe('GitLab interface', () => {
   })
 
   test('throws error if no personal access token or OAuth token is provided', () => {
-    const GitLab = require('../../../lib/GitLab')
+    jest.spyOn(config, 'get').mockImplementation(() => null)
 
     expect(() => new GitLab({})).toThrowError('Require an `oauthToken` or `token` option')
   })
