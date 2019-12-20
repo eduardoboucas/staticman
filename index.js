@@ -1,12 +1,10 @@
-(async () => {
-  try {
-    const StaticmanAPI = require('./server')
-    const api = await new StaticmanAPI()
+try {
+  const StaticmanAPI = require('./server')
+  const api = new StaticmanAPI()
 
-    api.start(port => {
-      console.log('Staticman API running on port', port)
-    })
-  } catch (e) {
-    console.error(e)
-  }
-})()
+  api.start(port => {
+    console.log('Staticman API running on port', port)
+  })
+} catch (e) {
+  console.error(e)
+}

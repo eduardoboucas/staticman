@@ -18,7 +18,7 @@ beforeEach(() => {
 
 describe('Auth controller', () => {
   describe('GitHub', () => {
-    test('authenticates to GitHub with the given code and returns the authenticated user', () => {
+    test('authenticates to GitHub with the given code and returns the authenticated user', async () => {
       const mockAccessToken = 'qwertyuiop'
       const mockCode = '1q2w3e4r'
       const mockUser = {
@@ -41,11 +41,12 @@ describe('Auth controller', () => {
           access_token: mockAccessToken
         })
 
-      nock(/github\.com/)
+      nock((/github\.com/), {
+        reqheaders: {
+          authorization: `token ${mockAccessToken}`
+        }
+      })
         .get('/user')
-        .query({
-          access_token: mockAccessToken
-        })
         .reply(200, mockUser)
 
       const reqWithQuery = Object.assign({}, req, {
@@ -54,15 +55,13 @@ describe('Auth controller', () => {
         }
       })
 
-      return auth(reqWithQuery, res).then(result => {
-        expect(res.send).toHaveBeenCalledTimes(1)
-        expect(helpers.decrypt(res.send.mock.calls[0][0].accessToken)).toBe(mockAccessToken)
-        expect(res.send.mock.calls[0][0].user)
-          .toEqual(new User('github', mockUser.login, mockUser.email, mockUser.name))
-      })
+      await auth(reqWithQuery, res)
+      expect(res.send).toHaveBeenCalledTimes(1)
+      expect(helpers.decrypt(res.send.mock.calls[0][0].accessToken)).toBe(mockAccessToken)
+      expect(res.send.mock.calls[0][0].user).toEqual(new User('github', mockUser.login, mockUser.email, mockUser.name))
     })
 
-    test('authenticates to GitHub with the given code and returns the original GitHub user when using v2 API', () => {
+    test('authenticates to GitHub with the given code and returns the original GitHub user when using v2 API', async () => {
       const mockAccessToken = 'qwertyuiop'
       const mockCode = '1q2w3e4r'
       const mockUser = {
@@ -83,12 +82,13 @@ describe('Auth controller', () => {
           access_token: mockAccessToken
         })
 
-      nock(/github\.com/)
-        .get('/user')
-        .query({
-          access_token: mockAccessToken
+        nock((/github\.com/), {
+          reqheaders: {
+            authorization: `token ${mockAccessToken}`
+          }
         })
-        .reply(200, mockUser)
+          .get('/user')
+          .reply(200, mockUser)
 
       const reqWithQuery = Object.assign({}, req, {
         params: {
@@ -100,14 +100,13 @@ describe('Auth controller', () => {
         }
       })
 
-      return auth(reqWithQuery, res).then(result => {
-        expect(res.send).toHaveBeenCalledTimes(1)
-        expect(helpers.decrypt(res.send.mock.calls[0][0].accessToken)).toBe(mockAccessToken)
-        expect(res.send.mock.calls[0][0].user).toEqual(mockUser)
-      })
+      await auth(reqWithQuery, res)
+      expect(res.send).toHaveBeenCalledTimes(1)
+      expect(helpers.decrypt(res.send.mock.calls[0][0].accessToken)).toBe(mockAccessToken)
+      expect(res.send.mock.calls[0][0].user).toEqual(mockUser)
     })
 
-    test('returns a 401 response when unable to get an access token from GitHub', () => {
+    test('returns a 401 response when unable to get an access token from GitHub', async () => {
       const mockCode = '1q2w3e4r'
       const siteConfig = helpers.getConfig()
 
@@ -125,21 +124,21 @@ describe('Auth controller', () => {
 
       const reqWithQuery = Object.assign({}, req, {
         params: {
-          service: 'github'
+          service: 'github',
+          version: '2'
         },
         query: {
           code: mockCode
         }
       })
 
-      return auth(reqWithQuery, res).then(result => {
-        expect(res.status.mock.calls[0][0]).toBe(401)
-        expect(res.send.mock.calls[0][0].statusCode).toBe(401)
-        expect(res.send.mock.calls[0][0].message).toContain('invalid_code')
-      })
+      await auth(reqWithQuery, res)
+      expect(res.status.mock.calls[0][0]).toBe(401)
+      expect(res.send.mock.calls[0][0].statusCode).toBe(401)
+      expect(res.send.mock.calls[0][0].message).toContain('invalid_code')
     })
 
-    test('returns a 401 response when an incorrect access token is used for the GitHub API', () => {
+    test('returns a 401 response when an incorrect access token is used for the GitHub API', async () => {
       const mockAccessToken = 'qwertyuiop'
       const mockCode = '1q2w3e4r'
 
@@ -157,25 +156,30 @@ describe('Auth controller', () => {
           access_token: mockAccessToken
         })
 
-      nock(/github\.com/).get('/user')
-        .query({
-          access_token: mockAccessToken
+        nock((/github\.com/), {
+          reqheaders: {
+            authorization: `token ${mockAccessToken}`
+          }
         })
-        .reply(401, {
-          message: 'Unauthorized'
-        })
+          .get('/user')
+          .reply(401, {
+            message: 'Unauthorized'
+          })
 
       const reqWithQuery = Object.assign({}, req, {
+        params: {
+          service: 'github',
+          version: '2'
+        },
         query: {
           code: mockCode
         }
       })
 
-      return auth(reqWithQuery, res).then(result => {
-        expect(res.status.mock.calls[0][0]).toBe(401)
-        expect(res.send.mock.calls[0][0].statusCode).toBe(401)
-        expect(res.send.mock.calls[0][0].message).toContain('Unauthorized')
-      })
+      await auth(reqWithQuery, res)
+      expect(res.status.mock.calls[0][0]).toBe(401)
+      expect(res.send.mock.calls[0][0].statusCode).toBe(401)
+      expect(res.send.mock.calls[0][0].message).toContain('Unauthorized')
     })
   })
 

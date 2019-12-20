@@ -16,10 +16,11 @@ module.exports = async (repo, data) => {
   const github = await new GitHub({
     username: data.repository.owner.login,
     repository: data.repository.name,
-    token: config.get('githubToken')
+    version: '1'
   })
 
-  return github.getReview(data.number).then(async (review) => {
+  try {
+    let review = await github.getReview(data.number)
     if (review.sourceBranch.indexOf('staticman_')) {
       return null
     }
@@ -38,27 +39,23 @@ module.exports = async (repo, data) => {
 
           staticman.setConfigPath(parsedBody.configPath)
           staticman.processMerge(parsedBody.fields, parsedBody.options)
-            .catch(err => Promise.reject(err))
         } catch (err) {
           return Promise.reject(err)
         }
       }
     }
 
-    return github.deleteBranch(review.sourceBranch)
-  }).then(response => {
     if (ua) {
       ua.event('Hooks', 'Delete branch').send()
     }
-
-    return response
-  }).catch(err => {
-    console.log(err.stack || err)
+    return github.deleteBranch(review.sourceBranch)
+  } catch (e) {
+    console.log(e.stack || e)
 
     if (ua) {
       ua.event('Hooks', 'Delete branch error').send()
     }
 
-    return Promise.reject(err)
-  })
+    return Promise.reject(e)
+  }
 }
