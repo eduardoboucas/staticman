@@ -16,34 +16,38 @@ function checkRecaptcha (staticman, req) {
 
       const reCaptchaOptions = req.body.options && req.body.options.reCaptcha
 
-      if (!reCaptchaOptions || !reCaptchaOptions.siteKey || !reCaptchaOptions.secret) {
+      if (!reCaptchaOptions || !reCaptchaOptions.siteKey) {
+        console.log('recaptcha missing credentials')
         return reject(errorHandler('RECAPTCHA_MISSING_CREDENTIALS'))
       }
 
-      let decryptedSecret
-
-      try {
-        decryptedSecret = staticman.decrypt(reCaptchaOptions.secret)
-      } catch (err) {
-        return reject(errorHandler('RECAPTCHA_CONFIG_MISMATCH'))
-      }
-
+      let decryptedSecret = siteConfig.get('reCaptcha.secret')
+      let siteKey = siteConfig.get('reCaptcha.siteKey')
       if (
-        reCaptchaOptions.siteKey !== siteConfig.get('reCaptcha.siteKey') ||
-        decryptedSecret !== siteConfig.get('reCaptcha.secret')
+        reCaptchaOptions.siteKey !== siteKey
       ) {
+        console.log('recaptcha invalid site key')
         return reject(errorHandler('RECAPTCHA_CONFIG_MISMATCH'))
       }
 
-      reCaptcha.init(reCaptchaOptions.siteKey, decryptedSecret)
-      reCaptcha.verify(req, err => {
+      // new version will use reCaptcha.RecaptchaV2 instead of init
+      reCaptcha.init(siteKey, decryptedSecret)
+      reCaptcha.verify(req, (err, data) => {
         if (err) {
+          console.log('recaptcha error ' + JSON.stringify(err))
           return reject(errorHandler(err))
         }
-
+        let allowedOrigins = siteConfig.get('allowedOrigins')
+        if (allowedOrigins && !allowedOrigins.includes(data.hostname)) {
+          let msg = 'recaptcha error, replay attack, captcha from ' + data.hostname + ' and not ' + JSON.stringify(allowedOrigins)
+          console.log(msg)
+          return reject(errorHandler({msg:msg}))
+        }
         return resolve(true)
       })
-    }).catch(err => reject(err))
+    }).catch(function (err) {
+      console.log('recaptcha raised error '+ JSON.stringify(err))
+      reject(err)})
   })
 }
 
