@@ -7,30 +7,26 @@ const objectPath = require('object-path')
 
 class StaticmanAPI {
   constructor () {
-    return (async () => {
-      this.controllers = {
-        connect: require('./controllers/connect'),
-        encrypt: require('./controllers/encrypt'),
-        auth: require('./controllers/auth'),
-        handlePR: require('./controllers/handlePR'),
-        home: require('./controllers/home'),
-        process: require('./controllers/process')
-      }
+    this.controllers = {
+      connect: require('./controllers/connect'),
+      encrypt: require('./controllers/encrypt'),
+      auth: require('./controllers/auth'),
+      handlePR: require('./controllers/handlePR'),
+      home: require('./controllers/home'),
+      process: require('./controllers/process')
+    }
 
-      this.server = express()
-      this.server.use(bodyParser.json())
-      this.server.use(bodyParser.urlencoded({
-        extended: true
-        // type: '*'
-      }))
+    this.server = express()
+    this.server.use(bodyParser.json())
+    this.server.use(bodyParser.urlencoded({
+      extended: true
+      // type: '*'
+    }))
 
-      this.initialiseWebhookHandler()
-      this.initialiseCORS()
-      this.initialiseBruteforceProtection()
-      this.initialiseRoutes()
-
-      return this
-    })()
+    this.initialiseWebhookHandler()
+    this.initialiseCORS()
+    this.initialiseBruteforceProtection()
+    this.initialiseRoutes()
   }
 
   initialiseBruteforceProtection () {
