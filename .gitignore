@@ -9,3 +9,5 @@ config.*.json
 coverage/
 node_modules/
 staticman_key
+.DS_Store
+staticman.pem
