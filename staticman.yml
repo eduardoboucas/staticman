@@ -13,7 +13,7 @@ comments:
   #
   # Name of the branch being used. Must match the one sent in the URL of the
   # request.
-  branch: "prod"
+  branch: "master"
 
   # Text to use as the commit message or pull request title. Accepts placeholders.
   commitMessage: "Add Staticman data"
@@ -65,7 +65,7 @@ comments:
   # (*) REQUIRED
   #
   # Destination path (directory) for the data files. Accepts placeholders.
-  path: "_data/comments/{options.slug}"
+  path: "src/_data/comments/{options.slug}"
 
   # Names of required fields. If any of these isn't in the request or is empty,
   # an error will be thrown.
