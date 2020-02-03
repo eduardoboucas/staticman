@@ -100,12 +100,14 @@ describe('GitHub interface', () => {
 
       const githubInstance = await new GitHub(req.params)
 
+      let exception = 'thrown'
       try {
         await githubInstance.readFile(filePath)
+        exception = 'not thrown'
       } catch (err) {
         expect(err._smErrorCode).toEqual('GITHUB_READING_FILE')
       }
-
+      expect(exception).toBe('thrown')
       expect(scope.isDone()).toBe(true)
     })
 
@@ -113,12 +115,16 @@ describe('GitHub interface', () => {
       const filePath = 'path/to/file.yml'
       const githubInstance = await new GitHub(req.params)
 
+      let exception = 'thrown'
       try {
         await githubInstance.readFile(filePath)
+        exception = 'not thrown'
       } catch (err) {
         expect(err._smErrorCode).toEqual('PARSING_ERROR')
         expect(err.message).toBeDefined()
       }
+
+      expect(exception).toBe('thrown')
     })
 
     test('reads a YAML file and returns its parsed contents', async () => {
@@ -290,6 +296,7 @@ describe('GitHub interface', () => {
 
       const githubInstance = await new GitHub(req.params)
 
+      let exception = 'thrown'
       try {
         await githubInstance.writeFile(
           options.path,
@@ -297,12 +304,13 @@ describe('GitHub interface', () => {
           options.branch,
           options.commitTitle
         )
+        exception = 'not thrown'
       } catch (err) {
         expect(err).toEqual({
           _smErrorCode: 'GITHUB_WRITING_FILE'
         })
       }
-
+      expect(exception).toBe('thrown')
       expect(scope.isDone()).toBe(true)
     })
   })
@@ -401,6 +409,7 @@ describe('GitHub interface', () => {
 
       const githubInstance = await new GitHub(req.params)
 
+      let exception = 'thrown'
       try {
         await githubInstance.writeFileAndSendReview(
           options.path,
@@ -409,9 +418,11 @@ describe('GitHub interface', () => {
           options.commitTitle,
           options.commitBody
         )
+        exception = 'not thrown'
       } catch (err) {
         expect(err._smErrorCode).toEqual('GITHUB_CREATING_PR')
       }
+      expect(exception).toBe('thrown')
       expect(scope.isDone()).toBe(true)
     })
   })
@@ -448,11 +459,14 @@ describe('GitHub interface', () => {
 
       const githubInstance = await new GitHub(req.params)
 
+      let exception = 'thrown'
       try {
         await githubInstance.getCurrentUser()
+        exception = 'not thrown'
       } catch (err) {
         expect(err._smErrorCode).toEqual('GITHUB_GET_USER')
       }
+      expect(exception).toBe('thrown')
       expect(scope.isDone()).toBe(true)
     })
   })
