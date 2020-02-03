@@ -111,13 +111,39 @@ describe('GitHub interface', () => {
       expect(scope.isDone()).toBe(true)
     })
 
-    test('returns an error if parsing fails for the given file', async () => {
+    test('returns an error if the config file cannot be read', async () => {
       const filePath = 'path/to/file.yml'
       const githubInstance = await new GitHub(req.params)
 
       let exception = 'thrown'
       try {
         await githubInstance.readFile(filePath)
+        exception = 'not thrown'
+      } catch (err) {
+        expect(err._smErrorCode).toEqual('GITHUB_READING_FILE')
+        expect(err.message).toBeDefined()
+      }
+
+      expect(exception).toBe('thrown')
+    })
+
+    test('returns an error if the config file cannot be parsed', async () => {
+      const filePath = 'path/to/file.yml'
+      const githubInstance = await new GitHub(req.params)
+
+      const scope = nock((/api\.github\.com/), {
+        reqheaders: {
+          authorization: 'token '.concat('1q2w3e4r')
+        }
+      })
+        .get('/repos/johndoe/foobar/contents/path/to/file.yml?ref=master')
+        .reply(200, {
+          content: btoa(sampleData.configInvalid)
+        })
+
+      let exception = 'thrown'
+      try {
+        let content = await githubInstance.readFile(filePath)
         exception = 'not thrown'
       } catch (err) {
         expect(err._smErrorCode).toEqual('PARSING_ERROR')
@@ -290,9 +316,7 @@ describe('GitHub interface', () => {
         }
       })
         .put('/repos/johndoe/foobar/contents/path/to/file.txt')
-        .reply(200, {
-          number: 123
-        })
+        .replyWithError('{ message: "an error" }')
 
       const githubInstance = await new GitHub(req.params)
 
@@ -306,9 +330,7 @@ describe('GitHub interface', () => {
         )
         exception = 'not thrown'
       } catch (err) {
-        expect(err).toEqual({
-          _smErrorCode: 'GITHUB_WRITING_FILE'
-        })
+        expect(err._smErrorCode).toEqual('GITHUB_WRITING_FILE')
       }
       expect(exception).toBe('thrown')
       expect(scope.isDone()).toBe(true)
