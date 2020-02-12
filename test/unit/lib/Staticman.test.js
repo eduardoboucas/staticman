@@ -527,11 +527,12 @@ describe('Staticman interface', () => {
       staticman.fields = fields
       staticman.options = options
       staticman.siteConfig = mockConfig
+      staticman.parameters.version = '3'
 
-      return staticman._checkAuth().then((result) => {
-        expect(mockConstructor.mock.calls[1][0]).toEqual({
-          oauthToken: 'test-token'
-        })
+      await staticman._checkAuth()
+      expect(mockConstructor.mock.calls[1][0]).toEqual({
+        oauthToken: 'test-token',
+        version: '3'
       })
     })
 
@@ -559,11 +560,12 @@ describe('Staticman interface', () => {
       staticman.fields = fields
       staticman.options = options
       staticman.siteConfig = mockConfig
+      staticman.parameters.version = '3'
 
-      return staticman._checkAuth().then((result) => {
-        expect(mockConstructor.mock.calls[0][0]).toEqual({
-          oauthToken: 'test-token'
-        })
+      await staticman._checkAuth()
+      expect(mockConstructor.mock.calls[0][0]).toEqual({
+        oauthToken: 'test-token',
+        version: '3'
       })
     })
 
@@ -589,14 +591,14 @@ describe('Staticman interface', () => {
       staticman.fields = fields
       staticman.options = options
       staticman.siteConfig = mockConfig
+      staticman.parameters.version = '3'
 
       const mockUser = new User('github', 'johndoe', 'johndoe@test.com', 'John Doe')
 
-      return staticman._checkAuth().then((result) => {
-        expect(mockGetCurrentUser).toHaveBeenCalledTimes(1)
-        expect(staticman.gitUser).toEqual(mockUser)
-        expect(result).toBeTruthy()
-      })
+      let result = await staticman._checkAuth()
+      expect(mockGetCurrentUser).toHaveBeenCalledTimes(1)
+      expect(staticman.gitUser).toEqual(mockUser)
+      expect(result).toBeTruthy()
     })
 
     test('sets the `gitUser` property to the authenticated User and returns true for GitLab authentication', async () => {
@@ -622,14 +624,14 @@ describe('Staticman interface', () => {
       staticman.fields = fields
       staticman.options = options
       staticman.siteConfig = mockConfig
+      staticman.parameters.version = '3'
 
       const mockUser = new User('github', 'johndoe', 'johndoe@test.com', 'John Doe')
 
-      return staticman._checkAuth().then((result) => {
-        expect(mockGetCurrentUser).toHaveBeenCalledTimes(1)
-        expect(staticman.gitUser).toEqual(mockUser)
-        expect(result).toBeTruthy()
-      })
+      let result = await staticman._checkAuth()
+      expect(mockGetCurrentUser).toHaveBeenCalledTimes(1)
+      expect(staticman.gitUser).toEqual(mockUser)
+      expect(result).toBeTruthy()
     })
   })
 
@@ -1464,16 +1466,16 @@ describe('Staticman interface', () => {
       mockConfig.set('auth.required', true)
 
       staticman.siteConfig = mockConfig
+      staticman.parameters.version = '3'
       staticman._checkForSpam = () => Promise.resolve(fields)
       staticman.git.writeFile = jest.fn(() => Promise.resolve())
 
       const spyCheckAuth = jest.spyOn(staticman, '_checkAuth')
 
-      return staticman.processEntry(fields, options).then(_ => {
-        expect(spyCheckAuth).toHaveBeenCalledTimes(1)
-        expect(mockGetCurrentUser).toHaveBeenCalledTimes(1)
-        expect(staticman.gitUser).toEqual(mockUser)
-      })
+      await staticman.processEntry(fields, options)
+      expect(spyCheckAuth).toHaveBeenCalledTimes(1)
+      expect(mockGetCurrentUser).toHaveBeenCalledTimes(1)
+      expect(staticman.gitUser).toEqual(mockUser)
     })
 
     test('authenticates user before creating file, throwing an error if unable to authenticate', async () => {

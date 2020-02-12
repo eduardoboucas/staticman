@@ -1,20 +1,22 @@
-const config = require('./../../config')
+const config = require('../../config')
 const githubToken = config.get('githubToken')
-const helpers = require('./../helpers')
+const helpers = require('../helpers')
 const nock = require('nock')
 const querystring = require('querystring')
 const request = helpers.wrappedRequest
-const sampleData = require('./../helpers/sampleData')
-const StaticmanAPI = require('./../../server')
+const sampleData = require('../helpers/sampleData')
+const StaticmanAPI = require('../../server')
 
 const btoa = contents => Buffer.from(contents).toString('base64')
 
 let server
 
-beforeAll(async (done) => {
-  server = await new StaticmanAPI()
+beforeAll(done => {
+  server = new StaticmanAPI()
 
-  server.start(done)
+  server.start(() => {})
+
+  done()
 })
 
 afterAll(done => {
@@ -206,7 +208,7 @@ describe('Entry endpoint', () => {
     })
   })
 
-  test('outputs a PARSING_ERROR error the site config is malformed', () => {
+  test('outputs a MISSING_CONFIG_BLOCK error the site config is malformed', () => {
     const data = Object.assign({}, helpers.getParameters(), {
       path: 'staticman.yml'
     })
@@ -252,8 +254,8 @@ describe('Entry endpoint', () => {
       const error = JSON.parse(response.error)
 
       expect(error.success).toBe(false)
-      expect(error.errorCode).toBe('PARSING_ERROR')
-      expect(error.message).toBeDefined()
+      expect(error.errorCode).toBe('MISSING_CONFIG_BLOCK')
+      expect(error.message).toBe('Error whilst parsing Staticman config file')
       expect(error.rawError).toBeDefined()
     })
   })
