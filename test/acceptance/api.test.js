@@ -255,7 +255,7 @@ describe('Entry endpoint', () => {
 
       expect(error.success).toBe(false)
       expect(error.errorCode).toBe('MISSING_CONFIG_BLOCK')
-      expect(error.message).toBe('Error whilst parsing staticman config file')
+      expect(error.message).toBe('Error whilst parsing Staticman config file')
       expect(error.rawError).toBeDefined()
     })
   })
