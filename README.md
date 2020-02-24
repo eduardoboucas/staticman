@@ -21,7 +21,8 @@ You can download and run the Staticman API on your own infrastructure. The easie
 - A [personal access token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) for the GitHub account you want to run Staticman with
 - An SSH key (click [here](https://help.github.com/articles/connecting-to-github-with-ssh/) to learn how to create one)
 
-## Setting up the server
+## Setting up the server on your own infrastructure
+NOTE: All you need to do if deploying to Heroku is click the above deploy button and then enter your config variables into Heroku.
 
 - Clone the repository and install the dependencies via npm.
 
@@ -76,5 +77,6 @@ Would you like to contribute to Staticman? That's great! Here's how:
 
 ## Useful links
 
+- [Detailed Staticman Setup Guide](https://travisdowns.github.io/blog/2020/02/05/now-with-comments.html#generate-personal-access-token)
 - [Improving Static Comments with Jekyll & Staticman](https://mademistakes.com/articles/improving-jekyll-static-comments/)
 - [Hugo + Staticman: Nested Replies and E-mail Notifications](https://networkhobo.com/2017/12/30/hugo-staticman-nested-replies-and-e-mail-notifications/)
