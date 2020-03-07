@@ -208,7 +208,7 @@ describe('Entry endpoint', () => {
     })
   })
 
-  test('outputs a MISSING_CONFIG_BLOCK error the site config is malformed', () => {
+  test('outputs a MISSING_CONFIG_BLOCK error if the site config is malformed', () => {
     const data = Object.assign({}, helpers.getParameters(), {
       path: 'staticman.yml'
     })
