@@ -150,6 +150,13 @@ module.exports.config3 = `comments:
     siteKey: "123456789"
     secret: "@reCaptchaSecret@"`
 
+module.exports.configInvalidYML = `invalid:
+- x
+y
+    foo
+bar
+`
+
 module.exports.prBody1 = `Dear human,
 
 Here's a new entry for your approval. :tada:
