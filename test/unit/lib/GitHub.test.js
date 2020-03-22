@@ -300,7 +300,7 @@ describe('GitHub interface', () => {
       expect(scope.isDone()).toBe(true)
     })
 
-    test.only('returns an error object if the save operation fails', async () => {
+    test('returns an error object if the save operation fails', async () => {
       const options = {
         branch: 'master',
         commitTitle: 'Adds a new file',
