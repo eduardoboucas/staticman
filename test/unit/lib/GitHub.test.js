@@ -100,6 +100,8 @@ describe('GitHub interface', () => {
 
       const githubInstance = await new GitHub(req.params)
 
+      expect.assertions(2)
+
       try {
         await githubInstance.readFile(filePath)
       } catch (err) {
@@ -109,17 +111,45 @@ describe('GitHub interface', () => {
       expect(scope.isDone()).toBe(true)
     })
 
-    test('returns an error if parsing fails for the given file', async () => {
+    test('returns an error if the config file cannot be read', async () => {
       const filePath = 'path/to/file.yml'
       const githubInstance = await new GitHub(req.params)
+
+      expect.assertions(2)
 
       try {
         await githubInstance.readFile(filePath)
       } catch (err) {
-        expect(err._smErrorCode).toEqual('PARSING_ERROR')
+        expect(err._smErrorCode).toEqual('GITHUB_READING_FILE')
         expect(err.message).toBeDefined()
       }
     })
+
+    test('returns an error if the config file cannot be parsed', async () => {
+        const scope = nock((/api\.github\.com/), {
+          reqheaders: {
+            authorization: 'token '.concat('1q2w3e4r')
+          }
+        })
+          .get('/repos/johndoe/foobar/contents/path/to/file.yml?ref=master')
+          .reply(200, {
+            content: btoa(sampleData.configInvalidYML)
+          })
+
+        const filePath = 'path/to/file.yml'
+        const githubInstance = await new GitHub(req.params)
+
+        expect.assertions(3)
+
+        try {
+          await githubInstance.readFile(filePath)
+        } catch (err) {
+          expect(err._smErrorCode).toEqual('PARSING_ERROR')
+          expect(err.message).toBeDefined()
+        }
+
+        expect(scope.isDone()).toBe(true)
+      })
 
     test('reads a YAML file and returns its parsed contents', async () => {
       const filePath = 'path/to/file.yml'
@@ -284,11 +314,11 @@ describe('GitHub interface', () => {
         }
       })
         .put('/repos/johndoe/foobar/contents/path/to/file.txt')
-        .reply(200, {
-          number: 123
-        })
+        .replyWithError('An error')
 
       const githubInstance = await new GitHub(req.params)
+
+      expect.assertions(2)
 
       try {
         await githubInstance.writeFile(
@@ -361,9 +391,11 @@ describe('GitHub interface', () => {
           id: 1
         })
 
+      expect.assertions(5)
+
       const githubInstance = await new GitHub(req.params)
 
-      await githubInstance.writeFileAndSendReview(
+      const data = await githubInstance.writeFileAndSendReview(
         options.path,
         options.content,
         options.newBranch,
@@ -371,12 +403,12 @@ describe('GitHub interface', () => {
         options.commitBody
       )
 
-      setTimeout(() => {
-        expect(branchScope.isDone()).toBe(true)
-        expect(refsScope.isDone()).toBe(true)
-        expect(fileScope.isDone()).toBe(true)
-        expect(pullScope.isDone()).toBe(true)
-      })
+      expect(data).toEqual({"id": 1})
+
+      expect(branchScope.isDone()).toBe(true)
+      expect(refsScope.isDone()).toBe(true)
+      expect(fileScope.isDone()).toBe(true)
+      expect(pullScope.isDone()).toBe(true)
     })
 
     // TODO: Figure out why this works with no mocks
@@ -400,6 +432,8 @@ describe('GitHub interface', () => {
         .replyWithError('An error, oh no.')
 
       const githubInstance = await new GitHub(req.params)
+
+      expect.assertions(2)
 
       try {
         await githubInstance.writeFileAndSendReview(
@@ -447,6 +481,8 @@ describe('GitHub interface', () => {
         .replyWithError('Oops, an error')
 
       const githubInstance = await new GitHub(req.params)
+
+      expect.assertions(2)
 
       try {
         await githubInstance.getCurrentUser()

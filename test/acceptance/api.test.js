@@ -26,7 +26,7 @@ afterAll(done => {
 })
 
 describe('Connect endpoint', () => {
-  test('accepts the invitation if one is found and replies with "OK!"', () => {
+  test('accepts the invitation if one is found and replies with "OK!"', async () => {
     const invitationId = 123
 
     const reqListInvititations = nock('https://api.github.com', {
@@ -52,15 +52,13 @@ describe('Connect endpoint', () => {
       .patch(`/user/repository_invitations/${invitationId}`)
       .reply(204)
 
-    return request('/v2/connect/johndoe/foobar')
-      .then(response => {
-        expect(reqListInvititations.isDone()).toBe(true)
-        expect(reqAcceptInvitation.isDone()).toBe(true)
-        expect(response).toBe('OK!')
-      })
+    let response = await request('/v2/connect/johndoe/foobar')
+    expect(reqListInvititations.isDone()).toBe(true)
+    expect(reqAcceptInvitation.isDone()).toBe(true)
+    expect(response).toBe('OK!')
   })
 
-  test('returns a 404 and an error message if a matching invitation is not found', () => {
+  test('returns a 404 and an error message if a matching invitation is not found', async () => {
     const invitationId = 123
     const reqListInvititations = nock('https://api.github.com', {
       reqheaders: {
@@ -85,18 +83,21 @@ describe('Connect endpoint', () => {
       .patch(`/user/repository_invitations/${invitationId}`)
       .reply(204)
 
-    return request('/v2/connect/johndoe/foobar')
-      .catch(err => {
+    expect.assertions(4)
+
+    try {
+      await request('/v2/connect/johndoe/foobar')
+    } catch (err) {
         expect(reqListInvititations.isDone()).toBe(true)
         expect(reqAcceptInvitation.isDone()).toBe(false)
         expect(err.response.body).toBe('Invitation not found')
         expect(err.statusCode).toBe(404)
-      })
+    }
   })
 })
 
 describe('Entry endpoint', () => {
-  test('outputs a RECAPTCHA_CONFIG_MISMATCH error if reCaptcha options do not match (wrong site key)', () => {
+  test('outputs a RECAPTCHA_CONFIG_MISMATCH error if reCaptcha options do not match (wrong site key)', async () => {
     const data = Object.assign({}, helpers.getParameters(), {
       path: 'staticman.yml'
     })
@@ -136,23 +137,27 @@ describe('Entry endpoint', () => {
     }
     const formData = querystring.stringify(form)
 
-    return request({
-      body: formData,
-      method: 'POST',
-      uri: `/v2/entry/${data.username}/${data.repository}/${data.branch}/${data.property}`,
-      headers: {
-        'content-type': 'application/x-www-form-urlencoded'
-      }
-    }).catch((response) => {
+    expect.assertions(3)
+
+    try {
+      await request({
+        body: formData,
+        method: 'POST',
+        uri: `/v2/entry/${data.username}/${data.repository}/${data.branch}/${data.property}`,
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded'
+        }
+      })
+    } catch(response) {
       const error = JSON.parse(response.error)
 
       expect(error.success).toBe(false)
       expect(error.errorCode).toBe('RECAPTCHA_CONFIG_MISMATCH')
       expect(error.message).toBe('reCAPTCHA options do not match Staticman config')
-    })
+    }
   })
 
-  test('outputs a RECAPTCHA_CONFIG_MISMATCH error if reCaptcha options do not match (wrong secret)', () => {
+  test('outputs a RECAPTCHA_CONFIG_MISMATCH error if reCaptcha options do not match (wrong secret)', async () => {
     const data = Object.assign({}, helpers.getParameters(), {
       path: 'staticman.yml'
     })
@@ -192,23 +197,27 @@ describe('Entry endpoint', () => {
     }
     const formData = querystring.stringify(form)
 
-    return request({
-      body: formData,
-      method: 'POST',
-      uri: '/v2/entry/johndoe/foobar/master/comments',
-      headers: {
-        'content-type': 'application/x-www-form-urlencoded'
-      }
-    }).catch(response => {
+    expect.assertions(3)
+
+    try {
+      await request({
+        body: formData,
+        method: 'POST',
+        uri: '/v2/entry/johndoe/foobar/master/comments',
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded'
+        }
+      })
+    } catch (response) {
       const error = JSON.parse(response.error)
 
       expect(error.success).toBe(false)
       expect(error.errorCode).toBe('RECAPTCHA_CONFIG_MISMATCH')
       expect(error.message).toBe('reCAPTCHA options do not match Staticman config')
-    })
+    }
   })
 
-  test('outputs a MISSING_CONFIG_BLOCK error if the site config is malformed', () => {
+  test('outputs a PARSING_ERROR error if the site config is malformed', async () => {
     const data = Object.assign({}, helpers.getParameters(), {
       path: 'staticman.yml'
     })
@@ -243,20 +252,24 @@ describe('Entry endpoint', () => {
     }
     const formData = querystring.stringify(form)
 
-    return request({
-      body: formData,
-      method: 'POST',
-      uri: '/v2/entry/johndoe/foobar/master/comments',
-      headers: {
-        'content-type': 'application/x-www-form-urlencoded'
-      }
-    }).catch(response => {
+    expect.assertions(4)
+
+    try {
+      await request({
+        body: formData,
+        method: 'POST',
+        uri: '/v2/entry/johndoe/foobar/master/comments',
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded'
+        }
+      })
+    } catch (response) {
       const error = JSON.parse(response.error)
 
       expect(error.success).toBe(false)
-      expect(error.errorCode).toBe('MISSING_CONFIG_BLOCK')
-      expect(error.message).toBe('Error whilst parsing Staticman config file')
+      expect(error.errorCode).toBe('PARSING_ERROR')
+      expect(error.message).toBe('Error whilst parsing config file')
       expect(error.rawError).toBeDefined()
-    })
+    }
   })
 })
