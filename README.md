@@ -80,3 +80,4 @@ Would you like to contribute to Staticman? That's great! Here's how:
 - [Detailed Site and API Setup Guide](https://travisdowns.github.io/blog/2020/02/05/now-with-comments.html)
 - [Improving Static Comments with Jekyll & Staticman](https://mademistakes.com/articles/improving-jekyll-static-comments/)
 - [Hugo + Staticman: Nested Replies and E-mail Notifications](https://networkhobo.com/2017/12/30/hugo-staticman-nested-replies-and-e-mail-notifications/)
+- [Guide on How to Setup Staticman with Gatsby](https://github.com/jovil/gatsby-staticman-example)
