@@ -82,7 +82,7 @@ function process (staticman, req, res) {
 
 function sendResponse (res, data) {
   const error = data && data.err
-  const statusCode = error ? 500 : 200
+  const statusCode = errorHandler.getInstance().getHttpStatus(error)
 
   if (!error && data.redirect) {
     return res.redirect(data.redirect)
