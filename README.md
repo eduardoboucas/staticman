@@ -10,10 +10,6 @@ Staticman is a Node.js application that receives user-generated content and uplo
 
 It consists of a small web service that handles the `POST` requests from your forms, runs various forms of validation and manipulation defined by you and finally pushes them to your repository as data files. You can choose to enable moderation, which means files will be pushed to a separate branch and a pull request will be created for your approval, or disable it completely, meaning that files will be pushed to the main branch automatically.
 
-You can download and run the Staticman API on your own infrastructure. The easiest way to get a personal Staticman API instance up and running is to use the free tier of Heroku. If deploying to Heroku you can simply click the button below and enter your config variables directly into Heroku as environment variables.
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
-
 ## Requirements
 
 - Node.js 8.11.3+
@@ -21,8 +17,24 @@ You can download and run the Staticman API on your own infrastructure. The easie
 - A [personal access token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) for the GitHub and/or GitLab account you want to run Staticman with
 - An RSA key in PEM format
 
+## Setting up your free Heroku instance (RECOMMENDED)
+
+- create a free account on Heroku and install the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli#download-and-install) on your workstation
+
+- clone the repository and install the dependencies via npm.
+
+    git clone git@github.com:eduardoboucas/staticman.git
+    cd staticman
+    npm install
+
+- Edit [config.sample.mk](config.sample.mk) adding the name for your Heroku app (e.g. `my-domain-com`) and your GitHub Token, save it as `config.mk`. NOTE: no quotes characters are needed around values, e.g.:
+
+    APP_NAME := my-domain-com
+    GITHUB_TOKEN := XXXXXXXYYYYYYYYYZZZZZZZZZZZ
+
+- run `make setup` and hit `ENTER` when asked for a _passphrase_ (and to confirm it, so `ENTER` to times). This should take care of setting up everything needed to expose your Staticman process to the public Internet
+
 ## Setting up the server on your own infrastructure
-NOTE: The below steps are not required if deploying to Heroku. To deploy to Heroku, click the above deploy button and enter your configuration variables in the Heroku Dashboard.
 
 - Clone the repository and install the dependencies via npm.
 
