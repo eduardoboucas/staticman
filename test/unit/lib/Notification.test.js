@@ -18,6 +18,7 @@ beforeEach(() => {
 describe('Notification interface', () => {
   const mockData = {
     data: {
+      fromAddress: `${config.get('email.fromAddress')}`,
       siteName: 'Eduardo\'s blog'
     },
     fields: {

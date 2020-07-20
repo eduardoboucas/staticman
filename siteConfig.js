@@ -142,12 +142,17 @@ const schema = {
       default: false
     },
     apiKey: {
-      doc: 'Mailgun API key',
+      doc: 'Mailgun API key to be used for email notifications.',
       format: 'EncryptedString',
       default: null
     },
     domain: {
-      doc: 'Mailgun domain',
+      doc: 'Domain to be used with Mailgun for email notifications.',
+      format: 'EncryptedString',
+      default: null
+    },
+    fromAddress: {
+      doc: 'Email address to send notifications from.',
       format: 'EncryptedString',
       default: null
     }
