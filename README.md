@@ -19,20 +19,19 @@ It consists of a small web service that handles the `POST` requests from your fo
 
 ## Setting up your free Heroku instance (RECOMMENDED)
 
-- create a free account on Heroku and install the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli#download-and-install) on your workstation
+- Create a free account on Heroku and install the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli#download-and-install) on your workstation
 
-- clone the repository and install the dependencies via npm.
+- Clone the repository and change the working directory
 
     git clone git@github.com:eduardoboucas/staticman.git
     cd staticman
-    npm install
 
 - Edit [config.sample.mk](config.sample.mk) adding the name for your Heroku app (e.g. `my-domain-com`) and your GitHub Token, save it as `config.mk`. NOTE: no quotes characters are needed around values, e.g.:
 
     APP_NAME := my-domain-com
     GITHUB_TOKEN := XXXXXXXYYYYYYYYYZZZZZZZZZZZ
 
-- run `make setup` and hit `ENTER` when asked for a _passphrase_ (and to confirm it, so `ENTER` to times). This should take care of setting up everything needed to expose your Staticman process to the public Internet
+- Run `make setup` and hit `ENTER` when asked for a _passphrase_ (and to confirm it, so `ENTER` to times). This should take care of setting up everything needed to expose your Staticman process to the public Internet
 
 ## Setting up the server on your own infrastructure
 
