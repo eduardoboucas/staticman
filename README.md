@@ -31,7 +31,7 @@ It consists of a small web service that handles the `POST` requests from your fo
     APP_NAME := my-domain-com
     GITHUB_TOKEN := XXXXXXXYYYYYYYYYZZZZZZZZZZZ
 
-- Run `make setup` and hit `ENTER` when asked for a _passphrase_ (and to confirm it, so `ENTER` to times). This should take care of setting up everything needed to expose your Staticman process to the public Internet
+- Run `make setup` and hit `ENTER` when asked for a _passphrase_ (and to confirm it, so `ENTER` two times). This should take care of setting up everything needed to expose your Staticman process to the public Internet
 
 ## Setting up the server on your own infrastructure
 
