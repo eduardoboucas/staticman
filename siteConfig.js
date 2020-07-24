@@ -21,6 +21,17 @@ const schema = {
       format: Boolean,
       default: false
     },
+    site: {
+      doc: 'URL of an Akismet account used for spam checking.',
+      docExample: 'http://yourdomain.com',
+      format: 'EncryptedString',
+      default: null
+    },
+    apiKey: {
+      doc: 'API key to be used with Akismet.',
+      format: 'EncryptedString',
+      default: null
+    },
     author: {
       doc: 'Name of the field to be used as the entry\'s author in Akistmet',
       format: String,
