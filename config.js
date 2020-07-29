@@ -6,14 +6,14 @@ const path = require('path')
 const schema = {
   akismet: {
     site: {
-      doc: 'URL of an Akismet account used for spam checking.',
+      doc: 'URL of an Akismet account used for spam checking. Will be overridden by a `akismet.site` parameter in the site config, if one is set.',
       docExample: 'http://yourdomain.com',
       format: String,
       default: null,
       env: 'AKISMET_SITE'
     },
     apiKey: {
-      doc: 'API key to be used with Akismet.',
+      doc: 'API key to be used with Akismet. Will be overridden by a `akismet.apiKey` parameter in the site config, if one is set.',
       format: String,
       default: null,
       env: 'AKISMET_API_KEY'

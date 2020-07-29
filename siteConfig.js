@@ -21,6 +21,17 @@ const schema = {
       format: Boolean,
       default: false
     },
+    site: {
+      doc: 'URL of an Akismet account used for spam checking.',
+      docExample: 'http://yourdomain.com',
+      format: 'EncryptedString',
+      default: null
+    },
+    apiKey: {
+      doc: 'API key to be used with Akismet.',
+      format: 'EncryptedString',
+      default: null
+    },
     author: {
       doc: 'Name of the field to be used as the entry\'s author in Akistmet',
       format: String,
@@ -142,12 +153,17 @@ const schema = {
       default: false
     },
     apiKey: {
-      doc: 'Mailgun API key',
+      doc: 'Mailgun API key to be used for email notifications.',
       format: 'EncryptedString',
       default: null
     },
     domain: {
-      doc: 'Mailgun domain',
+      doc: 'Domain to be used with Mailgun for email notifications.',
+      format: 'EncryptedString',
+      default: null
+    },
+    fromAddress: {
+      doc: 'Email address to send notifications from.',
       format: 'EncryptedString',
       default: null
     }
