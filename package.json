@@ -30,7 +30,7 @@
     "akismet": "^1.0.0",
     "body-parser": "^1.17.x",
     "bunyan-slack": "0.0.10",
-    "convict": "^4.3.0",
+    "convict": "^6.0.0",
     "express": "^4.14.0",
     "express-brute": "^0.6.0",
     "express-github-webhook": "^1.0.5",
