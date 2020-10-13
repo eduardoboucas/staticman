@@ -1,7 +1,7 @@
 'use strict'
 
 const config = require('../config')
-const GitHub = require('../lib/GitHub')
+const gitFactory = require('../lib/GitServiceFactory')
 const Staticman = require('../lib/Staticman')
 
 module.exports = async (repo, data) => {
@@ -9,18 +9,55 @@ module.exports = async (repo, data) => {
     ? require('universal-analytics')(config.get('analytics.uaTrackingId'))
     : null
 
-  if (!data.number) {
+  /*
+   * Unfortunately, all we have available to us at this point is the request body (as opposed to
+   * the full request). Meaning, we don't have the :service portion of the request URL available.
+   * As such, switch between GitHub and GitLab using the repo URL. For example:
+   *  "url": "https://api.github.com/repos/hispanic/staticman-test"
+   *  "url": "git@gitlab.com:ihispanic/staticman-test.git"
+   */
+  const calcIsGitHub = function (data) {
+    return data.repository.url.includes('github.com')
+  }
+  const calcIsGitLab = function (data) {
+    return data.repository.url.includes('gitlab.com')
+  }
+
+  /*
+   * Because we don't have the full request available to us here, we can't set the branch and
+   * (Staticman) version options. Fortunately, they aren't critical.
+   */
+  const unknownBranch = 'UNKNOWN'
+  const unknownVersion = ''
+
+  let gitService = null
+  let mergeReqNbr = null
+  if (calcIsGitHub(data)) {
+    gitService = await gitFactory.create('github', {
+      branch: unknownBranch,
+      repository: data.repository.name,
+      username: data.repository.owner.login,
+      version: unknownVersion
+    })
+    mergeReqNbr = data.number
+  } else if (calcIsGitLab(data)) {
+    gitService = await gitFactory.create('gitlab', {
+      branch: unknownBranch,
+      repository: data.repository.name,
+      username: data.user.username,
+      version: unknownVersion
+    })
+    mergeReqNbr = data.object_attributes.iid
+  } else {
+    return null
+  }
+
+  if (!mergeReqNbr) {
     return
   }
 
-  const github = await new GitHub({
-    username: data.repository.owner.login,
-    repository: data.repository.name,
-    version: '1'
-  })
-
   try {
-    let review = await github.getReview(data.number)
+    let review = await gitService.getReview(mergeReqNbr)
     if (review.sourceBranch.indexOf('staticman_')) {
       return null
     }
@@ -30,6 +67,10 @@ module.exports = async (repo, data) => {
     }
 
     if (review.state === 'merged') {
+      /*
+       * The "staticman_notification" comment section of the comment pull/merge request only
+       * exists if notifications were enabled at the time the pull/merge request was created.
+       */
       const bodyMatch = review.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
 
       if (bodyMatch && (bodyMatch.length === 2)) {
@@ -48,7 +89,18 @@ module.exports = async (repo, data) => {
     if (ua) {
       ua.event('Hooks', 'Delete branch').send()
     }
-    return github.deleteBranch(review.sourceBranch)
+
+    let result = null
+    /*
+     * Only necessary for GitHub, as GitLab automatically deletes the backing branch for the
+     * pull/merge request. For GitHub, this will throw the following error if the branch has
+     * already been deleted:
+     *  "UnhandledPromiseRejectionWarning: HttpError: Reference does not exist" if branch already deleted.
+     */
+    if (calcIsGitHub(data)) {
+      result = gitService.deleteBranch(review.sourceBranch)
+    }
+    return result
   } catch (e) {
     console.log(e.stack || e)
 
