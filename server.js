@@ -13,7 +13,8 @@ class StaticmanAPI {
       auth: require('./controllers/auth'),
       handlePR: require('./controllers/handlePR'),
       home: require('./controllers/home'),
-      process: require('./controllers/process')
+      process: require('./controllers/process'),
+      webhook: require('./controllers/webhook')
     }
 
     this.server = express()
@@ -23,7 +24,7 @@ class StaticmanAPI {
       // type: '*'
     }))
 
-    this.initialiseWebhookHandler()
+    this.initialiseGitHubWebhookHandler()
     this.initialiseCORS()
     this.initialiseBruteforceProtection()
     this.initialiseRoutes()
@@ -96,6 +97,14 @@ class StaticmanAPI {
       this.controllers.auth
     )
 
+    this.server.post(
+      '/v:version/webhook/:service/',
+      this.bruteforce.prevent,
+      this.requireApiVersion([3]),
+      this.requireService(['gitlab']),
+      this.controllers.webhook
+    )
+
     // Route: root
     this.server.get(
       '/',
@@ -103,14 +112,26 @@ class StaticmanAPI {
     )
   }
 
-  initialiseWebhookHandler () {
-    const webhookHandler = GithubWebHook({
-      path: '/v1/webhook'
-    })
+  initialiseGitHubWebhookHandler () {
+    /*
+     * The express-github-webhook module is frustrating, as it only allows for a simplistic match
+     * for equality against one path. No string patterns (e.g., /v1?3?/webhook(/github)?). No
+     * regular expressions (e.g., /\/v[13]\/webhook(?:\/github)?/). As such, create one instance
+     * of the module per supported path. This won't scale well as Staticman API versions are added.
+     */
+    for (const onePath of ['/v1/webhook', '/v3/webhook/github']) {
+      const webhookHandler = GithubWebHook({
+        path: onePath
+      })
 
-    webhookHandler.on('pull_request', this.controllers.handlePR)
+      /*
+       * Frustratingly, the express-github-webhook module only passes along body.data (and the
+       * repository name) to the callback, not the whole request.
+       */
+      webhookHandler.on('pull_request', this.controllers.handlePR)
 
-    this.server.use(webhookHandler)
+      this.server.use(webhookHandler)
+    }
   }
 
   requireApiVersion (versions) {

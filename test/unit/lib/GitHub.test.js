@@ -37,6 +37,22 @@ describe('GitHub interface', () => {
     expect(scope.isDone()).toBe(true)
   })
 
+  test('authenticates with the GitHub API using a personal access token when version blank', async () => {
+    const scope = nock((/api\.github\.com/), {
+      reqheaders: {
+        authorization: 'token '.concat('1q2w3e4r')
+      }
+    })
+      .get('/user/repository_invitations')
+      .reply(200)
+
+    let paramsWithoutVersion = Object.assign({}, req.params)
+    paramsWithoutVersion.version = ''
+    const githubInstance = await new GitHub(paramsWithoutVersion)
+    await githubInstance.api.repos.listInvitationsForAuthenticatedUser();
+    expect(scope.isDone()).toBe(true)
+  })
+
   test('authenticates with the GitHub API using an OAuth token', async () => {
     const scope = nock((/api\.github\.com/), {
       reqheaders: {
