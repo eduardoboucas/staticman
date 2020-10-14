@@ -231,7 +231,7 @@ const mockGitModules = function (mockGetReviewGitHub, mockGetReviewGitLab, mockD
   jest.mock('../../../lib/GitHub', () => {
     return jest.fn().mockImplementation(() => {
       let result = {
-        getReview: mockGetReviewGitHub, 
+        getReview: mockGetReviewGitHub
       }
       if (mockDeleteBranch) {
         result.deleteBranch = mockDeleteBranch
@@ -242,7 +242,7 @@ const mockGitModules = function (mockGetReviewGitHub, mockGetReviewGitLab, mockD
   jest.mock('../../../lib/GitLab', () => {
     return jest.fn().mockImplementation(() => {
       let result = {
-        getReview: mockGetReviewGitLab, 
+        getReview: mockGetReviewGitLab
       }
       if (mockDeleteBranch) {
         result.deleteBranch = mockDeleteBranch
