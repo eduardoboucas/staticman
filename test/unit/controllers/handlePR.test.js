@@ -18,15 +18,135 @@ jest.mock('../../../lib/Staticman', () => {
 
 beforeEach(() => {
   mockSetConfigPathFn = jest.fn()
-  mockProcessMergeFn = jest.fn()
+  mockProcessMergeFn = jest.fn().mockResolvedValue({ })
   req = helpers.getMockRequest()
-  res = helpers.getMockResponse()
 
   jest.resetAllMocks()
   jest.resetModules()
 })
 
 describe('HandlePR controller', () => {
+  test.each([
+    ['github'],
+    ['gitlab'],
+  ])('abort and return an error if unable to determine service  - %s', async (service) => {
+    let pr = {
+      title: 'Some random PR',
+      body: 'Unrelated review body',
+      head: {
+        ref: 'some-other-branch'
+      },
+      pull_request: {
+        base: {
+          ref: 'master'
+        }
+      },
+      merged: false,
+      repository: {
+        name: req.params.repository
+      },
+      state: 'open'
+    }
+    modifyPrDataForService(pr, service, req)
+    pr.repository.url = pr.repository.url.replace(service, 'gitFoo')
+
+    const mockDeleteBranch = jest.fn()
+
+    const handlePR = require('./../../../controllers/handlePR')
+
+    expect.hasAssertions()
+    try {
+      await handlePR(req.params.repository, pr)
+    } catch (e) {
+      expect(e.message).toBe('Unable to determine service.')
+      expect(mockDeleteBranch).toHaveBeenCalledTimes(0)
+      expect(mockProcessMergeFn).toHaveBeenCalledTimes(0)
+    }
+  })
+
+  test.each([
+    ['github'],
+    ['gitlab'],
+  ])('abort and return an error if no merge/pull request number found  - %s', async (service) => {
+    let pr = {
+      title: 'Some random PR',
+      body: 'Unrelated review body',
+      head: {
+        ref: 'some-other-branch'
+      },
+      pull_request: {
+        base: {
+          ref: 'master'
+        }
+      },
+      merged: false,
+      repository: {
+        name: req.params.repository
+      },
+      state: 'open'
+    }
+    modifyPrDataForService(pr, service, req)
+    if (service === 'github') {
+      pr.number = null
+    } else if (service === 'gitlab') {
+      pr.object_attributes.iid = null
+    }
+
+    const mockDeleteBranch = jest.fn()
+
+    const handlePR = require('./../../../controllers/handlePR')
+
+    expect.hasAssertions()
+    try {
+      await handlePR(req.params.repository, pr)
+    } catch (e) {
+      expect(e.message).toBe('No pull/merge request number found.')
+      expect(mockDeleteBranch).toHaveBeenCalledTimes(0)
+      expect(mockProcessMergeFn).toHaveBeenCalledTimes(0)
+    }
+  })
+
+  test.each([
+    ['github'],
+    ['gitlab'],
+  ])('abort and return an error if "getReview" call fails  - %s', async (service) => {
+    let pr = {
+      title: 'Some random PR',
+      body: 'Unrelated review body',
+      head: {
+        ref: 'some-other-branch'
+      },
+      pull_request: {
+        base: {
+          ref: 'master'
+        }
+      },
+      merged: false,
+      repository: {
+        name: req.params.repository
+      },
+      state: 'open'
+    }
+    modifyPrDataForService(pr, service, req)
+
+    const mockGetReviewGitHub = jest.fn().mockRejectedValue('Error calling getReview.')
+    const mockGetReviewGitLab = jest.fn().mockRejectedValue('Error calling getReview.')
+    const mockDeleteBranch = jest.fn()
+
+    mockGitModules(mockGetReviewGitHub, mockGetReviewGitLab, mockDeleteBranch)
+
+    const handlePR = require('./../../../controllers/handlePR')
+
+    expect.hasAssertions()
+    try {
+      await handlePR(req.params.repository, pr)
+    } catch (e) {
+      expect(e.message).toBe('Error calling getReview.')
+      expect(mockDeleteBranch).toHaveBeenCalledTimes(0)
+      expect(mockProcessMergeFn).toHaveBeenCalledTimes(0)
+    }
+  })
+
   test.each([
     ['github'],
     ['gitlab'],
@@ -37,8 +157,10 @@ describe('HandlePR controller', () => {
       head: {
         ref: 'some-other-branch'
       },
-      base: {
-        ref: 'master'
+      pull_request: {
+        base: {
+          ref: 'master'
+        }
       },
       merged: false,
       repository: {
@@ -48,7 +170,7 @@ describe('HandlePR controller', () => {
     }
     modifyPrDataForService(pr, service, req)
 
-    const mockReview = new Review(pr.title, pr.body, 'false', pr.head.ref, pr.base.ref)
+    const mockReview = new Review(pr.title, pr.body, 'false', pr.head.ref, pr.pull_request.base.ref)
     const mockGetReviewGitHub = jest.fn().mockResolvedValue(mockReview)
     const mockGetReviewGitLab = jest.fn().mockResolvedValue(mockReview)
 
@@ -73,8 +195,10 @@ describe('HandlePR controller', () => {
         head: {
           ref: 'staticman_1234567'
         },
-        base: {
-          ref: 'master'
+        pull_request: {
+          base: {
+            ref: 'master'
+          }
         },
         merged: true,
         repository: {
@@ -87,7 +211,7 @@ describe('HandlePR controller', () => {
       }
       modifyPrDataForService(pr, service, req)
       
-      const mockReview = new Review(pr.title, pr.body, 'false', pr.head.ref, pr.base.ref)
+      const mockReview = new Review(pr.title, pr.body, 'false', pr.head.ref, pr.pull_request.base.ref)
       const mockGetReviewGitHub = jest.fn().mockResolvedValue(mockReview)
       const mockGetReviewGitLab = jest.fn().mockResolvedValue(mockReview)
       const mockDeleteBranch = jest.fn()
@@ -112,8 +236,10 @@ describe('HandlePR controller', () => {
         head: {
           ref: 'staticman_1234567'
         },
-        base: {
-          ref: 'master'
+        pull_request: {
+          base: {
+            ref: 'master'
+          }
         },
         merged: true,
         repository: {
@@ -126,7 +252,7 @@ describe('HandlePR controller', () => {
       }
       modifyPrDataForService(pr, service, req)
       
-      const mockReview = new Review(pr.title, pr.body, 'merged', pr.head.ref, pr.base.ref)
+      const mockReview = new Review(pr.title, pr.body, 'merged', pr.head.ref, pr.pull_request.base.ref)
       const mockGetReviewGitHub = jest.fn().mockResolvedValue(mockReview)
       const mockGetReviewGitLab = jest.fn().mockResolvedValue(mockReview)
       const mockDeleteBranch = jest.fn()
@@ -165,8 +291,10 @@ describe('HandlePR controller', () => {
         head: {
           ref: 'staticman_1234567'
         },
-        base: {
-          ref: 'master'
+        pull_request: {
+          base: {
+            ref: 'master'
+          }
         },
         merged: true,
         repository: {
@@ -179,8 +307,8 @@ describe('HandlePR controller', () => {
       }
       modifyPrDataForService(pr, service, req)
 
-      const mockReview = new Review(pr.title, pr.body, 'merged', pr.head.ref, pr.base.ref)
-      const mockDeleteBranch = jest.fn()
+      const mockReview = new Review(pr.title, pr.body, 'merged', pr.head.ref, pr.pull_request.base.ref)
+      const mockDeleteBranch = jest.fn((sourceBranch) => new Promise((resolve, reject) => resolve({ })))
       const mockGetReviewGitHub = jest.fn().mockResolvedValue(mockReview)
       const mockGetReviewGitLab = jest.fn().mockResolvedValue(mockReview)
 

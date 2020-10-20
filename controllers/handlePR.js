@@ -13,8 +13,8 @@ module.exports = async (repo, data) => {
    * Unfortunately, all we have available to us at this point is the request body (as opposed to
    * the full request). Meaning, we don't have the :service portion of the request URL available.
    * As such, switch between GitHub and GitLab using the repo URL. For example:
-   *  "url": "https://api.github.com/repos/hispanic/staticman-test"
-   *  "url": "git@gitlab.com:ihispanic/staticman-test.git"
+   *  "url": "https://api.github.com/repos/foo/staticman-test"
+   *  "url": "git@gitlab.com:foo/staticman-test.git"
    */
   const calcIsGitHub = function (data) {
     return data.repository.url.includes('github.com')
@@ -24,73 +24,91 @@ module.exports = async (repo, data) => {
   }
 
   /*
-   * Because we don't have the full request available to us here, we can't set the branch and
-   * (Staticman) version options. Fortunately, they aren't critical.
+   * Because we don't have the full request available to us here, we can't set the (Staticman)
+   * version option. Fortunately, it isn't critical.
    */
-  const unknownBranch = 'UNKNOWN'
   const unknownVersion = ''
 
   let gitService = null
   let mergeReqNbr = null
   if (calcIsGitHub(data)) {
     gitService = await gitFactory.create('github', {
-      branch: unknownBranch,
+      branch: data.pull_request.base.ref,
       repository: data.repository.name,
       username: data.repository.owner.login,
       version: unknownVersion
     })
     mergeReqNbr = data.number
   } else if (calcIsGitLab(data)) {
+    const repoUrl = data.repository.url
+    const repoUsername = repoUrl.substring(repoUrl.indexOf(':') + 1, repoUrl.indexOf('/'))
     gitService = await gitFactory.create('gitlab', {
-      branch: unknownBranch,
+      branch: data.object_attributes.target_branch,
       repository: data.repository.name,
-      username: data.user.username,
+      username: repoUsername,
       version: unknownVersion
     })
     mergeReqNbr = data.object_attributes.iid
   } else {
-    return null
+    return Promise.reject(new Error('Unable to determine service.'))
   }
 
   if (!mergeReqNbr) {
-    return
+    return Promise.reject(new Error('No pull/merge request number found.'))
   }
 
-  try {
-    let review = await gitService.getReview(mergeReqNbr)
-    if (review.sourceBranch.indexOf('staticman_')) {
-      return null
-    }
+  let review = await gitService.getReview(mergeReqNbr).catch((error) => {
+    return Promise.reject(new Error(error))
+  })
 
-    if (review.state !== 'merged' && review.state !== 'closed') {
-      return null
-    }
+  if (review.sourceBranch.indexOf('staticman_') < 0) {
+    /*
+     * Don't throw an error here, as we might receive "real" (non-bot) pull requests for files
+     * other than Staticman-processed comments.
+     */
+    return null
+  }
 
-    if (review.state === 'merged') {
-      /*
-       * The "staticman_notification" comment section of the comment pull/merge request only
-       * exists if notifications were enabled at the time the pull/merge request was created.
-       */
-      const bodyMatch = review.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
+  if (review.state !== 'merged' && review.state !== 'closed') {
+    /*
+     * Don't throw an error here, as we'll regularly receive webhook calls whenever a pull/merge
+     * request is opened, not just merged/closed.
+     */
+    return null
+  }
 
-      if (bodyMatch && (bodyMatch.length === 2)) {
-        try {
-          const parsedBody = JSON.parse(bodyMatch[1])
-          const staticman = await new Staticman(parsedBody.parameters)
+  if (review.state === 'merged') {
+    /*
+     * The "staticman_notification" comment section of the comment pull/merge request only
+     * exists if notifications were enabled at the time the pull/merge request was created.
+     */
+    const bodyMatch = review.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
 
-          staticman.setConfigPath(parsedBody.configPath)
-          staticman.processMerge(parsedBody.fields, parsedBody.options)
-        } catch (err) {
-          return Promise.reject(err)
+    if (bodyMatch && (bodyMatch.length === 2)) {
+      try {
+        const parsedBody = JSON.parse(bodyMatch[1])
+        const staticman = await new Staticman(parsedBody.parameters)
+
+        staticman.setConfigPath(parsedBody.configPath)
+
+        await staticman.processMerge(parsedBody.fields, parsedBody.options)
+        // staticman.processMerge(parsedBody.fields, parsedBody.options).then(data => {
+        //   if (ua) {
+        //     ua.event('Hooks', 'Create/notify mailing list').send()
+        //   }
+        // })
+        if (ua) {
+          ua.event('Hooks', 'Create/notify mailing list').send()
         }
+      } catch (err) {
+        if (ua) {
+          ua.event('Hooks', 'Create/notify mailing list error').send()
+        }
+
+        return Promise.reject(err)
       }
     }
 
-    if (ua) {
-      ua.event('Hooks', 'Delete branch').send()
-    }
-
-    let result = null
     /*
      * Only necessary for GitHub, as GitLab automatically deletes the backing branch for the
      * pull/merge request. For GitHub, this will throw the following error if the branch has
@@ -98,16 +116,29 @@ module.exports = async (repo, data) => {
      *  "UnhandledPromiseRejectionWarning: HttpError: Reference does not exist" if branch already deleted.
      */
     if (calcIsGitHub(data)) {
-      result = gitService.deleteBranch(review.sourceBranch)
-    }
-    return result
-  } catch (e) {
-    console.log(e.stack || e)
+      // await gitService.deleteBranch(review.sourceBranch).then(data => {
+      //   if (ua) {
+      //     ua.event('Hooks', 'Delete branch').send()
+      //   }
+      // }).catch(err => {
+      //   if (ua) {
+      //     ua.event('Hooks', 'Delete branch error').send()
+      //   }
 
-    if (ua) {
-      ua.event('Hooks', 'Delete branch error').send()
-    }
+      //   return Promise.reject(err)
+      // })
+      try {
+        await gitService.deleteBranch(review.sourceBranch)
+        if (ua) {
+          ua.event('Hooks', 'Delete branch').send()
+        }
+      } catch (err) {
+        if (ua) {
+          ua.event('Hooks', 'Delete branch error').send()
+        }
 
-    return Promise.reject(e)
+        return Promise.reject(err)
+      }
+    }
   }
 }
