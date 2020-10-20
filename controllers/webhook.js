@@ -38,12 +38,6 @@ module.exports = async (req, res, next) => {
               console.error(error.stack || error)
               errorMsg = error.message
             })
-            // try {
-            //   await handlePR(req.params.repository, req.body)
-            // } catch (error) {
-            //   console.error(error.stack || error)
-            //   errorMsg = error.message
-            // }
           }
         }
       }

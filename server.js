@@ -134,15 +134,21 @@ class StaticmanAPI {
        */
       const handlePrWrapper = function (repo, data) {
         this.controllers.handlePR(repo, data).catch((error) => {
-          console.error(error)
           /*
            * Unfortunately, the express-github-webhook module returns a 200 (success) regardless
            * of any errors raised in the downstream handler. So, all we can do is log errors.
            */
+          console.error(error)
         })
       }.bind(this)
 
       webhookHandler.on('pull_request', handlePrWrapper)
+
+      /*
+       * Explicit handler for errors raised inside the express-github-webhook module that mimmicks 
+       * the system/express error handler. But, allows for customization and debugging.
+       */
+      webhookHandler.on('error', (error) => console.error(error.stack || error))
 
       this.server.use(webhookHandler)
     }
