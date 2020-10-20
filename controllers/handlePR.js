@@ -108,7 +108,7 @@ module.exports = async (repo, data) => {
      * Only necessary for GitHub, as GitLab automatically deletes the backing branch for the
      * pull/merge request. For GitHub, this will throw the following error if the branch has
      * already been deleted:
-     *  "UnhandledPromiseRejectionWarning: HttpError: Reference does not exist" if branch already deleted.
+     *  HttpError: Reference does not exist"
      */
     if (calcIsGitHub(data)) {
       try {
