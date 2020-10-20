@@ -145,7 +145,7 @@ class StaticmanAPI {
       webhookHandler.on('pull_request', handlePrWrapper)
 
       /*
-       * Explicit handler for errors raised inside the express-github-webhook module that mimmicks 
+       * Explicit handler for errors raised inside the express-github-webhook module that mimmicks
        * the system/express error handler. But, allows for customization and debugging.
        */
       webhookHandler.on('error', (error) => console.error(error.stack || error))
