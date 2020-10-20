@@ -92,11 +92,6 @@ module.exports = async (repo, data) => {
         staticman.setConfigPath(parsedBody.configPath)
 
         await staticman.processMerge(parsedBody.fields, parsedBody.options)
-        // staticman.processMerge(parsedBody.fields, parsedBody.options).then(data => {
-        //   if (ua) {
-        //     ua.event('Hooks', 'Create/notify mailing list').send()
-        //   }
-        // })
         if (ua) {
           ua.event('Hooks', 'Create/notify mailing list').send()
         }
@@ -116,17 +111,6 @@ module.exports = async (repo, data) => {
      *  "UnhandledPromiseRejectionWarning: HttpError: Reference does not exist" if branch already deleted.
      */
     if (calcIsGitHub(data)) {
-      // await gitService.deleteBranch(review.sourceBranch).then(data => {
-      //   if (ua) {
-      //     ua.event('Hooks', 'Delete branch').send()
-      //   }
-      // }).catch(err => {
-      //   if (ua) {
-      //     ua.event('Hooks', 'Delete branch error').send()
-      //   }
-
-      //   return Promise.reject(err)
-      // })
       try {
         await gitService.deleteBranch(review.sourceBranch)
         if (ua) {
