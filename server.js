@@ -121,14 +121,28 @@ class StaticmanAPI {
      */
     for (const onePath of ['/v1/webhook', '/v3/webhook/github']) {
       const webhookHandler = GithubWebHook({
-        path: onePath
+        path: onePath,
+        secret: config.get('githubWebhookSecret')
       })
 
       /*
+       * Wrap the handlePR callback so that we can catch any errors thrown and log them. This
+       * also has the benefit of eliminating noisy UnhandledPromiseRejectionWarning messages.
+       *
        * Frustratingly, the express-github-webhook module only passes along body.data (and the
        * repository name) to the callback, not the whole request.
        */
-      webhookHandler.on('pull_request', this.controllers.handlePR)
+      const handlePrWrapper = function (repo, data) {
+        this.controllers.handlePR(repo, data).catch((error) => {
+          console.error(error)
+          /*
+           * Unfortunately, the express-github-webhook module returns a 200 (success) regardless
+           * of any errors raised in the downstream handler. So, all we can do is log errors.
+           */
+        })
+      }.bind(this)
+
+      webhookHandler.on('pull_request', handlePrWrapper)
 
       this.server.use(webhookHandler)
     }
