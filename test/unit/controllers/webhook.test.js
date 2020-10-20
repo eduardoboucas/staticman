@@ -74,7 +74,7 @@ describe('Webhook controller', () => {
     req.headers['x-gitlab-event'] = 'Merge Request Hook'
 
     /*
-     * Replace the mock implementation to throw an error. More info: 
+     * Replace the mock implementation to throw an error. More info:
      *  https://blog.bguiz.com/2017/mocking-chained-apis-jest/
      */
     mockHandlePrFn.mockImplementation(() => Promise.reject( { message: 'Error calling handlePR.' } ))
