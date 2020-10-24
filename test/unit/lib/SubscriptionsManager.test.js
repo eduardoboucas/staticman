@@ -3,7 +3,7 @@
 const SubscriptionsManager = require('./../../../lib/SubscriptionsManager')
 
 let params = {
-	username: 'foo-user', 
+	username: 'foo-user',
 	repository: 'foo-repo'
 }
 const dataStore = null
@@ -20,8 +20,8 @@ beforeEach(() => {
   mockMailAgent = {
 	lists: jest.fn().mockImplementation(listaddr => {
 	  const result = {
-		info: mockListsInfoFunc, 
-		create: mockListsCreateFunc, 
+		info: mockListsInfoFunc,
+		create: mockListsCreateFunc,
 		members: jest.fn().mockImplementation(() => {
 		  const result = {
 			create: mockListsMembersCreateFunc
