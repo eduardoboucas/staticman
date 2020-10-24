@@ -1529,7 +1529,7 @@ describe('Staticman interface', () => {
         fields,
         options
       ).then(response => {
-        expect(mockSubscriptionSet.mock.calls[0][0]).toBe(options.parent)
+        expect(mockSubscriptionSet.mock.calls[0][0]).toEqual(options)
         expect(mockSubscriptionSet.mock.calls[0][1]).toBe(mockHelpers.getFields().email)
       })
     })
