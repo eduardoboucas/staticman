@@ -93,7 +93,7 @@ describe('SubscriptionsManager', () => {
       // Assert that "name" and "description" are passed when parent name is supplied.
       expect(mockListsCreateFunc.mock.calls[0][0]['name']).toBe(options.parentName)
       expect(mockListsCreateFunc.mock.calls[0][0]['description']).toBe(
-      	'Subscribers to: ' + options.parentName + ' (' + params.username + '/' + params.repository + ')')
+      	'Subscribers to ' + options.parent + ' (' + params.username + '/' + params.repository + ')')
       expect(mockListsMembersCreateFunc.mock.calls[0][0]).toEqual( { address: emailAddr } )
     })
   })
