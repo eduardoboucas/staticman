@@ -2,7 +2,6 @@ const bodyParser = require('body-parser')
 const config = require('./config')
 const express = require('express')
 const ExpressBrute = require('express-brute')
-const GithubWebHook = require('express-github-webhook')
 const objectPath = require('object-path')
 
 class StaticmanAPI {
@@ -11,7 +10,6 @@ class StaticmanAPI {
       connect: require('./controllers/connect'),
       encrypt: require('./controllers/encrypt'),
       auth: require('./controllers/auth'),
-      handlePR: require('./controllers/handlePR'),
       home: require('./controllers/home'),
       process: require('./controllers/process'),
       webhook: require('./controllers/webhook')
@@ -24,7 +22,6 @@ class StaticmanAPI {
       // type: '*'
     }))
 
-    this.initialiseGitHubWebhookHandler()
     this.initialiseCORS()
     this.initialiseBruteforceProtection()
     this.initialiseRoutes()
@@ -98,10 +95,18 @@ class StaticmanAPI {
     )
 
     this.server.post(
-      '/v:version/webhook/:service/',
+      /*
+       * Make the service, username, repository, and branch parameters optional in order to
+       * maintain backwards-compatibility with v1 of the endpoint, which assumed GitHub.
+       */
+      '/v:version/webhook/:service?/:username?/:repository?/:branch?/',
       this.bruteforce.prevent,
-      this.requireApiVersion([3]),
-      this.requireService(['gitlab']),
+      this.requireApiVersion([1, 3]),
+      /*
+       * Allow for the service to go unspecified in order to maintain backwards-compatibility
+       * with v1 of the endpoint, which assumed GitHub.
+       */
+      this.requireService(['', 'github', 'gitlab']),
       this.controllers.webhook
     )
 
@@ -110,48 +115,6 @@ class StaticmanAPI {
       '/',
       this.controllers.home
     )
-  }
-
-  initialiseGitHubWebhookHandler () {
-    /*
-     * The express-github-webhook module is frustrating, as it only allows for a simplistic match
-     * for equality against one path. No string patterns (e.g., /v1?3?/webhook(/github)?). No
-     * regular expressions (e.g., /\/v[13]\/webhook(?:\/github)?/). As such, create one instance
-     * of the module per supported path. This won't scale well as Staticman API versions are added.
-     */
-    for (const onePath of ['/v1/webhook', '/v3/webhook/github']) {
-      const webhookHandler = GithubWebHook({
-        path: onePath,
-        secret: config.get('githubWebhookSecret')
-      })
-
-      /*
-       * Wrap the handlePR callback so that we can catch any errors thrown and log them. This
-       * also has the benefit of eliminating noisy UnhandledPromiseRejectionWarning messages.
-       *
-       * Frustratingly, the express-github-webhook module only passes along body.data (and the
-       * repository name) to the callback, not the whole request.
-       */
-      const handlePrWrapper = function (repo, data) {
-        this.controllers.handlePR(repo, data).catch((error) => {
-          /*
-           * Unfortunately, the express-github-webhook module returns a 200 (success) regardless
-           * of any errors raised in the downstream handler. So, all we can do is log errors.
-           */
-          console.error(error)
-        })
-      }.bind(this)
-
-      webhookHandler.on('pull_request', handlePrWrapper)
-
-      /*
-       * Explicit handler for errors raised inside the express-github-webhook module that mimmicks
-       * the system/express error handler. But, allows for customization and debugging.
-       */
-      webhookHandler.on('error', (error) => console.error(error.stack || error))
-
-      this.server.use(webhookHandler)
-    }
   }
 
   requireApiVersion (versions) {
@@ -173,7 +136,13 @@ class StaticmanAPI {
 
   requireService (services) {
     return (req, res, next) => {
-      const serviceMatch = services.some(service => service === req.params.service)
+      const serviceMatch = services.some(service => {
+        let requestedService = req.params.service
+        if (typeof requestedService === 'undefined') {
+          requestedService = ''
+        }
+        return service === requestedService
+      })
 
       if (!serviceMatch) {
         return res.status(400).send({

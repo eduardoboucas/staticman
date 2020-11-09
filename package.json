@@ -34,7 +34,6 @@
     "convict": "^4.3.0",
     "express": "^4.14.0",
     "express-brute": "^0.6.0",
-    "express-github-webhook": "^1.0.5",
     "express-recaptcha": "^2.1.0",
     "gitlab": "^3.5.1",
     "js-yaml": "^3.10.0",

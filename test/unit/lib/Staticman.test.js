@@ -1499,10 +1499,11 @@ describe('Staticman interface', () => {
 
     test('subscribes the user to notifications', async () => {
       const mockSubscriptionSet = jest.fn(() => Promise.resolve(true))
+      const mockSubscriptionSend = jest.fn(() => Promise.resolve(true))
 
       jest.mock('./../../../lib/SubscriptionsManager', () => {
         return jest.fn(() => ({
-          send: jest.fn(),
+          send: mockSubscriptionSend,
           set: mockSubscriptionSet
         }))
       })
@@ -1631,7 +1632,7 @@ describe('Staticman interface', () => {
 
     describe('`processMerge()`', () => {
       test('subscribes the user to notifications', async () => {
-        const mockSubscriptionSend = jest.fn()
+        const mockSubscriptionSend = jest.fn(() => Promise.resolve(true))
 
         jest.mock('./../../../lib/SubscriptionsManager', () => {
           return jest.fn(() => ({
