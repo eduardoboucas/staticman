@@ -13,7 +13,6 @@ const Staticman = require('../lib/Staticman')
  */
 module.exports = async (req, res, next) => {
   let errorsRaised = []
-  let event
 
   let service = req.params.service
   const version = req.params.version
@@ -22,78 +21,16 @@ module.exports = async (req, res, next) => {
     service = 'github'
   }
 
-  const username = req.params.username
-  const repository = req.params.repository
-  const branch = req.params.branch
-
   switch (service) {
     case 'github':
-      event = req.headers['x-github-event']
-      if (!event) {
-        errorsRaised.push('No event found in the request')
-      } else {
-        if (event === 'pull_request') {
-          const webhookSecretExpected = config.get('githubWebhookSecret')
-          const webhookSecretSent = req.headers['x-hub-signature']
-
-          let reqAuthenticated = true
-          if (webhookSecretExpected) {
-            reqAuthenticated = false
-            if (!webhookSecretSent) {
-              // This could be worth logging... unless the endpoint gets hammered with spam.
-              errorsRaised.push('No secret found in the webhook request')
-            } else if (_verifyGitHubSignature(webhookSecretExpected, JSON.stringify(req.body), webhookSecretSent)) {
-              reqAuthenticated = true
-            } else {
-              // This could be worth logging... unless the endpoint gets hammered with spam.
-              errorsRaised.push('Unable to verify authenticity of request')
-            }
-          }
-
-          if (reqAuthenticated) {
-            await _handleMergeRequest(version, service, username, repository, branch, req.body).catch((errors) => {
-              errorsRaised = errors
-            })
-          }
-        }
-      }
-
+      await _handleWebhookGitHub(req, service, version).catch((errors) => {
+        errorsRaised = errorsRaised.concat(errors)
+      })
       break
     case 'gitlab':
-      event = req.headers['x-gitlab-event']
-      if (!event) {
-        errorsRaised.push('No event found in the request')
-      } else {
-        if (event === 'Merge Request Hook') {
-          const webhookSecretExpected = config.get('gitlabWebhookSecret')
-          const webhookSecretSent = req.headers['x-gitlab-token']
-
-          let reqAuthenticated = true
-          if (webhookSecretExpected) {
-            reqAuthenticated = false
-            if (!webhookSecretSent) {
-              // This could be worth logging... unless the endpoint gets hammered with spam.
-              errorsRaised.push('No secret found in the webhook request')
-            } else if (webhookSecretExpected === webhookSecretSent) {
-              /*
-               * Whereas GitHub uses the webhook secret to sign the request body, GitLab does not.
-               * As such, just check that the received secret equals the expected value.
-               */
-              reqAuthenticated = true
-            } else {
-              // This could be worth logging... unless the endpoint gets hammered with spam.
-              errorsRaised.push('Unable to verify authenticity of request')
-            }
-          }
-
-          if (reqAuthenticated) {
-            await _handleMergeRequest(version, service, username, repository, branch, req.body).catch((errors) => {
-              errorsRaised = errors
-            })
-          }
-        }
-      }
-
+      await _handleWebhookGitLab(req, service, version).catch((errors) => {
+        errorsRaised = errorsRaised.concat(errors)
+      })
       break
     default:
       errorsRaised.push('Unexpected service specified.')
@@ -110,6 +47,94 @@ module.exports = async (req, res, next) => {
   }
 }
 
+const _handleWebhookGitHub = async function (req, service, version) {
+  let errorsRaised = []
+
+  const username = req.params.username
+  const repository = req.params.repository
+  const branch = req.params.branch
+
+  const event = req.headers['x-github-event']
+  if (!event) {
+    errorsRaised.push('No event found in the request')
+  } else {
+    if (event === 'pull_request') {
+      const webhookSecretExpected = config.get('githubWebhookSecret')
+      const webhookSecretSent = req.headers['x-hub-signature']
+
+      let reqAuthenticated = true
+      if (webhookSecretExpected) {
+        reqAuthenticated = false
+        if (!webhookSecretSent) {
+          // This could be worth logging... unless the endpoint gets hammered with spam.
+          errorsRaised.push('No secret found in the webhook request')
+        } else if (_verifyGitHubSignature(webhookSecretExpected, JSON.stringify(req.body), webhookSecretSent)) {
+          reqAuthenticated = true
+        } else {
+          // This could be worth logging... unless the endpoint gets hammered with spam.
+          errorsRaised.push('Unable to verify authenticity of request')
+        }
+      }
+
+      if (reqAuthenticated) {
+        await _handleMergeRequest(version, service, username, repository, branch, req.body).catch((errors) => {
+          errorsRaised = errors
+        })
+      }
+    }
+  }
+
+  if (errorsRaised.length > 0) {
+    return Promise.reject(errorsRaised)
+  }
+}
+
+const _handleWebhookGitLab = async function (req, service, version) {
+  let errorsRaised = []
+
+  const username = req.params.username
+  const repository = req.params.repository
+  const branch = req.params.branch
+
+  const event = req.headers['x-gitlab-event']
+  if (!event) {
+    errorsRaised.push('No event found in the request')
+  } else {
+    if (event === 'Merge Request Hook') {
+      const webhookSecretExpected = config.get('gitlabWebhookSecret')
+      const webhookSecretSent = req.headers['x-gitlab-token']
+
+      let reqAuthenticated = true
+      if (webhookSecretExpected) {
+        reqAuthenticated = false
+        if (!webhookSecretSent) {
+          // This could be worth logging... unless the endpoint gets hammered with spam.
+          errorsRaised.push('No secret found in the webhook request')
+        } else if (webhookSecretExpected === webhookSecretSent) {
+          /*
+           * Whereas GitHub uses the webhook secret to sign the request body, GitLab does not.
+           * As such, just check that the received secret equals the expected value.
+           */
+          reqAuthenticated = true
+        } else {
+          // This could be worth logging... unless the endpoint gets hammered with spam.
+          errorsRaised.push('Unable to verify authenticity of request')
+        }
+      }
+
+      if (reqAuthenticated) {
+        await _handleMergeRequest(version, service, username, repository, branch, req.body).catch((errors) => {
+          errorsRaised = errors
+        })
+      }
+    }
+  }
+
+  if (errorsRaised.length > 0) {
+    return Promise.reject(errorsRaised)
+  }
+}
+
 const _calcIsVersion1WhenGitHubAssumed = function (service, version) {
   return (!service && version === '1')
 }
@@ -120,7 +145,6 @@ const _verifyGitHubSignature = function (secret, data, signature) {
 }
 
 const _handleMergeRequest = async function (version, service, username, repository, branch, data) {
-  // Allow for multiple errors to be raised and reported back.
   const errors = []
 
   const ua = config.get('analytics.uaTrackingId')
@@ -225,8 +249,6 @@ const _createNotifyMailingList = async function (review, ua) {
         if (ua) {
           ua.event('Hooks', 'Create/notify mailing list').send()
         }
-      }).catch(err => {
-        return Promise.reject(err)
       })
     } catch (err) {
       if (ua) {

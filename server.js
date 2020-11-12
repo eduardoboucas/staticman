@@ -102,11 +102,7 @@ class StaticmanAPI {
       '/v:version/webhook/:service?/:username?/:repository?/:branch?/',
       this.bruteforce.prevent,
       this.requireApiVersion([1, 3]),
-      /*
-       * Allow for the service to go unspecified in order to maintain backwards-compatibility
-       * with v1 of the endpoint, which assumed GitHub.
-       */
-      this.requireService(['', 'github', 'gitlab']),
+      this.requireService(['github', 'gitlab'], true),
       this.controllers.webhook
     )
 
@@ -134,15 +130,17 @@ class StaticmanAPI {
     }
   }
 
-  requireService (services) {
+  requireService (services, optional = false) {
     return (req, res, next) => {
-      const serviceMatch = services.some(service => {
-        let requestedService = req.params.service
-        if (typeof requestedService === 'undefined') {
-          requestedService = ''
-        }
-        return service === requestedService
-      })
+      let serviceMatch = false
+      if (optional && !req.params.service) {
+        serviceMatch = true
+      } else {
+        serviceMatch = services.some(service => {
+          let requestedService = req.params.service ? req.params.service : ''
+          return service === requestedService
+        })
+      }
 
       if (!serviceMatch) {
         return res.status(400).send({
