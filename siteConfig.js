@@ -107,6 +107,11 @@ const schema = {
       default: false
     }
   },
+  githubWebhookSecret: {
+    doc: 'Token to verify that webhook requests are from GitHub',
+    format: 'EncryptedString',
+    default: null
+  },
   gitlabAuth: {
     clientId: {
       doc: 'The client ID to the GitLab Application used for GitLab OAuth.',
@@ -123,6 +128,11 @@ const schema = {
       format: String,
       default: ''
     }
+  },
+  gitlabWebhookSecret: {
+    doc: 'Token to verify that webhook requests are from GitLab',
+    format: 'EncryptedString',
+    default: null
   },
   moderation: {
     doc: 'When set to `true`, a pull request with the data files will be created to allow site administrators to approve or reject an entry. Otherwise, entries will be pushed to `branch` immediately.',

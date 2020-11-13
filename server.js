@@ -96,10 +96,10 @@ class StaticmanAPI {
 
     this.server.post(
       /*
-       * Make the service, username, repository, and branch parameters optional in order to
+       * Make the service, username, repository, etc. parameters optional in order to
        * maintain backwards-compatibility with v1 of the endpoint, which assumed GitHub.
        */
-      '/v:version/webhook/:service?/:username?/:repository?/:branch?/',
+      '/v:version/webhook/:service?/:username?/:repository?/:branch?/:property?',
       this.bruteforce.prevent,
       this.requireApiVersion([1, 3]),
       this.requireService(['github', 'gitlab'], true),

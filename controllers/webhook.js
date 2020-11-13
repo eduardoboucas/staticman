@@ -14,21 +14,28 @@ const Staticman = require('../lib/Staticman')
 module.exports = async (req, res, next) => {
   let errorsRaised = []
 
-  let service = req.params.service
-  const version = req.params.version
-
-  if (_calcIsVersion1WhenGitHubAssumed(service, version)) {
+  let service = null
+  let staticman = null
+  if (_calcIsVersion1WhenGitHubAssumed(req)) {
     service = 'github'
+  } else {
+    /*
+     * In versions of the webhook endpoint beyond v1, we have the parameters necessary to
+     * instantiate a Staticman instance right away.
+     */
+    service = req.params.service
+    staticman = await new Staticman(req.params)
+    staticman.setConfigPath()
   }
 
   switch (service) {
     case 'github':
-      await _handleWebhookGitHub(req, service, version).catch((errors) => {
+      await _handleWebhookGitHub(req, service, staticman).catch((errors) => {
         errorsRaised = errorsRaised.concat(errors)
       })
       break
     case 'gitlab':
-      await _handleWebhookGitLab(req, service, version).catch((errors) => {
+      await _handleWebhookGitLab(req, service, staticman).catch((errors) => {
         errorsRaised = errorsRaised.concat(errors)
       })
       break
@@ -47,24 +54,24 @@ module.exports = async (req, res, next) => {
   }
 }
 
-const _handleWebhookGitHub = async function (req, service, version) {
+const _handleWebhookGitHub = async function (req, service, staticman) {
   let errorsRaised = []
-
-  const username = req.params.username
-  const repository = req.params.repository
-  const branch = req.params.branch
 
   const event = req.headers['x-github-event']
   if (!event) {
     errorsRaised.push('No event found in the request')
   } else {
     if (event === 'pull_request') {
-      const webhookSecretExpected = config.get('githubWebhookSecret')
-      const webhookSecretSent = req.headers['x-hub-signature']
+      let webhookSecretExpected = null
+      if (staticman) {
+        // Webhook request authentication is NOT supported in v1 of the endpoint.
+        webhookSecretExpected = staticman.getSiteConfig().get('githubWebhookSecret')
+      }
 
       let reqAuthenticated = true
       if (webhookSecretExpected) {
         reqAuthenticated = false
+        const webhookSecretSent = req.headers['x-hub-signature']
         if (!webhookSecretSent) {
           // This could be worth logging... unless the endpoint gets hammered with spam.
           errorsRaised.push('No secret found in the webhook request')
@@ -77,7 +84,7 @@ const _handleWebhookGitHub = async function (req, service, version) {
       }
 
       if (reqAuthenticated) {
-        await _handleMergeRequest(version, service, username, repository, branch, req.body).catch((errors) => {
+        await _handleMergeRequest(req.params, service, req.body, staticman).catch((errors) => {
           errorsRaised = errors
         })
       }
@@ -89,24 +96,24 @@ const _handleWebhookGitHub = async function (req, service, version) {
   }
 }
 
-const _handleWebhookGitLab = async function (req, service, version) {
+const _handleWebhookGitLab = async function (req, service, staticman) {
   let errorsRaised = []
-
-  const username = req.params.username
-  const repository = req.params.repository
-  const branch = req.params.branch
 
   const event = req.headers['x-gitlab-event']
   if (!event) {
     errorsRaised.push('No event found in the request')
   } else {
     if (event === 'Merge Request Hook') {
-      const webhookSecretExpected = config.get('gitlabWebhookSecret')
-      const webhookSecretSent = req.headers['x-gitlab-token']
+      let webhookSecretExpected = null
+      if (staticman) {
+        // Webhook request authentication is NOT supported in v1 of the endpoint.
+        webhookSecretExpected = staticman.getSiteConfig().get('gitlabWebhookSecret')
+      }
 
       let reqAuthenticated = true
       if (webhookSecretExpected) {
         reqAuthenticated = false
+        const webhookSecretSent = req.headers['x-gitlab-token']
         if (!webhookSecretSent) {
           // This could be worth logging... unless the endpoint gets hammered with spam.
           errorsRaised.push('No secret found in the webhook request')
@@ -123,7 +130,7 @@ const _handleWebhookGitLab = async function (req, service, version) {
       }
 
       if (reqAuthenticated) {
-        await _handleMergeRequest(version, service, username, repository, branch, req.body).catch((errors) => {
+        await _handleMergeRequest(req.params, service, req.body, staticman).catch((errors) => {
           errorsRaised = errors
         })
       }
@@ -135,7 +142,9 @@ const _handleWebhookGitLab = async function (req, service, version) {
   }
 }
 
-const _calcIsVersion1WhenGitHubAssumed = function (service, version) {
+const _calcIsVersion1WhenGitHubAssumed = function (req) {
+  const service = req.params.service
+  const version = req.params.version
   return (!service && version === '1')
 }
 
@@ -144,12 +153,17 @@ const _verifyGitHubSignature = function (secret, data, signature) {
   return bufferEq(Buffer.from(signature), Buffer.from(signedData))
 }
 
-const _handleMergeRequest = async function (version, service, username, repository, branch, data) {
+const _handleMergeRequest = async function (params, service, data, staticman) {
   const errors = []
 
   const ua = config.get('analytics.uaTrackingId')
     ? require('universal-analytics')(config.get('analytics.uaTrackingId'))
     : null
+
+  const version = params.version
+  const username = params.username
+  const repository = params.repository
+  const branch = params.branch
 
   let gitService = null
   let mergeReqNbr = null
@@ -183,7 +197,7 @@ const _handleMergeRequest = async function (version, service, username, reposito
 
   if (_calcIsMergeRequestStaticmanGenerated(review)) {
     if (_calcIsMergeRequestAccepted(review)) {
-      await _createNotifyMailingList(review, ua).catch((error) => {
+      await _createNotifyMailingList(review, staticman, ua).catch((error) => {
         errors.push(error.message)
       })
 
@@ -236,14 +250,15 @@ const _calcIsMergeRequestBranchRequiresManualDelete = function (service) {
   return (service === 'github')
 }
 
-const _createNotifyMailingList = async function (review, ua) {
+const _createNotifyMailingList = async function (review, staticman, ua) {
   const bodyMatch = review.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i)
   if (_calcIsNotificationsEnabledWhenMergeRequestCreated(bodyMatch)) {
     try {
       const parsedBody = JSON.parse(bodyMatch[1])
-      const staticman = await new Staticman(parsedBody.parameters)
-
-      staticman.setConfigPath(parsedBody.configPath)
+      if (staticman === null) {
+        staticman = await new Staticman(parsedBody.parameters)
+        staticman.setConfigPath(parsedBody.configPath)
+      }
 
       await staticman.processMerge(parsedBody.fields, parsedBody.extendedFields, parsedBody.options).then(msg => {
         if (ua) {
