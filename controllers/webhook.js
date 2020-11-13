@@ -65,7 +65,9 @@ const _handleWebhookGitHub = async function (req, service, staticman) {
       let webhookSecretExpected = null
       if (staticman) {
         // Webhook request authentication is NOT supported in v1 of the endpoint.
-        webhookSecretExpected = staticman.getSiteConfig().get('githubWebhookSecret')
+        await staticman.getSiteConfig().then((siteConfig) => {
+          webhookSecretExpected = siteConfig.get('githubWebhookSecret')
+        })
       }
 
       let reqAuthenticated = true
@@ -107,7 +109,9 @@ const _handleWebhookGitLab = async function (req, service, staticman) {
       let webhookSecretExpected = null
       if (staticman) {
         // Webhook request authentication is NOT supported in v1 of the endpoint.
-        webhookSecretExpected = staticman.getSiteConfig().get('gitlabWebhookSecret')
+        await staticman.getSiteConfig().then((siteConfig) => {
+          webhookSecretExpected = siteConfig.get('gitlabWebhookSecret')
+        })
       }
 
       let reqAuthenticated = true
