@@ -1,4 +1,5 @@
-const config = require('./../../../config')
+let mockCreateHmacFn = jest.fn()
+
 const helpers = require('./../../helpers')
 const Review = require('../../../lib/models/Review')
 const sampleData = require('./../../helpers/sampleData')
@@ -11,6 +12,7 @@ let mockGetReviewFn = jest.fn()
 let mockDeleteBranchFn = jest.fn()
 let mockCreateFn = jest.fn()
 let mockSetConfigPathFn = jest.fn()
+let mockGetSiteConfigFn = jest.fn()
 let mockProcessMergeFn = jest.fn()
 
 jest.mock('../../../lib/GitServiceFactory', () => {
@@ -29,17 +31,7 @@ jest.mock('crypto', () => {
   const cryptoOrig = require.requireActual('crypto')
   return {
     ...cryptoOrig,
-    createHmac: (algo, data) => {
-      return {
-        update: data => {
-          return {
-            digest: encoding => {
-              return mockHmacDigest
-            }
-          }
-        }
-      }
-    }
+    createHmac: mockCreateHmacFn
   }
 })
 
@@ -47,6 +39,7 @@ jest.mock('../../../lib/Staticman', () => {
   return jest.fn().mockImplementation(() => {
     return {
       setConfigPath: mockSetConfigPathFn,
+      getSiteConfig: mockGetSiteConfigFn,
       processMerge: mockProcessMergeFn
     }
   })
@@ -65,6 +58,18 @@ beforeEach(() => {
       deleteBranch: mockDeleteBranchFn
     }
   })
+
+  mockCreateHmacFn.mockImplementation((algo, data) => {
+    return {
+      update: data => {
+        return {
+          digest: encoding => {
+            return mockHmacDigest
+          }
+        }
+      }
+    }
+  })
 })
 
 afterEach(() => {
@@ -72,11 +77,9 @@ afterEach(() => {
   mockDeleteBranchFn.mockClear()
   mockCreateFn.mockClear()
   mockSetConfigPathFn.mockClear()
+  mockGetSiteConfigFn.mockClear()
   mockProcessMergeFn.mockClear()
-
-  // Clean-up the (possibly) modified JSON-sourced config.
-  config.set('githubWebhookSecret', null)
-  config.set('gitlabWebhookSecret', null)
+  mockCreateHmacFn.mockClear()
 })
 
 describe('Webhook controller', () => {
@@ -94,7 +97,7 @@ describe('Webhook controller', () => {
   })
 
   test.each([
-    ['github', 'gitlab']
+    ['github'], ['gitlab']
   ])('abort and return an error if no event header found - %s', async (service) => {
     req.params.service = service
 
@@ -107,7 +110,7 @@ describe('Webhook controller', () => {
   })
 
   test.each([
-    ['github', 'gitlab']
+    ['github'], ['gitlab']
   ])('abort and return success if not "Merge Request Hook" event - %s', async (service) => {
     req.params.service = service
     if (service === 'github') {
@@ -124,7 +127,7 @@ describe('Webhook controller', () => {
   })
 
   test.each([
-    ['github', 'gitlab']
+    ['github'], ['gitlab']
   ])('abort and return an error if webhook secret expected, but not sent - %s', async (service) => {
     req.params.service = service
     if (service === 'github') {
@@ -133,11 +136,17 @@ describe('Webhook controller', () => {
       req.headers['x-gitlab-event'] = 'Merge Request Hook'
     }
 
-    // Inject a value for the expected webhook secret into the JSON-sourced config.
+    // Inject a value for the expected webhook secret into the site config.
     if (service === 'github') {
-      config.set('githubWebhookSecret', '2a-foobar-db72')
+      mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+          ['githubWebhookSecret', '2a-foobar-db72']
+        ])))
+      )
     } else if (service === 'gitlab') {
-      config.set('gitlabWebhookSecret', '2a-foobar-db72')
+      mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+          ['gitlabWebhookSecret', '2a-foobar-db72']
+        ])))
+      )
     }
 
     expect.hasAssertions()
@@ -149,22 +158,28 @@ describe('Webhook controller', () => {
   })
 
   test.each([
-    ['github', 'gitlab']
+    ['github'], ['gitlab']
   ])('abort and return an error if unexpected webhook secret sent - %s', async (service) => {
     req.params.service = service
     if (service === 'github') {
       req.headers['x-github-event'] = 'pull_request'
 
-      // Inject a value for the expected webhook secret into the JSON-sourced config.
-      config.set('githubWebhookSecret', 'sha1=' + mockHmacDigest)
+      // Inject a value for the expected webhook secret into the site config.
+      mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+          ['githubWebhookSecret', 'sha1=' + mockHmacDigest]
+        ])))
+      )
 
       // Mock a signature from GitHub that does NOT match the expected signature.
       req.headers['x-hub-signature'] = 'sha1=' + 'foobar'
     } else if (service === 'gitlab') {
       req.headers['x-gitlab-event'] = 'Merge Request Hook'
 
-      // Inject a value for the expected webhook secret into the JSON-sourced config.
-      config.set('gitlabWebhookSecret', '2a-foobar-db72')
+      // Inject a value for the expected webhook secret into the site config.
+      mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+          ['gitlabWebhookSecret', '2a-foobar-db72']
+        ])))
+      )
 
       // Mock a token from GitLab that does NOT match the expected token.
       req.headers['x-gitlab-token'] = '2a-different-db72'
@@ -172,6 +187,9 @@ describe('Webhook controller', () => {
 
     expect.hasAssertions()
     return webhook(req, res).then(response => {
+      if (service === 'github') {
+        expect(mockCreateHmacFn).toHaveBeenCalledTimes(1)
+      }
       expect(mockCreateFn).toHaveBeenCalledTimes(0)
       expect(res.send.mock.calls[0][0]).toEqual({ errors: '[\"Unable to verify authenticity of request\"]' })
       expect(res.status.mock.calls[0][0]).toBe(400)
@@ -179,25 +197,33 @@ describe('Webhook controller', () => {
   })
 
   test.each([
-    ['github', 'gitlab']
+    ['github'], ['gitlab']
   ])('abort and return an error if no merge request number found in webhook payload - %s', async (service) => {
     req.params.service = service
 
-    req.body = {}
+    req.body = {
+      object_attributes: {}
+    }
 
     if (service === 'github') {
       req.headers['x-github-event'] = 'pull_request'
 
-      // Inject a value for the expected webhook secret into the JSON-sourced config.
-      config.set('githubWebhookSecret', 'sha1=' + mockHmacDigest)
+      // Inject a value for the expected webhook secret into the site config.
+      mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+          ['githubWebhookSecret', 'sha1=' + mockHmacDigest]
+        ])))
+      )
 
       // Mock a signature from GitHub that matches the expected signature.
       req.headers['x-hub-signature'] = 'sha1=' + mockHmacDigest
     } else if (service === 'gitlab') {
       req.headers['x-gitlab-event'] = 'Merge Request Hook'
 
-      // Inject a value for the expected webhook secret into the JSON-sourced config.
-      config.set('gitlabWebhookSecret', '2a-foobar-db72')
+      // Inject a value for the expected webhook secret into the site config.
+      mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+          ['gitlabWebhookSecret', '2a-foobar-db72']
+        ])))
+      )
 
       // Mock a token from GitLab that matches the expected token.
       req.headers['x-gitlab-token'] = '2a-foobar-db72'
@@ -205,6 +231,9 @@ describe('Webhook controller', () => {
 
     expect.hasAssertions()
     return webhook(req, res).then(response => {
+      if (service === 'github') {
+        expect(mockCreateHmacFn).toHaveBeenCalledTimes(1)
+      }
       expect(mockCreateFn).toHaveBeenCalledTimes(1)
       expect(mockCreateFn.mock.calls[0][0]).toBe(service)
       expect(res.send.mock.calls[0][0]).toEqual({ errors: '[\"No pull/merge request number found.\"]' })
@@ -236,11 +265,20 @@ describe('Webhook controller', () => {
     }
 
     req.headers['x-github-event'] = 'pull_request'
-    config.set('githubWebhookSecret', 'sha1=' + mockHmacDigest)
+    mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+        ['githubWebhookSecret', 'sha1=' + mockHmacDigest]
+      ])))
+    )
     req.headers['x-hub-signature'] = 'sha1=' + mockHmacDigest
 
     expect.hasAssertions()
     return webhook(req, res).then(response => {
+      /*
+       * The necessary parameters to retrieve the site config and verify the webhook signature are
+       * not passed in v1 of the webhook endpoint.
+       */
+      expect(mockGetSiteConfigFn).toHaveBeenCalledTimes(0)
+      expect(mockCreateHmacFn).toHaveBeenCalledTimes(0)
       expect(mockCreateFn).toHaveBeenCalledTimes(1)
       expect(mockCreateFn.mock.calls[0][0]).toBe('github')
     })
@@ -270,11 +308,20 @@ describe('Webhook controller', () => {
     }
 
     req.headers['x-github-event'] = 'pull_request'
-    config.set('githubWebhookSecret', 'sha1=' + mockHmacDigest)
+    mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+        ['githubWebhookSecret', 'sha1=' + mockHmacDigest]
+      ])))
+    )
     req.headers['x-hub-signature'] = 'sha1=' + mockHmacDigest
 
     expect.hasAssertions()
     return webhook(req, res).then(response => {
+      /*
+       * The necessary parameters to retrieve the site config and verify the webhook signature are
+       * not passed in v1 of the webhook endpoint.
+       */
+      expect(mockGetSiteConfigFn).toHaveBeenCalledTimes(0)
+      expect(mockCreateHmacFn).toHaveBeenCalledTimes(0)
       expect(mockCreateFn).toHaveBeenCalledTimes(1)
       expect(mockCreateFn.mock.calls[0][0]).toBe('github')
       expect(mockCreateFn.mock.calls[0][1].username).toBe(req.body.repository.owner.login)
@@ -284,7 +331,7 @@ describe('Webhook controller', () => {
   })
 
   test.each([
-    ['github', 'gitlab']
+    ['github'], ['gitlab']
   ])('abort and return an error if error retrieving merge request - %s', async (service) => {
     req.params.service = service
 
@@ -297,11 +344,17 @@ describe('Webhook controller', () => {
 
     if (service === 'github') {
       req.headers['x-github-event'] = 'pull_request'
-      config.set('githubWebhookSecret', 'sha1=' + mockHmacDigest)
+      mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+          ['githubWebhookSecret', 'sha1=' + mockHmacDigest]
+        ])))
+      )
       req.headers['x-hub-signature'] = 'sha1=' + mockHmacDigest
     } else if (service === 'gitlab') {
       req.headers['x-gitlab-event'] = 'Merge Request Hook'
-      config.set('gitlabWebhookSecret', '2a-foobar-db72')
+      mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+          ['gitlabWebhookSecret', '2a-foobar-db72']
+        ])))
+      )
       req.headers['x-gitlab-token'] = '2a-foobar-db72'
     }
 
@@ -313,6 +366,9 @@ describe('Webhook controller', () => {
 
     expect.hasAssertions()
     return webhook(req, res).then(response => {
+      if (service === 'github') {
+        expect(mockCreateHmacFn).toHaveBeenCalledTimes(1)
+      }
       expect(mockCreateFn).toHaveBeenCalledTimes(1)
       expect(mockGetReviewFn).toHaveBeenCalledTimes(1)
       if (service === 'github') {
@@ -332,8 +388,8 @@ describe('Webhook controller', () => {
   })
 
   test.each([
-    ['github', 'gitlab']
-  ])('abort and return success if merge request source branch not created by Staticman_ - %s', async (service) => {
+    ['github'], ['gitlab']
+  ])('abort and return success if merge request source branch not created by Staticman - %s', async (service) => {
     req.params.service = service
 
     req.body = {
@@ -345,11 +401,17 @@ describe('Webhook controller', () => {
 
     if (service === 'github') {
       req.headers['x-github-event'] = 'pull_request'
-      config.set('githubWebhookSecret', 'sha1=' + mockHmacDigest)
+      mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+          ['githubWebhookSecret', 'sha1=' + mockHmacDigest]
+        ])))
+      )
       req.headers['x-hub-signature'] = 'sha1=' + mockHmacDigest
     } else if (service === 'gitlab') {
       req.headers['x-gitlab-event'] = 'Merge Request Hook'
-      config.set('gitlabWebhookSecret', '2a-foobar-db72')
+      mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+          ['gitlabWebhookSecret', '2a-foobar-db72']
+        ])))
+      )
       req.headers['x-gitlab-token'] = '2a-foobar-db72'
     }
 
@@ -358,6 +420,9 @@ describe('Webhook controller', () => {
 
     expect.hasAssertions()
     return webhook(req, res).then(response => {
+      if (service === 'github') {
+        expect(mockCreateHmacFn).toHaveBeenCalledTimes(1)
+      }
       expect(mockCreateFn).toHaveBeenCalledTimes(1)
       expect(mockGetReviewFn).toHaveBeenCalledTimes(1)
       if (service === 'github') {
@@ -370,7 +435,7 @@ describe('Webhook controller', () => {
   })
 
   test.each([
-    ['github', 'gitlab']
+    ['github'], ['gitlab']
   ])('abort and return success if merge request state not merged or closed - %s', async (service) => {
     req.params.service = service
 
@@ -383,11 +448,17 @@ describe('Webhook controller', () => {
 
     if (service === 'github') {
       req.headers['x-github-event'] = 'pull_request'
-      config.set('githubWebhookSecret', 'sha1=' + mockHmacDigest)
+      mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+          ['githubWebhookSecret', 'sha1=' + mockHmacDigest]
+        ])))
+      )
       req.headers['x-hub-signature'] = 'sha1=' + mockHmacDigest
     } else if (service === 'gitlab') {
       req.headers['x-gitlab-event'] = 'Merge Request Hook'
-      config.set('gitlabWebhookSecret', '2a-foobar-db72')
+      mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+          ['gitlabWebhookSecret', '2a-foobar-db72']
+        ])))
+      )
       req.headers['x-gitlab-token'] = '2a-foobar-db72'
     }
 
@@ -396,6 +467,9 @@ describe('Webhook controller', () => {
 
     expect.hasAssertions()
     return webhook(req, res).then(response => {
+      if (service === 'github') {
+        expect(mockCreateHmacFn).toHaveBeenCalledTimes(1)
+      }
       expect(mockCreateFn).toHaveBeenCalledTimes(1)
       expect(mockGetReviewFn).toHaveBeenCalledTimes(1)
       if (service === 'github') {
@@ -408,7 +482,7 @@ describe('Webhook controller', () => {
   })
 
   test.each([
-    ['github', 'gitlab']
+    ['github'], ['gitlab']
   ])('return success if merge request body does not match template - %s', async (service) => {
     req.params.service = service
 
@@ -421,11 +495,17 @@ describe('Webhook controller', () => {
 
     if (service === 'github') {
       req.headers['x-github-event'] = 'pull_request'
-      config.set('githubWebhookSecret', 'sha1=' + mockHmacDigest)
+      mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+          ['githubWebhookSecret', 'sha1=' + mockHmacDigest]
+        ])))
+      )
       req.headers['x-hub-signature'] = 'sha1=' + mockHmacDigest
     } else if (service === 'gitlab') {
       req.headers['x-gitlab-event'] = 'Merge Request Hook'
-      config.set('gitlabWebhookSecret', '2a-foobar-db72')
+      mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+          ['gitlabWebhookSecret', '2a-foobar-db72']
+        ])))
+      )
       req.headers['x-gitlab-token'] = '2a-foobar-db72'
     }
 
@@ -434,6 +514,9 @@ describe('Webhook controller', () => {
 
     expect.hasAssertions()
     return webhook(req, res).then(response => {
+      if (service === 'github') {
+        expect(mockCreateHmacFn).toHaveBeenCalledTimes(1)
+      }
       expect(mockCreateFn).toHaveBeenCalledTimes(1)
       expect(mockGetReviewFn).toHaveBeenCalledTimes(1)
       // No attempt should be made to send notification emails.
@@ -448,7 +531,7 @@ describe('Webhook controller', () => {
   })
 
   test.each([
-    ['github', 'gitlab']
+    ['github'], ['gitlab']
   ])('abort and return an error if error raised sending notification emails - %s', async (service) => {
     req.params.service = service
 
@@ -461,11 +544,17 @@ describe('Webhook controller', () => {
 
     if (service === 'github') {
       req.headers['x-github-event'] = 'pull_request'
-      config.set('githubWebhookSecret', 'sha1=' + mockHmacDigest)
+      mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+          ['githubWebhookSecret', 'sha1=' + mockHmacDigest]
+        ])))
+      )
       req.headers['x-hub-signature'] = 'sha1=' + mockHmacDigest
     } else if (service === 'gitlab') {
       req.headers['x-gitlab-event'] = 'Merge Request Hook'
-      config.set('gitlabWebhookSecret', '2a-foobar-db72')
+      mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+          ['gitlabWebhookSecret', '2a-foobar-db72']
+        ])))
+      )
       req.headers['x-gitlab-token'] = '2a-foobar-db72'
     }
 
@@ -481,6 +570,9 @@ describe('Webhook controller', () => {
 
     expect.hasAssertions()
     return webhook(req, res).then(response => {
+      if (service === 'github') {
+        expect(mockCreateHmacFn).toHaveBeenCalledTimes(1)
+      }
       expect(mockCreateFn).toHaveBeenCalledTimes(1)
       expect(mockGetReviewFn).toHaveBeenCalledTimes(1)
       expect(mockProcessMergeFn).toHaveBeenCalledTimes(1)
@@ -508,7 +600,10 @@ describe('Webhook controller', () => {
     }
 
     req.headers['x-github-event'] = 'pull_request'
-    config.set('githubWebhookSecret', 'sha1=' + mockHmacDigest)
+    mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+        ['githubWebhookSecret', 'sha1=' + mockHmacDigest]
+      ])))
+    )
     req.headers['x-hub-signature'] = 'sha1=' + mockHmacDigest
 
     mockReview = new Review('Some random PR', sampleData.prBody1, 'merged', 'staticman_1234567', 'master')
@@ -523,6 +618,7 @@ describe('Webhook controller', () => {
 
     expect.hasAssertions()
     return webhook(req, res).then(response => {
+      expect(mockCreateHmacFn).toHaveBeenCalledTimes(1)
       expect(mockCreateFn).toHaveBeenCalledTimes(1)
       expect(mockGetReviewFn).toHaveBeenCalledTimes(1)
       expect(mockProcessMergeFn).toHaveBeenCalledTimes(1)
@@ -549,7 +645,10 @@ describe('Webhook controller', () => {
     }
 
     req.headers['x-github-event'] = 'pull_request'
-    config.set('githubWebhookSecret', 'sha1=' + mockHmacDigest)
+    mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+        ['githubWebhookSecret', 'sha1=' + mockHmacDigest]
+      ])))
+    )
     req.headers['x-hub-signature'] = 'sha1=' + mockHmacDigest
 
     mockReview = new Review('Some random PR', sampleData.prBody1, 'merged', 'staticman_1234567', 'master')
@@ -559,6 +658,7 @@ describe('Webhook controller', () => {
 
     expect.hasAssertions()
     return webhook(req, res).then(response => {
+      expect(mockCreateHmacFn).toHaveBeenCalledTimes(1)
       expect(mockCreateFn).toHaveBeenCalledTimes(1)
       expect(mockGetReviewFn).toHaveBeenCalledTimes(1)
       expect(mockProcessMergeFn).toHaveBeenCalledTimes(1)
@@ -580,7 +680,10 @@ describe('Webhook controller', () => {
     }
 
     req.headers['x-gitlab-event'] = 'Merge Request Hook'
-    config.set('gitlabWebhookSecret', '2a-foobar-db72')
+    mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+        ['gitlabWebhookSecret', '2a-foobar-db72']
+      ])))
+    )
     req.headers['x-gitlab-token'] = '2a-foobar-db72'
 
     mockReview = new Review('Some random PR', sampleData.prBody1, 'merged', 'staticman_1234567', 'master')
@@ -611,7 +714,10 @@ describe('Webhook controller', () => {
     }
 
     req.headers['x-github-event'] = 'pull_request'
-    config.set('githubWebhookSecret', 'sha1=' + mockHmacDigest)
+    mockGetSiteConfigFn.mockImplementation(() => new Promise((resolve, reject) => resolve(new Map([
+        ['githubWebhookSecret', 'sha1=' + mockHmacDigest]
+      ])))
+    )
     req.headers['x-hub-signature'] = 'sha1=' + mockHmacDigest
 
     mockReview = new Review('Some random PR', sampleData.prBody1, 'merged', 'staticman_1234567', 'master')
@@ -629,6 +735,7 @@ describe('Webhook controller', () => {
 
     expect.hasAssertions()
     return webhook(req, res).then(response => {
+      expect(mockCreateHmacFn).toHaveBeenCalledTimes(1)
       expect(mockCreateFn).toHaveBeenCalledTimes(1)
       expect(mockGetReviewFn).toHaveBeenCalledTimes(1)
       expect(mockProcessMergeFn).toHaveBeenCalledTimes(1)
