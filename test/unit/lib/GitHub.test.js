@@ -1,10 +1,10 @@
-const mockHelpers = require('./../../helpers')
-const sampleData = require('./../../helpers/sampleData')
-const User = require('../../../lib/models/User')
+const mockHelpers = require('../../helpers')
+const sampleData = require('../../helpers/sampleData')
+const User = require('../../../source/lib/models/User')
 const yaml = require('js-yaml')
-const GitHub = require('./../../../lib/GitHub')
+const GitHub = require('../../../source/lib/GitHub')
 const nock = require('nock')
-const config = require('../../../config')
+const config = require('../../../source/config')
 
 let req
 

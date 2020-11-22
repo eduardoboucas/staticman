@@ -1,4 +1,4 @@
-const Transforms = require('./../../../lib/Transforms')
+const Transforms = require('../../../source/lib/Transforms')
 
 describe('Transforms', () => {
   describe('md5', () => {

@@ -1,8 +1,7 @@
 'use strict'
 
-const path = require('path')
-const config = require(path.join(__dirname, '/../config'))
-const GitHub = require(path.join(__dirname, '/../lib/GitHub'))
+const config = require('../config')
+const GitHub = require('../lib/GitHub')
 
 module.exports = async (req, res) => {
   const ua = config.get('analytics.uaTrackingId')

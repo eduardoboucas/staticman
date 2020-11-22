@@ -1,11 +1,11 @@
-const config = require('./../../../config')
-const errorHandler = require('./../../../lib/ErrorHandler')
+const config = require('../../../source/config')
+const errorHandler = require('../../../source/lib/ErrorHandler')
 const frontMatter = require('front-matter')
 const moment = require('moment')
-const mockHelpers = require('./../../helpers')
+const mockHelpers = require('../../helpers')
 const slugify = require('slug')
 const yaml = require('js-yaml')
-const User = require('../../../lib/models/User')
+const User = require('../../../source/lib/models/User')
 
 let mockConfig
 let mockParameters
@@ -15,15 +15,15 @@ beforeEach(() => {
   mockParameters = mockHelpers.getParameters()
 
   jest.resetModules()
-  jest.unmock('./../../../lib/SubscriptionsManager')
+  jest.unmock('../../../source/lib/SubscriptionsManager')
   jest.unmock('node-rsa')
 })
 
 describe('Staticman interface', () => {
   describe('initialisation', () => {
     test('creates an instance of the GitHub module', async () => {
-      const GitHub = require('../../../lib/GitHub')
-      const Staticman = require('./../../../lib/Staticman')
+      const GitHub = require('../../../source/lib/GitHub')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       expect(staticman.git).toBeInstanceOf(GitHub)
@@ -33,8 +33,8 @@ describe('Staticman interface', () => {
     })
 
     test('creates an instance of the GitLab module', async () => {
-      const GitLab = require('../../../lib/GitLab')
-      const Staticman = require('./../../../lib/Staticman')
+      const GitLab = require('../../../source/lib/GitLab')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(Object.assign({}, mockParameters, {service: 'gitlab'}))
 
       expect(staticman.git).toBeInstanceOf(GitLab)
@@ -44,7 +44,7 @@ describe('Staticman interface', () => {
     })
 
     test('generates a new unique ID', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman1 = await new Staticman(mockParameters)
       const staticman2 = await new Staticman(mockParameters)
 
@@ -62,7 +62,7 @@ describe('Staticman interface', () => {
         }))
       })
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       expect(staticman.rsa).toBeDefined()
@@ -71,21 +71,21 @@ describe('Staticman interface', () => {
     })
 
     test('saves an internal reference to the parameters provided', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       expect(staticman.parameters).toEqual(mockParameters)
     })
 
     test('exposes the parameters via the `getParameters()` method', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       expect(staticman.getParameters()).toEqual(staticman.parameters)
     })
 
     test('sets the config path via the `setConfigPath()` method', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
       const configObject = mockHelpers.getConfigObject()
 
@@ -95,7 +95,7 @@ describe('Staticman interface', () => {
     })
 
     test('sets the request IP via the `setIp()` method', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
       const ip = '123.456.78.9'
 
@@ -105,7 +105,7 @@ describe('Staticman interface', () => {
     })
 
     test('sets the request User Agent via the `setUserAgent()` method', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
       const userAgent = mockHelpers.getUserAgent()
 
@@ -117,7 +117,7 @@ describe('Staticman interface', () => {
 
   describe('internal fields', () => {
     test('adds an _id field to the data object', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       staticman.options = {}
@@ -131,7 +131,7 @@ describe('Staticman interface', () => {
     })
 
     test('adds an _parent field if the parent option is defined', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman1 = await new Staticman(mockParameters)
       const staticman2 = await new Staticman(mockParameters)
 
@@ -158,7 +158,7 @@ describe('Staticman interface', () => {
 
   describe('generated fields', () => {
     test('returns the data object unchanged if the `generatedFields` property is not in the site config', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       mockConfig.set('generatedFields', undefined)
@@ -170,7 +170,7 @@ describe('Staticman interface', () => {
     })
 
     test('adds the generated fields to the data object', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       staticman._createDate = jest.fn(() => 'generatedDate')
@@ -202,7 +202,7 @@ describe('Staticman interface', () => {
     })
 
     test('adds the `user` generated fields to the data object', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       mockConfig.set('generatedFields', {
@@ -233,7 +233,7 @@ describe('Staticman interface', () => {
     })
 
     test('adds the `github` generated fields to the data object in the v2 API', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       mockConfig.set('generatedFields', {
@@ -269,7 +269,7 @@ describe('Staticman interface', () => {
 
   describe('field transforms', () => {
     test('returns the data object unchanged if the `transforms` property is not in the site config', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       mockConfig.set('transforms', undefined)
@@ -283,7 +283,7 @@ describe('Staticman interface', () => {
     })
 
     test('transforms the fields defined in the `transforms` property', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       mockConfig.set('transforms', {
@@ -304,7 +304,7 @@ describe('Staticman interface', () => {
     })
 
     test('handles multiple transforms per field', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       mockConfig.set('transforms', {
@@ -326,7 +326,7 @@ describe('Staticman interface', () => {
   describe('spam detection', () => {
     test('returns the data object unchanged if Akismet is not enabled in config', async () => {
       const fields = mockHelpers.getFields()
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       mockConfig.set('akismet.enabled', false)
@@ -353,7 +353,7 @@ describe('Staticman interface', () => {
         client: mockClientFn
       }))
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       mockConfig.set('akismet.enabled', true)
@@ -398,7 +398,7 @@ describe('Staticman interface', () => {
         client: mockClientFn
       }))
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       mockConfig.set('akismet.enabled', true)
@@ -426,7 +426,7 @@ describe('Staticman interface', () => {
         client: mockClientFn
       }))
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       mockConfig.set('akismet.enabled', true)
@@ -455,7 +455,7 @@ describe('Staticman interface', () => {
       const fields = mockHelpers.getFields()
       const options = {}
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       staticman.fields = fields
@@ -469,7 +469,7 @@ describe('Staticman interface', () => {
       const fields = mockHelpers.getFields()
       const options = {}
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       staticman.fields = fields
@@ -490,7 +490,7 @@ describe('Staticman interface', () => {
         'auth-type': 'github'
       }
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       staticman.fields = fields
@@ -508,7 +508,7 @@ describe('Staticman interface', () => {
       const mockConstructor = jest.fn()
       const mockUser = new User('github', 'johndoe', 'johndoe@test.com', 'John Doe')
 
-      jest.mock('../../../lib/GitHub', () => {
+      jest.mock('../../../source/lib/GitHub', () => {
         return mockConstructor.mockImplementation(() => {
           return {
             getCurrentUser: () => Promise.resolve(mockUser)
@@ -521,7 +521,7 @@ describe('Staticman interface', () => {
         'auth-token': mockHelpers.encrypt('test-token'),
       }
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       staticman.fields = fields
@@ -540,7 +540,7 @@ describe('Staticman interface', () => {
       const mockConstructor = jest.fn()
       const mockUser = new User('gitlab', 'johndoe', 'johndoe@test.com', 'John Doe')
 
-      jest.mock('../../../lib/GitLab', () => {
+      jest.mock('../../../source/lib/GitLab', () => {
         return mockConstructor.mockImplementation(() => {
           return {
             getCurrentUser: () => Promise.resolve(mockUser)
@@ -554,7 +554,7 @@ describe('Staticman interface', () => {
         'auth-type': 'gitlab'
       }
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       staticman.fields = fields
@@ -572,7 +572,7 @@ describe('Staticman interface', () => {
     test('sets the `gitUser` property to the authenticated User and returns true for GitHub authentication', async () => {
       const mockGetCurrentUser = jest.fn(() => Promise.resolve(mockUser))
 
-      jest.mock('../../../lib/GitHub', () => {
+      jest.mock('../../../source/lib/GitHub', () => {
         return function () {
           return {
             getCurrentUser: mockGetCurrentUser
@@ -585,7 +585,7 @@ describe('Staticman interface', () => {
         'auth-token': mockHelpers.encrypt('test-token')
       }
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       staticman.fields = fields
@@ -604,7 +604,7 @@ describe('Staticman interface', () => {
     test('sets the `gitUser` property to the authenticated User and returns true for GitLab authentication', async () => {
       const mockGetCurrentUser = jest.fn(() => Promise.resolve(mockUser))
 
-      jest.mock('../../../lib/GitLab', () => {
+      jest.mock('../../../source/lib/GitLab', () => {
         return function () {
           return {
             getCurrentUser: mockGetCurrentUser
@@ -618,7 +618,7 @@ describe('Staticman interface', () => {
         'auth-type': 'gitlab'
       }
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       staticman.fields = fields
@@ -648,7 +648,7 @@ describe('Staticman interface', () => {
 
       mockParameters.version = '2'
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       staticman.fields = fields
@@ -664,7 +664,7 @@ describe('Staticman interface', () => {
 
       mockParameters.version = '2'
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       staticman.fields = fields
@@ -686,7 +686,7 @@ describe('Staticman interface', () => {
 
       mockParameters.version = '2'
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       staticman.fields = fields
@@ -709,7 +709,7 @@ describe('Staticman interface', () => {
         data: mockUser
       }))
 
-      jest.mock('../../../lib/GitHub', () => {
+      jest.mock('../../../source/lib/GitHub', () => {
         return function () {
           return {
             api: {
@@ -728,7 +728,7 @@ describe('Staticman interface', () => {
 
       mockParameters.version = '2'
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       staticman.fields = fields
@@ -754,7 +754,7 @@ describe('Staticman interface', () => {
     }
 
     test('creates a timestamp in milliseconds if the format is set to `timestamp`', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       const date = staticman._createDate({
@@ -765,7 +765,7 @@ describe('Staticman interface', () => {
     })
 
     test('creates a timestamp in seconds if the format is set to `timestamp-seconds`', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       const date = staticman._createDate({
@@ -778,7 +778,7 @@ describe('Staticman interface', () => {
     test(
       'creates a ISO-8601 representation of the date if the format is set to `iso8601`, absent, or set to none of the other supported formats',
       async () => {
-        const Staticman = require('./../../../lib/Staticman')
+        const Staticman = require('../../../source/lib/Staticman')
         const staticman = await new Staticman(mockParameters)
 
         const date1 = staticman._createDate({
@@ -799,7 +799,7 @@ describe('Staticman interface', () => {
   describe('file formatting', () => {
     test('formats the given fields as JSON if `format` is set to `json`', async () => {
       const fields = mockHelpers.getFields()
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       mockConfig.set('format', 'json')
@@ -812,7 +812,7 @@ describe('Staticman interface', () => {
 
     test('formats the given fields as YAML if `format` is set to `yaml` or `yml`', async () => {
       const fields = mockHelpers.getFields()
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman1 = await new Staticman(mockParameters)
       const staticman2 = await new Staticman(mockParameters)
       const config1 = mockHelpers.getConfig()
@@ -834,7 +834,7 @@ describe('Staticman interface', () => {
 
     test('formats the given fields as YAML/Frontmatter if `format` is set to `frontmatter`', async () => {
       const fields = mockHelpers.getFields()
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       mockConfig.set('format', 'frontmatter')
@@ -858,7 +858,7 @@ describe('Staticman interface', () => {
       'throws an error if `format` is set to `frontmatter` but there is no `frontmatterContent` transform defined',
       async () => {
         const fields = mockHelpers.getFields()
-        const Staticman = require('./../../../lib/Staticman')
+        const Staticman = require('../../../source/lib/Staticman')
         const staticman = await new Staticman(mockParameters)
 
         mockConfig.set('format', 'frontmatter')
@@ -875,7 +875,7 @@ describe('Staticman interface', () => {
 
     test('throws an error if `format` contains an invalid format', async () => {
       const fields = mockHelpers.getFields()
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       mockConfig.set('format', 'someWeirdFormat')
@@ -893,7 +893,7 @@ describe('Staticman interface', () => {
     test('generates a PR body with the message set in config and a table listing fields and their values', async () => {
       const fields = mockHelpers.getFields()
       const fieldsTable = mockHelpers.getFieldsTable()
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       mockConfig.set('notifications.enabled', false)
@@ -912,7 +912,7 @@ describe('Staticman interface', () => {
       }
       const fields = mockHelpers.getFields()
       const fieldsTable = mockHelpers.getFieldsTable()
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       mockConfig.set('notifications.enabled', true)
@@ -941,7 +941,7 @@ describe('Staticman interface', () => {
     test('uses UID as the default file name and extension if `filename` and `extension` are not set in config', async () => {
       const fields = mockHelpers.getFields()
       const directory = 'some/directory'
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       mockConfig.set('filename', '')
@@ -958,7 +958,7 @@ describe('Staticman interface', () => {
       const fields = mockHelpers.getFields()
       const directory = 'some/directory'
       const name = 'my-file'
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       mockConfig.set('filename', name)
@@ -975,7 +975,7 @@ describe('Staticman interface', () => {
       const fields = mockHelpers.getFields()
       const directory = 'some/directory'
       const name = 'my-file'
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       mockConfig.set('extension', 'html')
@@ -991,7 +991,7 @@ describe('Staticman interface', () => {
 
     test('removes a trailing slash from `path` if it exists', async () => {
       const fields = mockHelpers.getFields()
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman1 = await new Staticman(mockParameters)
       const staticman2 = await new Staticman(mockParameters)
       const config1 = mockHelpers.getConfig()
@@ -1023,7 +1023,7 @@ describe('Staticman interface', () => {
       }
       const directory = 'groups/{fields.group}'
       const name = 'file-{options.slug}'
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       mockConfig.set('filename', name)
@@ -1041,7 +1041,7 @@ describe('Staticman interface', () => {
     })
 
     test('gets the correct extension for each supported format', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       const extension1 = staticman._getExtensionForFormat('json')
@@ -1058,7 +1058,7 @@ describe('Staticman interface', () => {
 
   describe('placeholders (`_resolvePlaceholders`)', () => {
     test('returns the given string unchanged if it does not contain placeholders', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       const subject = 'This is a normal string, nothing to replace here.'
@@ -1068,7 +1068,7 @@ describe('Staticman interface', () => {
     })
 
     test('returns the given string with placeholders replaced with data from the data object provided', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       const subject = 'My name is {name} and I come from {location.city}, {location.country}'
@@ -1097,7 +1097,7 @@ describe('Staticman interface', () => {
         }
       }
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       const data = {
@@ -1122,7 +1122,7 @@ describe('Staticman interface', () => {
         }
       }
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       const data = {
@@ -1139,7 +1139,7 @@ describe('Staticman interface', () => {
 
   describe('`_validateConfig`', () => {
     test('throws an error if no config is provided', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       expect(staticman._validateConfig(null)).toEqual({
@@ -1148,7 +1148,7 @@ describe('Staticman interface', () => {
     })
 
     test('throws an error if the config provided is missing any of the required fields', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
       const config = {
         allowedFields: ['name', 'email'],
@@ -1162,7 +1162,7 @@ describe('Staticman interface', () => {
     })
 
     test('creates a SiteConfig object and assigns it to the Staticman instance', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
       const config = {
         allowedFields: ['name', 'email'],
@@ -1182,7 +1182,7 @@ describe('Staticman interface', () => {
 
   describe('`_validateFields`', () => {
     test('throws an error if the payload contains a field that is not allowed', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
       const payload = mockHelpers.getFields()
 
@@ -1197,7 +1197,7 @@ describe('Staticman interface', () => {
     })
 
     test('returns a copy of the fields provided with all strings trimmed', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
       const payload = mockHelpers.getFields()
       const paddedPayload = Object.assign({}, payload)
@@ -1217,7 +1217,7 @@ describe('Staticman interface', () => {
     })
 
     test('throws an error if the payload is missing a required field', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
       const payload = mockHelpers.getFields()
 
@@ -1243,7 +1243,7 @@ describe('Staticman interface', () => {
 
   describe('`getSiteConfig()`', () => {
     test('returns the existing site config if `force` is falsy', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       staticman.siteConfig = mockConfig
@@ -1254,7 +1254,7 @@ describe('Staticman interface', () => {
     })
 
     test('throws an error if the config path has not been set', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       return staticman.getSiteConfig().catch(err => {
@@ -1267,7 +1267,7 @@ describe('Staticman interface', () => {
     test(
       'fetches the site config from the repository, even if there is one already defined, if `force` is truthy',
       async () => {
-        const Staticman = require('./../../../lib/Staticman')
+        const Staticman = require('../../../source/lib/Staticman')
         const staticman = await new Staticman(mockParameters)
         const configObject = mockHelpers.getConfigObject()
 
@@ -1289,7 +1289,7 @@ describe('Staticman interface', () => {
     )
 
     test('fetches the site config from the repository and throws an error if it fails validation', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
       const configObject = mockHelpers.getConfigObject()
       const validationErrors = {
@@ -1318,7 +1318,7 @@ describe('Staticman interface', () => {
     })
 
     test('fetches the site config from the repository and throws an error if there is a branch mismatch', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
       const configObject = mockHelpers.getConfigObject()
       const mockRemoteConfig = Object.assign({}, mockConfig.getProperties())
@@ -1343,7 +1343,7 @@ describe('Staticman interface', () => {
     })
 
     test('fetches the site config from the repository and returns the new site config object', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
       const configObject = mockHelpers.getConfigObject()
 
@@ -1364,7 +1364,7 @@ describe('Staticman interface', () => {
 
   describe('`processEntry()`', () => {
     test('gets site config and checks for spam, throwing an error if found', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
 
       staticman.getSiteConfig = jest.fn(() => {
@@ -1388,7 +1388,7 @@ describe('Staticman interface', () => {
     })
 
     test('validates fields, throwing an error if validation fails', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
       const fields = mockHelpers.getFields()
 
@@ -1413,7 +1413,7 @@ describe('Staticman interface', () => {
     test(
       'creates a file after applying generated fields, transforms and internal fields, throwing an error if file creation fails',
       async () => {
-        const Staticman = require('./../../../lib/Staticman')
+        const Staticman = require('../../../source/lib/Staticman')
         const staticman = await new Staticman(mockParameters)
         const fields = mockHelpers.getFields()
 
@@ -1448,7 +1448,7 @@ describe('Staticman interface', () => {
       const mockUser = new User('github', 'johndoe', 'johndoe@test.com', 'John Doe')
       const mockGetCurrentUser = jest.fn(() => Promise.resolve(mockUser))
 
-      jest.mock('../../../lib/GitHub', () => {
+      jest.mock('../../../source/lib/GitHub', () => {
         return function () {
           return {
             getCurrentUser: mockGetCurrentUser
@@ -1456,7 +1456,7 @@ describe('Staticman interface', () => {
         }
       })
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
       const fields = mockHelpers.getFields()
       const options = {
@@ -1479,7 +1479,7 @@ describe('Staticman interface', () => {
     })
 
     test('authenticates user before creating file, throwing an error if unable to authenticate', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
       const fields = mockHelpers.getFields()
       const options = {
@@ -1500,14 +1500,14 @@ describe('Staticman interface', () => {
     test('subscribes the user to notifications', async () => {
       const mockSubscriptionSet = jest.fn(() => Promise.resolve(true))
 
-      jest.mock('./../../../lib/SubscriptionsManager', () => {
+      jest.mock('../../../source/lib/SubscriptionsManager', () => {
         return jest.fn(() => ({
           send: jest.fn(),
           set: mockSubscriptionSet
         }))
       })
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
       const fields = mockHelpers.getFields()
       const options = {
@@ -1535,7 +1535,7 @@ describe('Staticman interface', () => {
     })
 
     test('creates a pull request with the generated file if moderation is enabled', async () => {
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
       const fields = mockHelpers.getFields()
 
@@ -1578,14 +1578,14 @@ describe('Staticman interface', () => {
     test('commits the generated file directly if moderation is disabled', async () => {
       const mockSubscriptionSend = jest.fn()
 
-      jest.mock('./../../../lib/SubscriptionsManager', () => {
+      jest.mock('../../../source/lib/SubscriptionsManager', () => {
         return jest.fn(() => ({
           send: mockSubscriptionSend,
           set: () => Promise.resolve(true)
         }))
       })
 
-      const Staticman = require('./../../../lib/Staticman')
+      const Staticman = require('../../../source/lib/Staticman')
       const staticman = await new Staticman(mockParameters)
       const fields = mockHelpers.getFields()
       const options = {
@@ -1633,13 +1633,13 @@ describe('Staticman interface', () => {
       test('subscribes the user to notifications', async () => {
         const mockSubscriptionSend = jest.fn()
 
-        jest.mock('./../../../lib/SubscriptionsManager', () => {
+        jest.mock('../../../source/lib/SubscriptionsManager', () => {
           return jest.fn(() => ({
             send: mockSubscriptionSend
           }))
         })
 
-        const Staticman = require('./../../../lib/Staticman')
+        const Staticman = require('../../../source/lib/Staticman')
         const staticman = await new Staticman(mockParameters)
         const fields = mockHelpers.getFields()
         const options = {

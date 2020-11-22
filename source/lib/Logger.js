@@ -1,7 +1,6 @@
 const logger = require('@dadi/logger')
 const BunyanSlack = require('bunyan-slack')
-const path = require('path')
-const config = require(path.join(__dirname, '/../config'))
+const config = require('../config')
 
 const Logger = function () {
   let options = {

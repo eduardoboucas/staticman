@@ -1,12 +1,12 @@
 const CatchAllApiMock = require('./CatchAllApiMock')
 const cloneDeep = require('lodash/cloneDeep')
-const config = require('./../../config')
+const config = require('../../source/config')
 const objectPath = require('object-path')
 const markdownTable = require('markdown-table')
 const NodeRSA = require('node-rsa')
 const request = require('request-promise')
 const sampleData = require('./sampleData')
-const SiteConfig = require('./../../siteConfig')
+const SiteConfig = require('../../source/siteConfig')
 const yaml = require('js-yaml')
 
 // Disable console.log() for tests
@@ -17,7 +17,8 @@ if (process.env.TEST_DEV !== 'true') {
 }
 
 const rsa = new NodeRSA()
-rsa.importKey(config.get('rsaPrivateKey'), 'private')
+const rsaKey = config.get('rsaPrivateKey')
+rsa.importKey(rsaKey, 'private')
 
 const fields = {
   name: 'Eduardo Bouças',

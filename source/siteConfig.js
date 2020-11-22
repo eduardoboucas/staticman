@@ -89,12 +89,12 @@ const schema = {
     clientId: {
       doc: 'The client ID to the GitHub Application used for GitHub OAuth.',
       format: 'EncryptedString',
-      default: null
+      default: ''
     },
     clientSecret: {
       doc: 'The client secret to the GitHub Application used for GitHub OAuth.',
       format: 'EncryptedString',
-      default: null
+      default: ''
     },
     redirectUri: {
       doc: 'The URL to redirect to after authenticating with GitHub.',
@@ -111,12 +111,12 @@ const schema = {
     clientId: {
       doc: 'The client ID to the GitLab Application used for GitLab OAuth.',
       format: 'EncryptedString',
-      default: null
+      default: ''
     },
     clientSecret: {
       doc: 'The client secret to the GitLab Application used for GitLab OAuth.',
       format: 'EncryptedString',
-      default: null
+      default: ''
     },
     redirectUri: {
       doc: 'The URL to redirect to after authenticating with GitLab.',
@@ -144,12 +144,12 @@ const schema = {
     apiKey: {
       doc: 'Mailgun API key',
       format: 'EncryptedString',
-      default: null
+      default: ''
     },
     domain: {
       doc: 'Mailgun domain',
       format: 'EncryptedString',
-      default: null
+      default: ''
     }
   },
   path: {

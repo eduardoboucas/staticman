@@ -5,10 +5,10 @@
   "main": "index.js",
   "scripts": {
     "prestart": "if [ ! -d node_modules ]; then npm install; fi",
-    "start": "node index.js",
+    "start": "node source/index.js",
     "test": "standard && jest",
     "test-dev": "TEST_DEV=true jest --watch",
-    "debug": "nodemon --inspect index.js"
+    "debug": "nodemon --inspect source/index.js"
   },
   "engines": {
     "node": ">=8.11.3"
@@ -63,9 +63,9 @@
   "jest": {
     "collectCoverage": true,
     "collectCoverageFrom": [
-      "controllers/**/*.js",
-      "lib/**/*.js",
-      "*.js"
+      "source/controllers/**/*.js",
+      "source/lib/**/*.js",
+      "source/*.js"
     ],
     "coverageReporters": [
       "cobertura"

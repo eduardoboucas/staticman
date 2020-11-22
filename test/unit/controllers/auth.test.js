@@ -1,8 +1,8 @@
-const auth = require('../../../controllers/auth')
-const helpers = require('./../../helpers')
+const auth = require('../../../source/controllers/auth')
+const helpers = require('../../helpers')
 const nock = require('nock')
-const Staticman = require('./../../../lib/Staticman')
-const User = require('../../../lib/models/User')
+const Staticman = require('../../../source/lib/Staticman')
+const User = require('../../../source/lib/models/User')
 
 Staticman.prototype.getSiteConfig = function () {
   return Promise.resolve(helpers.getConfig())

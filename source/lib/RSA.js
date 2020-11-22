@@ -1,5 +1,4 @@
-const path = require('path')
-const config = require(path.join(__dirname, '/../config'))
+const config = require('../config')
 const NodeRSA = require('node-rsa')
 const key = new NodeRSA()
 
