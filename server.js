@@ -1,12 +1,27 @@
 const bodyParser = require('body-parser')
 const config = require('./config')
 const express = require('express')
+const expressJSDocSwagger = require('express-jsdoc-swagger')
 const ExpressBrute = require('express-brute')
 const GithubWebHook = require('express-github-webhook')
 const objectPath = require('object-path')
+const pkg = require('./package.json')
 
 class StaticmanAPI {
   constructor () {
+    const swaggerOptions = {
+      info: {
+        title: pkg.name,
+        description: 'For use by static websites to allow submission dynamically generated content, such as comments.',
+        version: pkg.version,
+        license: {
+          name: pkg.license
+        }
+      },
+      filesPattern: __filename,
+      baseDir: __dirname
+    }
+
     this.controllers = {
       connect: require('./controllers/connect'),
       encrypt: require('./controllers/encrypt'),
@@ -27,6 +42,8 @@ class StaticmanAPI {
     this.initialiseCORS()
     this.initialiseBruteforceProtection()
     this.initialiseRoutes()
+
+    expressJSDocSwagger(this.server)(swaggerOptions)
   }
 
   initialiseBruteforceProtection () {
@@ -45,15 +62,42 @@ class StaticmanAPI {
   }
 
   initialiseRoutes () {
-    // Route: connect
+    /**
+     * GET /v{version}/connect/{username}/{repository}
+     * @summary Used when running Staticman on a bot account to accept GitHub repo collaboration invites.
+     * @tags Bot Connection
+     * @param {number} version.path - Staticman API version - enum:1,2,3
+     * @param {string} username.path - Github username
+     * @param {string} repository.path - Github repository name
+     * @return {string} 200 - Success - text/html
+     * @example response - 200 - Example success response
+     * OK!
+     * @return {string} 404 - Invitation not found - text/html
+     * @example response - 404 - Example invitation not found response
+     * Invitation not found
+     * @return {string} 500 - Staticman server error - text/html
+     * @example response - 500 - Example Staticman server error response
+     * Error
+     */
     this.server.get(
       '/v:version/connect/:username/:repository',
       this.bruteforce.prevent,
-      this.requireApiVersion([1, 2]),
+      this.requireApiVersion([1, 2, 3]),
       this.controllers.connect
     )
 
-    // Route: process
+    /**
+     * POST /v{version}/entry/{username}/{repository}/{branch}
+     * @summary Used to submit a comment to a website connected to Staticman.
+     * @deprecated
+     * @tags Entry Submission
+     * @param {number} version.path - Staticman API version - enum:1,2
+     * @param {string} username.path - Github username
+     * @param {string} repository.path - Github repository name
+     * @param {string} branch.path - Repository branch
+     * @return {string} 200 - Success
+     * @return {string} 500 - Staticman server error
+     */
     this.server.post(
       '/v:version/entry/:username/:repository/:branch',
       this.bruteforce.prevent,
@@ -62,6 +106,19 @@ class StaticmanAPI {
       this.controllers.process
     )
 
+    /**
+     * POST /v{version}/entry/{username}/{repository}/{branch}/{property}
+     * @summary Used to submit a comment to a website connected to Staticman.
+     * @deprecated
+     * @tags Entry Submission
+     * @param {number} version.path - Staticman API version - enum:2
+     * @param {string} username.path - Github username
+     * @param {string} repository.path - Github repository name
+     * @param {string} branch.path - Repository branch
+     * @param {string} property.path - Name of the top level key in the Staticman config
+     * @return {string} 200 - Success
+     * @return {string} 500 - Staticman server error
+     */
     this.server.post(
       '/v:version/entry/:username/:repository/:branch/:property',
       this.bruteforce.prevent,
@@ -70,6 +127,19 @@ class StaticmanAPI {
       this.controllers.process
     )
 
+    /**
+     * POST /v{version}/entry/{service}/{username}/{repository}/{branch}/{property}
+     * @summary Used to submit a comment to a website connected to Staticman.
+     * @tags Entry Submission
+     * @param {number} version.path - Staticman API version - enum:3
+     * @param {string} service.path - Git service - enum:github,gitlab
+     * @param {string} username.path - Github username
+     * @param {string} repository.path - Github repository name
+     * @param {string} branch.path - Repository branch
+     * @param {string} property.path - Name of the top level key in the Staticman config
+     * @return {string} 200 - Success
+     * @return {string} 500 - Staticman server error
+     */
     this.server.post(
       '/v:version/entry/:service/:username/:repository/:branch/:property',
       this.bruteforce.prevent,
@@ -79,7 +149,15 @@ class StaticmanAPI {
       this.controllers.process
     )
 
-    // Route: encrypt
+    /**
+     * GET /v{version}/encrypt/{text}
+     * @summary Encrypt a string
+     * @tags Security
+     * @param {number} version.path - Staticman API version - enum:2,3
+     * @param {string} text.path - Text to encrypt
+     * @return {string} 200 - Success
+     * @return {string} 500 - Could not encrypt text
+     */
     this.server.get(
       '/v:version/encrypt/:text',
       this.bruteforce.prevent,
@@ -87,7 +165,19 @@ class StaticmanAPI {
       this.controllers.encrypt
     )
 
-    // Route: oauth
+    /**
+     * GET /v{version}/auth/{service}/{username}/{repository}/{branch}/{property}
+     * @summary Authenticate with the git service using oauth
+     * @tags Authentication
+     * @param {number} version.path - Staticman API version - enum:3
+     * @param {string} service.path - Git service - enum:github,gitlab
+     * @param {string} username.path - Github username
+     * @param {string} repository.path - Github repository name
+     * @param {string} branch.path - Repository branch
+     * @param {string} property.path - Name of the top level key in the Staticman config
+     * @return {string} 200 - Success
+     * @return {string} 401 - Authentication error
+     */
     this.server.get(
       '/v:version/auth/:service/:username/:repository/:branch/:property',
       this.bruteforce.prevent,
@@ -96,7 +186,14 @@ class StaticmanAPI {
       this.controllers.auth
     )
 
-    // Route: root
+    /**
+     * GET /
+     * @summary Staticman API home message
+     * @tags Misc
+     * @return {string} 200 - Success - text/html
+     * @example response - 200 - Example success response
+     * Hello from Staticman version 3.0.0!
+     */
     this.server.get(
       '/',
       this.controllers.home
