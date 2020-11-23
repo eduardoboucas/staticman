@@ -1,10 +1,11 @@
-const helpers = require('../../helpers')
-const sampleData = require('../../helpers/sampleData')
-const Review = require('../../../source/lib/models/Review')
+import { getMockRequest, getMockResponse } from '../../helpers'
+import sampleData from '../../helpers/sampleData'
+import Review from '../../../source/lib/models/Review'
 
 let mockSetConfigPathFn
 let mockProcessMergeFn
 let req
+let res
 
 // Mock Staticman module
 jest.mock('../../../source/lib/Staticman', () => {
@@ -17,13 +18,11 @@ jest.mock('../../../source/lib/Staticman', () => {
 })
 
 beforeEach(() => {
+  jest.resetModules()
   mockSetConfigPathFn = jest.fn()
   mockProcessMergeFn = jest.fn()
-  req = helpers.getMockRequest()
-  res = helpers.getMockResponse()
-
-  jest.resetAllMocks()
-  jest.resetModules()
+  req = getMockRequest()
+  res = getMockResponse()
 })
 
 describe('HandlePR controller', () => {

@@ -1,13 +1,13 @@
-const CatchAllApiMock = require('./CatchAllApiMock')
-const cloneDeep = require('lodash/cloneDeep')
-const config = require('../../source/config')
-const objectPath = require('object-path')
-const markdownTable = require('markdown-table')
-const NodeRSA = require('node-rsa')
-const request = require('request-promise')
-const sampleData = require('./sampleData')
-const SiteConfig = require('../../source/siteConfig')
-const yaml = require('js-yaml')
+import CatchAllApiMock from './CatchAllApiMock'
+import cloneDeep from 'lodash/cloneDeep'
+import config from '../../source/config'
+import objectPath from 'object-path'
+import markdownTable from 'markdown-table'
+import NodeRSA from 'node-rsa'
+import request from 'request-promise'
+import sampleData from './sampleData'
+import SiteConfig from '../../source/siteConfig'
+import yaml from 'js-yaml'
 
 // Disable console.log() for tests
 if (process.env.TEST_DEV !== 'true') {
@@ -38,39 +38,39 @@ const parameters = {
 const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
 const siteConfig = SiteConfig(parsedConfig.comments, rsa)
 
-module.exports.baseUrl = ''
+export const baseUrl = ''
 
-module.exports.decrypt = text => {
+export function decrypt (text) {
   return rsa.decrypt(text, 'utf8')
 }
 
-module.exports.encrypt = text => {
+export function encrypt (text) {
   return rsa.encrypt(text, 'base64')
 }
 
-module.exports.getCatchAllApiMock = callback => {
+export function getCatchAllApiMock (callback) {
   return new CatchAllApiMock(callback)
 }
 
-module.exports.getConfig = () => {
+export function getConfig () {
   const config = cloneDeep(siteConfig)
   config.getRaw = key => objectPath.get(parsedConfig, `comments.${key}`)
 
   return config
 }
 
-module.exports.getConfigObject = () => {
+export function getConfigObject () {
   return {
     file: 'path/to/staticman.yml',
     path: 'comments'
   }
 }
 
-module.exports.getFields = () => {
-  return Object.assign({}, fields)
+export function getFields () {
+  return { ...fields }
 }
 
-module.exports.getFieldsTable = () => {
+export function getFieldsTable () {
   let rows = [
     ['Field', 'Content']
   ]
@@ -82,16 +82,16 @@ module.exports.getFieldsTable = () => {
   return markdownTable(rows)
 }
 
-module.exports.getMockRequest = () => {
+export function getMockRequest () {
   return {
     headers: {
       'x-forwarded-for': '123.456.78.9'
     },
-    params: Object.assign({}, parameters)
+    params: { ...parameters }
   }
 }
 
-module.exports.getMockResponse = () => {
+export function getMockResponse () {
   const redirectFn = jest.fn()
   const sendFn = jest.fn()
   const statusFn = jest.fn(code => ({
@@ -105,22 +105,23 @@ module.exports.getMockResponse = () => {
   }
 }
 
-module.exports.getParameters = () => Object.assign({}, parameters)
+export const getParameters = () => { return { ...parameters } }
 
-module.exports.getParsedConfig = () => {
+export function getParsedConfig () {
   return yaml.safeLoad(sampleData.config1, 'utf8')
 }
 
-module.exports.getUserAgent = () => {
+export function getUserAgent () {
   return 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'
 }
 
-module.exports.wrappedRequest = options => {
+export function wrappedRequest (options) {
   const newOptions = typeof options === 'string'
     ? `http://localhost:${config.get('port')}${options}`
-    : Object.assign({}, options, {
+    : {
+      ...options,
       uri: `http://localhost:${config.get('port')}${options.uri}`
-    })
+    }
 
   return request(newOptions)
 }
