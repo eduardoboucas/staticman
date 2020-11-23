@@ -1,10 +1,9 @@
-'use strict'
+import Staticman from '../lib/Staticman'
 
 const reCaptcha = require('express-recaptcha')
 const universalAnalytics = require('universal-analytics')
 const config = require('../config')
 const errorHandler = require('../lib/ErrorHandler')
-const Staticman = require('../lib/Staticman')
 
 function checkRecaptcha (staticman, req) {
   return new Promise((resolve, reject) => {

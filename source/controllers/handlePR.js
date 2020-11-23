@@ -1,8 +1,7 @@
-'use strict'
+import Staticman from '../lib/Staticman'
 
 const config = require('../config')
 const GitHub = require('../lib/GitHub')
-const Staticman = require('../lib/Staticman')
 
 module.exports = async (repo, data) => {
   const ua = config.get('analytics.uaTrackingId')

@@ -1,33 +1,34 @@
-const logger = require('@dadi/logger')
-const BunyanSlack = require('bunyan-slack')
+import BunyanSlack from 'bunyan-slack'
+import logger from '@dadi/logger'
+
 const config = require('../config')
 
-const Logger = function () {
-  const options = {
-    enabled: true,
-    level: 'info',
-    stream: process.stdout
+class Logger {
+  constructor () {
+    const options = {
+      enabled: true,
+      level: 'info',
+      stream: process.stdout
+    }
+
+    if (typeof config.get('logging.slackWebhook') === 'string') {
+      this.formatFn = t => '```\n' + t + '\n```'
+
+      options.stream = new BunyanSlack({
+        webhook_url: config.get('logging.slackWebhook')
+      })
+    }
+
+    logger.init(options)
   }
 
-  if (typeof config.get('logging.slackWebhook') === 'string') {
-    this.formatFn = t => '```\n' + t + '\n```'
+  info (data) {
+    const formattedData = typeof this.formatFn === 'function'
+      ? this.formatFn(data)
+      : data
 
-    options.stream = new BunyanSlack({
-      webhook_url: config.get('logging.slackWebhook')
-    })
+    logger.info(formattedData)
   }
-
-  logger.init(options)
 }
 
-Logger.prototype.info = function (data) {
-  const formattedData = typeof this.formatFn === 'function'
-    ? this.formatFn(data)
-    : data
-
-  logger.info(formattedData)
-}
-
-const instance = new Logger()
-
-module.exports = instance
+export const instance = new Logger()

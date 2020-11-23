@@ -5,7 +5,7 @@ import objectPath from 'object-path'
 import markdownTable from 'markdown-table'
 import NodeRSA from 'node-rsa'
 import request from 'request-promise'
-import sampleData from './sampleData'
+import * as sampleData from './sampleData'
 import SiteConfig from '../../source/siteConfig'
 import yaml from 'js-yaml'
 

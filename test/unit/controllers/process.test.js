@@ -2,7 +2,6 @@ const config = require('../../../source/config')
 const errorHandler = require('../../../source/lib/ErrorHandler').getInstance()
 const githubToken = config.get('githubToken')
 const mockHelpers = require('../../helpers')
-const sampleData = require('../../helpers/sampleData')
 
 let mockSiteConfig
 let req

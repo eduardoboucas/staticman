@@ -1,10 +1,9 @@
-'use strict'
+import request from 'request-promise'
 
 const config = require('../config')
-const request = require('request-promise')
 const errorHandler = require('./ErrorHandler')
 
-const requestGitHubAccessToken = (code, clientId, clientSecret, redirectUri) => {
+export const requestGitHubAccessToken = (code, clientId, clientSecret, redirectUri) => {
   return request({
     headers: {
       Accept: 'application/json'
@@ -23,7 +22,7 @@ const requestGitHubAccessToken = (code, clientId, clientSecret, redirectUri) => 
     .catch(err => Promise.reject(errorHandler('GITHUB_AUTH_FAILED', { err }))) // eslint-disable-line handle-callback-err
 }
 
-const requestGitLabAccessToken = (code, clientId, clientSecret, redirectUri) => {
+export const requestGitLabAccessToken = (code, clientId, clientSecret, redirectUri) => {
   return request({
     headers: {
       Accept: 'application/json'
@@ -41,9 +40,4 @@ const requestGitLabAccessToken = (code, clientId, clientSecret, redirectUri) => 
   })
     .then(res => res.access_token)
     .catch(err => Promise.reject(errorHandler('GITLAB_AUTH_FAILED', { err }))) // eslint-disable-line handle-callback-err
-}
-
-module.exports = {
-  requestGitHubAccessToken,
-  requestGitLabAccessToken
 }

@@ -1,4 +1,4 @@
-module.exports.config1 = `# Name of the property. You can have multiple properties with completely
+export const config1 = `# Name of the property. You can have multiple properties with completely
 # different config blocks for different sections of your site.
 # For example, you can have one property to handle comment submission and
 # another one to handle posts.
@@ -81,7 +81,7 @@ comments:
     clientSecret: "1zzjCrOZQ9dVs1p/WLgT8Lvwez3EKd1tp3D+7P5uGlEdqP1RN7kQvcaqOmOpm5SIY6g+yKJQGZq9G/IqUoKdsZDhA2VGYGXVzETU6eB48AL0OXlFumhjzJoGAXpnqDWzfevglkVuAkivBv6o9S1r/FL1GydwlRwWcYU6NNJjjkB04A00B4s0J7FRR3VFRxpJqDznHgXgT32E2+F3s6enh9/aErqi9uqn+iVtw7gvbd9PN1ejlo95R3BVNKUxNi2Dn4BbsH3MjQG4DyuzX8BiS9Nb+Xt+CwLygTT/i4C5Aj+KkMjAEiYOyttFbk3jkvYVXJ1XtW+taloBVPYCHgDzmg=="
     redirectUri: "https://my-test-site-2.com"`
 
-module.exports.config2 = `{
+export const config2 = `{
   "comments": {
     "allowedFields": [
       "name",
@@ -126,7 +126,7 @@ module.exports.config2 = `{
   }
 }`
 
-module.exports.config3 = `comments:
+export const config3 = `comments:
   allowedFields: ["name", "email", "url", "message"]
   allowedOrigins: ["localhost", "eduardoboucas.com"]
   branch: "master"
@@ -150,14 +150,14 @@ module.exports.config3 = `comments:
     siteKey: "123456789"
     secret: "@reCaptchaSecret@"`
 
-module.exports.configInvalidYML = `invalid:
+export const configInvalidYML = `invalid:
 - x
 y
     foo
 bar
 `
 
-module.exports.prBody1 = `Dear human,
+export const prBody1 = `Dear human,
 
 Here's a new entry for your approval. :tada:
 
@@ -177,7 +177,7 @@ Merge the pull request to accept it, or close it to send it away.
 
 <!--staticman_notification:{"configPath":{"file":"staticman.yml","path":"comments"},"fields":{"name":"John","email":"017dab421e1e1cf6257bcadc0d289c62","url":"http://johndoe.com","address":"","message":"This is a test entry","date":1485597255},"options":{"slug":"2015-05-11-rethinking-the-commenting-system-for-my-jekyll-site","parent":"2015-05-11-rethinking-the-commenting-system-for-my-jekyll-site","origin":"https://eduardoboucas.com/blog/2015/05/11/rethinking-the-commenting-system-for-my-jekyll-site.html","subscribe":"email"},"parameters":{"username":"eduardoboucas","repository":"eduardoboucas.github.io","branch":"master","property":"comments"}}-->`
 
-module.exports.prBody2 = `Dear human,
+export const prBody2 = `Dear human,
 
 Here's a new entry for your approval. :tada:
 

@@ -1,9 +1,9 @@
+import Staticman from '../../../source/lib/Staticman'
 import User from '../../../source/lib/models/User'
 
 const auth = require('../../../source/controllers/auth')
 const helpers = require('../../helpers')
 const nock = require('nock')
-const Staticman = require('../../../source/lib/Staticman')
 
 Staticman.prototype.getSiteConfig = function () {
   return Promise.resolve(helpers.getConfig())

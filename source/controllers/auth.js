@@ -1,8 +1,7 @@
+import * as gitFactory from '../lib/GitServiceFactory'
+import * as oauth from '../lib/OAuth'
 import * as RSA from '../lib/RSA'
-
-const gitFactory = require('../lib/GitServiceFactory')
-const oauth = require('../lib/OAuth')
-const Staticman = require('../lib/Staticman')
+import Staticman from '../lib/Staticman'
 
 module.exports = async (req, res) => {
   const staticman = await new Staticman(req.params)

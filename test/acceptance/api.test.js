@@ -1,10 +1,11 @@
+import * as sampleData from '../helpers/sampleData'
+
 const config = require('../../source/config')
 const githubToken = config.get('githubToken')
 const helpers = require('../helpers')
 const nock = require('nock')
 const querystring = require('querystring')
 const request = helpers.wrappedRequest
-const sampleData = require('../helpers/sampleData')
 const StaticmanAPI = require('../../source/server')
 
 const btoa = contents => Buffer.from(contents).toString('base64')

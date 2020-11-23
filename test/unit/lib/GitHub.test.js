@@ -1,7 +1,7 @@
+import * as sampleData from '../../helpers/sampleData'
 import User from '../../../source/lib/models/User'
 
 const mockHelpers = require('../../helpers')
-const sampleData = require('../../helpers/sampleData')
 const yaml = require('js-yaml')
 const GitHub = require('../../../source/lib/GitHub')
 const nock = require('nock')

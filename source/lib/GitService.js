@@ -1,9 +1,7 @@
-'use strict'
-
 const errorHandler = require('./ErrorHandler')
 const yaml = require('js-yaml')
 
-class GitService {
+export default class GitService {
   constructor (username, repository, branch) {
     this.username = username
     this.repository = repository
@@ -100,5 +98,3 @@ class GitService {
       .then(() => this.createReview(commitTitle, branch, reviewBody))
   }
 }
-
-module.exports = GitService

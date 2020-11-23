@@ -1,5 +1,5 @@
 import { getMockRequest, getMockResponse } from '../../helpers'
-import sampleData from '../../helpers/sampleData'
+import * as sampleData from '../../helpers/sampleData'
 import Review from '../../../source/lib/models/Review'
 
 let mockSetConfigPathFn

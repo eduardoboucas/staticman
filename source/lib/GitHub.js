@@ -1,3 +1,5 @@
+import GitService from './GitService'
+import Review from './models/Review'
 import User from './models/User'
 
 const config = require('../config')
@@ -5,8 +7,6 @@ const errorHandler = require('./ErrorHandler')
 const GithubApi = require('@octokit/rest')
 const { App } = require('@octokit/app')
 const { request } = require('@octokit/request')
-const GitService = require('./GitService')
-const Review = require('./models/Review')
 
 const normalizeResponse = ({ data }) => data
 

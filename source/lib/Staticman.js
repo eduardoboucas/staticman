@@ -1,3 +1,4 @@
+import * as gitFactory from './GitServiceFactory'
 import * as RSA from './RSA'
 import SubscriptionsManager from './SubscriptionsManager'
 import * as Transforms from './Transforms'
@@ -5,7 +6,6 @@ import * as Transforms from './Transforms'
 const akismetApi = require('akismet')
 const config = require('../config')
 const errorHandler = require('./ErrorHandler')
-const gitFactory = require('./GitServiceFactory')
 const markdownTable = require('markdown-table')
 const moment = require('moment')
 const Mailgun = require('mailgun-js')
@@ -16,7 +16,7 @@ const slugify = require('slug')
 const uuidv1 = require('uuid/v1')
 const yaml = require('js-yaml')
 
-class Staticman {
+export default class Staticman {
   constructor (parameters) {
     return (async () => {
       this.parameters = parameters
@@ -620,5 +620,3 @@ class Staticman {
     this.userAgent = userAgent
   }
 }
-
-module.exports = Staticman
