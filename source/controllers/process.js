@@ -1,9 +1,9 @@
+import config from '../config'
+import errorHandler, { getInstance as getErrorHandlerInstance } from '../lib/ErrorHandler'
 import Staticman from '../lib/Staticman'
 
 const reCaptcha = require('express-recaptcha')
 const universalAnalytics = require('universal-analytics')
-const config = require('../config')
-const errorHandler = require('../lib/ErrorHandler')
 
 function checkRecaptcha (staticman, req) {
   return new Promise((resolve, reject) => {
@@ -95,8 +95,8 @@ function sendResponse (res, data) {
   }
 
   if (error && error._smErrorCode) {
-    const errorCode = errorHandler.getInstance().getErrorCode(error._smErrorCode)
-    const errorMessage = errorHandler.getInstance().getMessage(error._smErrorCode)
+    const errorCode = getErrorHandlerInstance().getErrorCode(error._smErrorCode)
+    const errorMessage = getErrorHandlerInstance().getMessage(error._smErrorCode)
 
     if (errorMessage) {
       payload.message = errorMessage

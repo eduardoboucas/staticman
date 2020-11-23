@@ -1,7 +1,7 @@
 import BunyanSlack from 'bunyan-slack'
 import logger from '@dadi/logger'
 
-const config = require('../config')
+import config from '../config'
 
 class Logger {
   constructor () {

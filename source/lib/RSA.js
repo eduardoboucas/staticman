@@ -1,6 +1,7 @@
 import NodeRSA from 'node-rsa'
 
-const config = require('../config')
+import config from '../config'
+
 const key = new NodeRSA()
 
 key.importKey(config.get('rsaPrivateKey'), 'private')

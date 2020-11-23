@@ -1,11 +1,12 @@
-const bodyParser = require('body-parser')
-const config = require('./config')
-const express = require('express')
-const ExpressBrute = require('express-brute')
-const GithubWebHook = require('express-github-webhook')
-const objectPath = require('object-path')
+import bodyParser from 'body-parser'
+import express from 'express'
+import ExpressBrute from 'express-brute'
+import GithubWebHook from 'express-github-webhook'
+import objectPath from 'object-path'
 
-class StaticmanAPI {
+import config from './config'
+
+export default class StaticmanAPI {
   constructor () {
     this.controllers = {
       connect: require('./controllers/connect'),
@@ -182,5 +183,3 @@ class StaticmanAPI {
     this.instance.close()
   }
 }
-
-module.exports = StaticmanAPI

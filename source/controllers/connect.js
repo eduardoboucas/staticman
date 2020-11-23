@@ -1,7 +1,5 @@
-'use strict'
-
-const config = require('../config')
-const GitHub = require('../lib/GitHub')
+import config from '../config'
+import GitHub from '../lib/GitHub'
 
 module.exports = async (req, res) => {
   const ua = config.get('analytics.uaTrackingId')

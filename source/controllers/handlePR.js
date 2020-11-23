@@ -1,7 +1,6 @@
+import config from '../config'
+import GitHub from '../lib/GitHub'
 import Staticman from '../lib/Staticman'
-
-const config = require('../config')
-const GitHub = require('../lib/GitHub')
 
 module.exports = async (repo, data) => {
   const ua = config.get('analytics.uaTrackingId')

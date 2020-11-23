@@ -1,12 +1,14 @@
-import * as sampleData from '../helpers/sampleData'
+import nock from 'nock'
+import querystring from 'querystring'
 
-const config = require('../../source/config')
-const githubToken = config.get('githubToken')
+import config from '../../source/config'
+import * as sampleData from '../helpers/sampleData'
+import StaticmanAPI from '../../source/server'
+
 const helpers = require('../helpers')
-const nock = require('nock')
-const querystring = require('querystring')
+
+const githubToken = config.get('githubToken')
 const request = helpers.wrappedRequest
-const StaticmanAPI = require('../../source/server')
 
 const btoa = contents => Buffer.from(contents).toString('base64')
 

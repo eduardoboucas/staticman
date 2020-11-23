@@ -1,13 +1,14 @@
-import CatchAllApiMock from './CatchAllApiMock'
 import cloneDeep from 'lodash/cloneDeep'
-import config from '../../source/config'
 import objectPath from 'object-path'
 import markdownTable from 'markdown-table'
 import NodeRSA from 'node-rsa'
 import request from 'request-promise'
+import yaml from 'js-yaml'
+
+import CatchAllApiMock from './CatchAllApiMock'
+import config from '../../source/config'
 import * as sampleData from './sampleData'
 import SiteConfig from '../../source/siteConfig'
-import yaml from 'js-yaml'
 
 // Disable console.log() for tests
 if (process.env.TEST_DEV !== 'true') {

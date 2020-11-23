@@ -1,8 +1,6 @@
-'use strict'
+import convict from 'convict'
 
-const convict = require('convict')
-
-const schema = {
+export const schema = {
   allowedFields: {
     doc: 'An array with the names of the allowed fields. If any of the fields sent is not part of this list, the entry will be discarded and an error will be thrown.',
     docExample: 'allowedFields: ["name", "email", "message"]',
@@ -192,7 +190,7 @@ const schema = {
   }
 }
 
-module.exports = (data, rsa) => {
+export default (data, rsa) => {
   convict.addFormat({
     name: 'EncryptedString',
     validate: val => true,
@@ -208,5 +206,3 @@ module.exports = (data, rsa) => {
 
   return config
 }
-
-module.exports.schema = schema

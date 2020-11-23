@@ -1,5 +1,6 @@
-const errorHandler = require('./ErrorHandler')
-const yaml = require('js-yaml')
+import yaml from 'js-yaml'
+
+import errorHandler from './ErrorHandler'
 
 export default class GitService {
   constructor (username, repository, branch) {

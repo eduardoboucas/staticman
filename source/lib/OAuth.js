@@ -1,7 +1,7 @@
 import request from 'request-promise'
 
-const config = require('../config')
-const errorHandler = require('./ErrorHandler')
+import config from '../config'
+import errorHandler from './ErrorHandler'
 
 export const requestGitHubAccessToken = (code, clientId, clientSecret, redirectUri) => {
   return request({

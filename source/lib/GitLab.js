@@ -1,12 +1,13 @@
+import config from '../config'
+import errorHandler from './ErrorHandler'
 import GitService from './GitService'
 import Review from './models/Review'
 import User from './models/User'
 
-const config = require('../config')
-const errorHandler = require('./ErrorHandler')
+// TODO: Replace this. Import is ugly and dependency is deprecated.
 const GitLabApi = require('gitlab/dist/es5').default
 
-class GitLab extends GitService {
+export default class GitLab extends GitService {
   constructor (options = {}) {
     super(options.username, options.repository, options.branch)
 
@@ -115,5 +116,3 @@ class GitLab extends GitService {
       .catch(err => Promise.reject(errorHandler('GITLAB_GET_USER', { err })))
   }
 }
-
-module.exports = GitLab

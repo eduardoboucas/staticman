@@ -1,7 +1,8 @@
-const config = require('../../../source/config')
-const errorHandler = require('../../../source/lib/ErrorHandler').getInstance()
-const githubToken = config.get('githubToken')
+import { getInstance } from '../../../source/lib/ErrorHandler'
+
 const mockHelpers = require('../../helpers')
+
+const errorHandler = getInstance()
 
 let mockSiteConfig
 let req

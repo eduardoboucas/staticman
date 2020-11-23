@@ -1,6 +1,6 @@
-import * as oauth from '../../../source/lib/OAuth'
+import nock from 'nock'
 
-const nock = require('nock')
+import * as oauth from '../../../source/lib/OAuth'
 
 describe('OAuth access tokens', () => {
   test('requests OAuth access token from GitHub', () => {

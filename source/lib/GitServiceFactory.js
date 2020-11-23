@@ -1,5 +1,5 @@
-const GitLab = require('./GitLab')
-const GitHub = require('./GitHub')
+import GitLab from './GitLab'
+import GitHub from './GitHub'
 
 export const create = async (service, options) => {
   switch (service) {

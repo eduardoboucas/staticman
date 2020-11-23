@@ -1,11 +1,12 @@
+import yaml from 'js-yaml'
+import nock from 'nock'
+
+import config from '../../../source/config'
+import GitHub from '../../../source/lib/GitHub'
 import * as sampleData from '../../helpers/sampleData'
 import User from '../../../source/lib/models/User'
 
 const mockHelpers = require('../../helpers')
-const yaml = require('js-yaml')
-const GitHub = require('../../../source/lib/GitHub')
-const nock = require('nock')
-const config = require('../../../source/config')
 
 let req
 

@@ -1,10 +1,11 @@
+import yaml from 'js-yaml'
+
+import config from '../../../source/config'
+import GitLab from '../../../source/lib/GitLab'
 import * as sampleData from '../../helpers/sampleData'
 import User from '../../../source/lib/models/User'
 
 const mockHelpers = require('../../helpers')
-const yaml = require('js-yaml')
-const GitLab = require('../../../source/lib/GitLab')
-const config = require('../../../source/config')
 
 let req
 
@@ -37,7 +38,7 @@ describe('GitLab interface', () => {
       }
     })
  
-    const GitLab = require('./../../../source/lib/GitLab')
+    const GitLab = require('./../../../source/lib/GitLab').default
     const gitlab = new GitLab(req.params) // eslint-disable-line no-unused-vars
 
     expect(mockConstructor.mock.calls[0][0]).toEqual({
@@ -58,7 +59,7 @@ describe('GitLab interface', () => {
       }
     })
 
-    const GitLab = require('./../../../source/lib/GitLab')
+    const GitLab = require('./../../../source/lib/GitLab').default
 
     const oauthToken = 'test-oauth-token'
     const gitlab = new GitLab(Object.assign({}, req.params, {oauthToken})) // eslint-disable-line no-unused-vars
@@ -95,7 +96,7 @@ describe('GitLab interface', () => {
         }
       })
 
-      const GitLab = require('./../../../source/lib/GitLab')
+      const GitLab = require('./../../../source/lib/GitLab').default
       const gitlab = new GitLab(req.params)
 
       return gitlab.readFile(filePath).then(contents => {
@@ -121,7 +122,7 @@ describe('GitLab interface', () => {
         }
       })
 
-      const GitLab = require('./../../../source/lib/GitLab')
+      const GitLab = require('./../../../source/lib/GitLab').default
       const gitlab = new GitLab(req.params)
 
       return gitlab.readFile(filePath).catch(err => {
@@ -157,7 +158,7 @@ describe('GitLab interface', () => {
         }
       })
 
-      const GitLab = require('./../../../source/lib/GitLab')
+      const GitLab = require('./../../../source/lib/GitLab').default
       const gitlab = new GitLab(req.params)
 
       return gitlab.readFile(filePath).catch(err => {
@@ -188,7 +189,7 @@ describe('GitLab interface', () => {
         }
       })
 
-      const GitLab = require('./../../../source/lib/GitLab')
+      const GitLab = require('./../../../source/lib/GitLab').default
       const gitlab = new GitLab(req.params)
 
       return gitlab.readFile(filePath).then(contents => {
@@ -219,7 +220,7 @@ describe('GitLab interface', () => {
         }
       })
 
-      const GitLab = require('./../../../source/lib/GitLab')
+      const GitLab = require('./../../../source/lib/GitLab').default
       const gitlab = new GitLab(req.params)
 
       return gitlab.readFile(filePath, true).then(response => {
@@ -247,7 +248,7 @@ describe('GitLab interface', () => {
         }
       })
 
-      const GitLab = require('./../../../source/lib/GitLab')
+      const GitLab = require('./../../../source/lib/GitLab').default
       const gitlab = new GitLab(req.params)
 
       return gitlab.readFile(filePath).then(contents => {
@@ -275,7 +276,7 @@ describe('GitLab interface', () => {
         }
       })
 
-      const GitLab = require('./../../../source/lib/GitLab')
+      const GitLab = require('./../../../source/lib/GitLab').default
       const gitlab = new GitLab(req.params)
 
       return gitlab.readFile(filePath, true).then(response => {
@@ -307,7 +308,7 @@ describe('GitLab interface', () => {
         }
       })
 
-      const GitLab = require('./../../../source/lib/GitLab')
+      const GitLab = require('./../../../source/lib/GitLab').default
       const gitlab = new GitLab(req.params)
 
       return gitlab.writeFile(
@@ -345,7 +346,7 @@ describe('GitLab interface', () => {
           }
         })
 
-        const GitLab = require('./../../../source/lib/GitLab')
+        const GitLab = require('./../../../source/lib/GitLab').default
         const gitlab = new GitLab(req.params)
         const options = {
           content: 'This is a new file',
@@ -382,7 +383,7 @@ describe('GitLab interface', () => {
         }
       })
 
-      const GitLab = require('./../../../source/lib/GitLab')
+      const GitLab = require('./../../../source/lib/GitLab').default
       const gitlab = new GitLab(req.params)
       const options = {
         branch: 'master',
@@ -446,7 +447,7 @@ describe('GitLab interface', () => {
           }
         })
 
-        const GitLab = require('./../../../source/lib/GitLab')
+        const GitLab = require('./../../../source/lib/GitLab').default
         const gitlab = new GitLab(req.params)
 
         return gitlab.writeFileAndSendReview(
@@ -492,7 +493,7 @@ describe('GitLab interface', () => {
         }
       })
 
-      const GitLab = require('./../../../source/lib/GitLab')
+      const GitLab = require('./../../../source/lib/GitLab').default
       const gitlab = new GitLab(req.params)
       const options = {
         commitBody: '',
@@ -536,7 +537,7 @@ describe('GitLab interface', () => {
         }
       })
 
-      const GitLab = require('./../../../source/lib/GitLab')
+      const GitLab = require('./../../../source/lib/GitLab').default
       const gitlab = new GitLab(req.params)
 
       return gitlab.getCurrentUser().then((user) => {
@@ -557,7 +558,7 @@ describe('GitLab interface', () => {
         }
       })
 
-      const GitLab = require('./../../../source/lib/GitLab')
+      const GitLab = require('./../../../source/lib/GitLab').default
       const gitlab = new GitLab(req.params)
 
       return gitlab.getCurrentUser().catch((err) => {

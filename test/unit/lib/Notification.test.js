@@ -1,6 +1,5 @@
+import config from '../../../source/config'
 import Notification from '../../../source/lib/Notification'
-
-const config = require('../../../source/config')
 
 const mockSendFn = jest.fn()
 const mockMessagesFn = jest.fn(() => ({

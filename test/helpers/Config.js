@@ -1,22 +1,22 @@
-const objectPath = require('object-path')
-const yaml = require('js-yaml')
+import objectPath from 'object-path'
+import yaml from 'js-yaml'
 
-const Config = function (rawContent) {
-  this.data = yaml.safeLoad(rawContent, 'utf8')
-}
-
-Config.prototype.get = function (key) {
-  if (key) {
-    return objectPath.get(this.data, key)  
+export default class Config {
+  constructor (rawContent) {
+    this.data = yaml.safeLoad(rawContent, 'utf8')
   }
-  
-  return this.data
+
+  get (key) {
+    if (key) {
+      return objectPath.get(this.data, key)  
+    }
+    
+    return this.data
+  }
+
+  set (key, value) {
+    this.data = objectPath.set(this.data, key, value)
+
+    return this.data
+  }
 }
-
-Config.prototype.set = function (key, value) {
-  this.data = objectPath.set(this.data, key, value)
-
-  return this.data
-}
-
-module.exports = Config

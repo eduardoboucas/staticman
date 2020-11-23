@@ -1,20 +1,20 @@
+import akismetApi from 'akismet'
+import Mailgun from 'mailgun-js'
+import markdownTable from 'markdown-table'
+import moment from 'moment'
+import NodeRSA from 'node-rsa'
+import objectPath from 'object-path'
+import slugify from 'slug'
+import uuidv1 from 'uuid/v1'
+import yaml from 'js-yaml'
+
+import config from '../config'
+import errorHandler from './ErrorHandler'
 import * as gitFactory from './GitServiceFactory'
 import * as RSA from './RSA'
+import SiteConfig from '../siteConfig'
 import SubscriptionsManager from './SubscriptionsManager'
 import * as Transforms from './Transforms'
-
-const akismetApi = require('akismet')
-const config = require('../config')
-const errorHandler = require('./ErrorHandler')
-const markdownTable = require('markdown-table')
-const moment = require('moment')
-const Mailgun = require('mailgun-js')
-const NodeRSA = require('node-rsa')
-const objectPath = require('object-path')
-const SiteConfig = require('../siteConfig')
-const slugify = require('slug')
-const uuidv1 = require('uuid/v1')
-const yaml = require('js-yaml')
 
 export default class Staticman {
   constructor (parameters) {

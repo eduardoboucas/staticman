@@ -1,4 +1,3 @@
-const config = require('../../../source/config')
 const helpers = require('../../helpers')
 
 let encrypt

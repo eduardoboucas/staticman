@@ -1,4 +1,4 @@
-const config = require('../config')
+import config from '../config'
 
 export default class Notification {
   constructor (mailAgent) {

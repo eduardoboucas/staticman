@@ -1,12 +1,13 @@
+import frontMatter from 'front-matter'
+import moment from 'moment'
+import slugify from 'slug'
+import yaml from 'js-yaml'
+
+import config from '../../../source/config'
+import errorHandler from '../../../source/lib/ErrorHandler'
 import User from '../../../source/lib/models/User'
 
-const config = require('../../../source/config')
-const errorHandler = require('../../../source/lib/ErrorHandler')
-const frontMatter = require('front-matter')
-const moment = require('moment')
 const mockHelpers = require('../../helpers')
-const slugify = require('slug')
-const yaml = require('js-yaml')
 
 let mockConfig
 let mockParameters
@@ -23,7 +24,7 @@ beforeEach(() => {
 describe('Staticman interface', () => {
   describe('initialisation', () => {
     test('creates an instance of the GitHub module', async () => {
-      const GitHub = require('../../../source/lib/GitHub')
+      const GitHub = require('../../../source/lib/GitHub').default
       const Staticman = require('../../../source/lib/Staticman').default
       const staticman = await new Staticman(mockParameters)
 
@@ -34,7 +35,7 @@ describe('Staticman interface', () => {
     })
 
     test('creates an instance of the GitLab module', async () => {
-      const GitLab = require('../../../source/lib/GitLab')
+      const GitLab = require('../../../source/lib/GitLab').default
       const Staticman = require('../../../source/lib/Staticman').default
       const staticman = await new Staticman(Object.assign({}, mockParameters, {service: 'gitlab'}))
 

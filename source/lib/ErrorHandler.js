@@ -1,8 +1,6 @@
-'use strict'
+import { StatusCodeError, RequestError } from 'request-promise/errors'
 
-const { StatusCodeError, RequestError } = require('request-promise/errors')
-
-class ApiError {
+export class ApiError {
   constructor (message, statusCode = 500, smErrorCode = '') {
     this.message = message
     this.statusCode = statusCode
@@ -98,12 +96,10 @@ class ErrorHandler {
 
 const errorHandler = new ErrorHandler()
 
-module.exports = function () {
+export default function () {
   return errorHandler._save.apply(errorHandler, arguments)
 }
 
-module.exports.getInstance = function () {
+export const getInstance = function () {
   return errorHandler
 }
-
-module.exports.ApiError = ApiError

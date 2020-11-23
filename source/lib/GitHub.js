@@ -1,16 +1,16 @@
+import { App } from '@octokit/app'
+import GithubApi from '@octokit/rest'
+import { request } from '@octokit/request'
+
+import config from '../config'
+import errorHandler from './ErrorHandler'
 import GitService from './GitService'
 import Review from './models/Review'
 import User from './models/User'
 
-const config = require('../config')
-const errorHandler = require('./ErrorHandler')
-const GithubApi = require('@octokit/rest')
-const { App } = require('@octokit/app')
-const { request } = require('@octokit/request')
-
 const normalizeResponse = ({ data }) => data
 
-class GitHub extends GitService {
+export default class GitHub extends GitService {
   constructor (options = {}) {
     super(options.username, options.repository, options.branch)
 
@@ -199,5 +199,3 @@ class GitHub extends GitService {
       .catch(err => Promise.reject(errorHandler('GITHUB_GET_USER', { err })))
   }
 }
-
-module.exports = GitHub

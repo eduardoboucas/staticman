@@ -1,9 +1,7 @@
-'use strict'
+import convict from 'convict'
+import path from 'path'
 
-const convict = require('convict')
-const path = require('path')
-
-const schema = {
+export const schema = {
   akismet: {
     site: {
       doc: 'URL of an Akismet account used for spam checking.',
@@ -138,5 +136,4 @@ try {
   console.log(e)
 }
 
-module.exports = config
-module.exports.schema = schema
+export default config
