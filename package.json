@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "prestart": "if [ ! -d node_modules ]; then npm install; fi",
-    "start": "node source/index.js",
+    "clean": "rm -rf build && mkdir build",
+    "build:babel": "babel source -d ./build",
+    "build": "npm run clean && npm run build:babel",
+    "start": "npm run build && node build/index.js",
     "start:dev": "nodemon --exec babel-node -- source/index.js",
     "test": "standard && jest",
     "test-dev": "TEST_DEV=true jest --watch",
@@ -55,6 +58,7 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "@babel/cli": "^7.12.7",
     "@babel/core": "^7.12.7",
     "@babel/node": "^7.12.6",
     "@babel/preset-env": "^7.12.7",
