@@ -3,7 +3,7 @@ const BunyanSlack = require('bunyan-slack')
 const config = require('../config')
 
 const Logger = function () {
-  let options = {
+  const options = {
     enabled: true,
     level: 'info',
     stream: process.stdout

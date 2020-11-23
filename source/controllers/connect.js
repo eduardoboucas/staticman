@@ -31,6 +31,7 @@ module.exports = async (req, res) => {
 
         return true
       }
+      return false
     })
 
     if (!invitation) {
@@ -45,7 +46,7 @@ module.exports = async (req, res) => {
       if (ua) {
         ua.event('Repositories', 'Connect').send()
       }
-    }).catch(err => { // eslint-disable-line handle-callback-err
+    }).catch(() => { // eslint-disable-line handle-callback-err
       res.status(500).send('Error')
 
       if (ua) {

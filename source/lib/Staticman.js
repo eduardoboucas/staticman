@@ -47,7 +47,7 @@ class Staticman {
   }
 
   _applyInternalFields (data) {
-    let internalFields = {
+    const internalFields = {
       _id: this.uid
     }
 
@@ -110,15 +110,15 @@ class Staticman {
 
     // This doesn't serve any purpose for now, but we might want to have
     // asynchronous transforms in the future.
-    let queue = []
+    const queue = []
 
     Object.keys(transforms).forEach(field => {
       if (!fields[field]) return
 
-      let transformNames = [].concat(transforms[field])
+      const transformNames = [].concat(transforms[field])
 
       transformNames.forEach(transformName => {
-        let transformFn = Transforms[transformName]
+        const transformFn = Transforms[transformName]
 
         if (transformFn) {
           fields[field] = transformFn(fields[field])
@@ -210,7 +210,7 @@ class Staticman {
       version: this.parameters.version
     })
 
-    return git.api.users.getAuthenticated({}).then(({data}) => {
+    return git.api.users.getAuthenticated({}).then(({ data }) => {
       this.gitUser = data
 
       return true
@@ -252,24 +252,8 @@ class Staticman {
           }
 
         case 'frontmatter':
-          const transforms = this.siteConfig.get('transforms')
-
-          const contentField = transforms && Object.keys(transforms).find(field => {
-            return transforms[field] === 'frontmatterContent'
-          })
-
-          if (!contentField) {
-            return reject(errorHandler('NO_FRONTMATTER_CONTENT_TRANSFORM'))
-          }
-
-          const content = fields[contentField]
-          const attributeFields = Object.assign({}, fields)
-
-          delete attributeFields[contentField]
-
           try {
-            const output = `---\n${yaml.safeDump(attributeFields)}---\n${content}\n`
-
+            const output = this._generateFrontmatterOutput(fields)
             return resolve(output)
           } catch (err) {
             return reject(err)
@@ -281,8 +265,27 @@ class Staticman {
     })
   }
 
+  _generateFrontmatterOutput (fields) {
+    const transforms = this.siteConfig.get('transforms')
+
+    const contentField = transforms && Object.keys(transforms).find(field => {
+      return transforms[field] === 'frontmatterContent'
+    })
+
+    if (!contentField) {
+      throw errorHandler('NO_FRONTMATTER_CONTENT_TRANSFORM')
+    }
+
+    const content = fields[contentField]
+    const attributeFields = Object.assign({}, fields)
+
+    delete attributeFields[contentField]
+
+    return `---\n${yaml.safeDump(attributeFields)}---\n${content}\n`
+  }
+
   _generateReviewBody (fields) {
-    let table = [
+    const table = [
       ['Field', 'Content']
     ]
 
@@ -310,9 +313,9 @@ class Staticman {
     const configFilename = this.siteConfig.get('filename')
     const filename = (configFilename && configFilename.length)
       ? this._resolvePlaceholders(configFilename, {
-        fields: data,
-        options: this.options
-      })
+          fields: data,
+          options: this.options
+        })
       : this.uid
 
     let path = this._resolvePlaceholders(this.siteConfig.get('path'), {
@@ -369,6 +372,7 @@ class Staticman {
     matches.forEach((match) => {
       const escapedMatch = match.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&')
       const property = match.slice(1, -1)
+      const timeIdentifier = '@date:'
 
       let newText
 
@@ -384,8 +388,6 @@ class Staticman {
           break
 
         default:
-          const timeIdentifier = '@date:'
-
           if (property.indexOf(timeIdentifier) === 0) {
             const timePattern = property.slice(timeIdentifier.length)
 
@@ -413,7 +415,7 @@ class Staticman {
       'path'
     ]
 
-    let missingFields = []
+    const missingFields = []
 
     // Checking for missing required fields
     requiredFields.forEach(requiredField => {
@@ -434,8 +436,8 @@ class Staticman {
   }
 
   _validateFields (fields) {
-    let missingRequiredFields = []
-    let invalidFields = []
+    const missingRequiredFields = []
+    const invalidFields = []
 
     Object.keys(fields).forEach(field => {
       // Check for any invalid fields

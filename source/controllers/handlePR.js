@@ -20,7 +20,7 @@ module.exports = async (repo, data) => {
   })
 
   try {
-    let review = await github.getReview(data.number)
+    const review = await github.getReview(data.number)
     if (review.sourceBranch.indexOf('staticman_')) {
       return null
     }

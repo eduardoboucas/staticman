@@ -11,7 +11,7 @@
     "debug": "nodemon --inspect source/index.js"
   },
   "engines": {
-    "node": ">=8.11.3"
+    "node": ">=10.12.0"
   },
   "repository": {
     "type": "git",
@@ -58,7 +58,7 @@
     "jest": "^23.6.0",
     "lodash": "^4.17.15",
     "nock": "^11.7.0",
-    "standard": "^10.0.2"
+    "standard": "^16.0.3"
   },
   "jest": {
     "collectCoverage": true,

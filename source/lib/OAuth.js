@@ -7,7 +7,7 @@ const errorHandler = require('./ErrorHandler')
 const requestGitHubAccessToken = (code, clientId, clientSecret, redirectUri) => {
   return request({
     headers: {
-      'Accept': 'application/json'
+      Accept: 'application/json'
     },
     json: true,
     method: 'POST',
@@ -20,13 +20,13 @@ const requestGitHubAccessToken = (code, clientId, clientSecret, redirectUri) => 
     }
   })
     .then(res => res.access_token)
-    .catch(err => Promise.reject(errorHandler('GITHUB_AUTH_FAILED', {err}))) // eslint-disable-line handle-callback-err
+    .catch(err => Promise.reject(errorHandler('GITHUB_AUTH_FAILED', { err }))) // eslint-disable-line handle-callback-err
 }
 
 const requestGitLabAccessToken = (code, clientId, clientSecret, redirectUri) => {
   return request({
     headers: {
-      'Accept': 'application/json'
+      Accept: 'application/json'
     },
     json: true,
     method: 'POST',
@@ -40,7 +40,7 @@ const requestGitLabAccessToken = (code, clientId, clientSecret, redirectUri) => 
     }
   })
     .then(res => res.access_token)
-    .catch(err => Promise.reject(errorHandler('GITLAB_AUTH_FAILED', {err}))) // eslint-disable-line handle-callback-err
+    .catch(err => Promise.reject(errorHandler('GITLAB_AUTH_FAILED', { err }))) // eslint-disable-line handle-callback-err
 }
 
 module.exports = {

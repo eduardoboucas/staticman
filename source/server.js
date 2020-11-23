@@ -147,7 +147,7 @@ class StaticmanAPI {
 
   requireParams (params) {
     return function (req, res, next) {
-      let missingParams = []
+      const missingParams = []
 
       params.forEach(param => {
         if (

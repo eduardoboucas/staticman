@@ -1,6 +1,6 @@
 'use strict'
 
-const {assertString} = require('../TypeUtils')
+const { assertString } = require('../TypeUtils')
 
 class User {
   /**

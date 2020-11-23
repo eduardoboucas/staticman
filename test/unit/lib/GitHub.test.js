@@ -74,7 +74,7 @@ describe('GitHub interface', () => {
           authorization: 'token '.concat('1q2w3e4r')
         }
       })
-        .get('/repos/johndoe/foobar/contents/path/to/file.yml?ref=master')
+        .get('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.yml?ref=master')
         .reply(200, {
           content: btoa(sampleData.config1)
         })
@@ -95,7 +95,7 @@ describe('GitHub interface', () => {
           authorization: 'token '.concat('1q2w3e4r')
         }
       })
-        .get('/repos/johndoe/foobar/contents/path/to/file.yml?ref=master')
+        .get('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.yml?ref=master')
         .replyWithError('Error encountered oh no')
 
       const githubInstance = await new GitHub(req.params)
@@ -131,7 +131,7 @@ describe('GitHub interface', () => {
             authorization: 'token '.concat('1q2w3e4r')
           }
         })
-          .get('/repos/johndoe/foobar/contents/path/to/file.yml?ref=master')
+          .get('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.yml?ref=master')
           .reply(200, {
             content: btoa(sampleData.configInvalidYML)
           })
@@ -160,7 +160,7 @@ describe('GitHub interface', () => {
           authorization: 'token '.concat('1q2w3e4r')
         }
       })
-        .get('/repos/johndoe/foobar/contents/path/to/file.yml?ref=master')
+        .get('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.yml?ref=master')
         .reply(200, {
           content: btoa(sampleData.config1)
         })
@@ -181,7 +181,7 @@ describe('GitHub interface', () => {
           authorization: 'token '.concat('1q2w3e4r')
         }
       })
-        .get('/repos/johndoe/foobar/contents/path/to/file.yml?ref=master')
+        .get('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.yml?ref=master')
         .reply(200, {
           content: btoa(sampleData.config1)
         })
@@ -203,7 +203,7 @@ describe('GitHub interface', () => {
           authorization: 'token '.concat('1q2w3e4r')
         }
       })
-        .get('/repos/johndoe/foobar/contents/path/to/file.json?ref=master')
+        .get('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.json?ref=master')
         .reply(200, {
           content: btoa(sampleData.config2)
         })
@@ -228,7 +228,7 @@ describe('GitHub interface', () => {
           authorization: 'token '.concat('1q2w3e4r')
         }
       })
-        .get('/repos/johndoe/foobar/contents/path/to/file.json?ref=master')
+        .get('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.json?ref=master')
         .reply(200, {
           content: btoa(sampleData.config2)
         })
@@ -256,7 +256,7 @@ describe('GitHub interface', () => {
           authorization: 'token '.concat('1q2w3e4r')
         }
       })
-        .put('/repos/johndoe/foobar/contents/path/to/file.txt')
+        .put('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.txt')
         .reply(200, {
           number: 123
         })
@@ -285,7 +285,7 @@ describe('GitHub interface', () => {
           authorization: 'token '.concat('1q2w3e4r')
         }
       })
-        .put('/repos/johndoe/foobar/contents/path/to/file.txt')
+        .put('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.txt')
         .reply(200, {
           number: 123
         })
@@ -313,7 +313,7 @@ describe('GitHub interface', () => {
           authorization: 'token '.concat('1q2w3e4r')
         }
       })
-        .put('/repos/johndoe/foobar/contents/path/to/file.txt')
+        .put('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.txt')
         .replyWithError('An error')
 
       const githubInstance = await new GitHub(req.params)
@@ -376,7 +376,7 @@ describe('GitHub interface', () => {
           authorization: 'token '.concat('1q2w3e4r')
         }
       })
-        .put('/repos/johndoe/foobar/contents/path/to/file.txt')
+        .put('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.txt')
         .reply(200, {
           number: 123
         })

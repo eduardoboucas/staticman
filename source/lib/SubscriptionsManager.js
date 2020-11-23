@@ -49,7 +49,7 @@ SubscriptionsManager.prototype.set = function (entryId, email) {
   const listAddress = this._getListAddress(entryId)
 
   return new Promise((resolve, reject) => {
-    let queue = []
+    const queue = []
 
     return this._get(entryId).then(list => {
       if (!list) {

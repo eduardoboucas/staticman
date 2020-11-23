@@ -47,7 +47,7 @@ function checkRecaptcha (staticman, req) {
 }
 
 function createConfigObject (apiVersion, property) {
-  let remoteConfig = {}
+  const remoteConfig = {}
 
   if (apiVersion === '1') {
     remoteConfig.file = '_config.yml'
@@ -91,7 +91,7 @@ function sendResponse (res, data) {
     return res.redirect(data.redirectError)
   }
 
-  let payload = {
+  const payload = {
     success: !error
   }
 

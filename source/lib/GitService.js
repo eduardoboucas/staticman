@@ -45,13 +45,13 @@ class GitService {
   async readFile (path, getFullResponse) {
     const extension = path.split('.').pop()
 
-    let res = await this._pullFile(path, this.branch)
+    const res = await this._pullFile(path, this.branch)
 
     let content
     try {
       content = Buffer.from(res.content, 'base64').toString()
     } catch (err) {
-      throw errorHandler('GITHUB_READING_FILE', {err})
+      throw errorHandler('GITHUB_READING_FILE', { err })
     }
 
     try {
@@ -79,7 +79,7 @@ class GitService {
 
       return content
     } catch (err) {
-      let errorData = {err}
+      const errorData = { err }
 
       if (err.message) {
         errorData.data = err.message
