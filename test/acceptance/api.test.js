@@ -2,10 +2,9 @@ import nock from 'nock'
 import querystring from 'querystring'
 
 import config from '../../source/config'
+import * as helpers from '../helpers'
 import * as sampleData from '../helpers/sampleData'
 import StaticmanAPI from '../../source/server'
-
-const helpers = require('../helpers')
 
 const githubToken = config.get('githubToken')
 const request = helpers.wrappedRequest

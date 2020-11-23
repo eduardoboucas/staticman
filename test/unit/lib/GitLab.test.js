@@ -2,10 +2,9 @@ import yaml from 'js-yaml'
 
 import config from '../../../source/config'
 import GitLab from '../../../source/lib/GitLab'
+import * as mockHelpers from '../../helpers'
 import * as sampleData from '../../helpers/sampleData'
 import User from '../../../source/lib/models/User'
-
-const mockHelpers = require('../../helpers')
 
 let req
 

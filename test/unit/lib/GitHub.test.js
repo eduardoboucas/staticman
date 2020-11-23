@@ -3,10 +3,9 @@ import nock from 'nock'
 
 import config from '../../../source/config'
 import GitHub from '../../../source/lib/GitHub'
+import * as mockHelpers from '../../helpers'
 import * as sampleData from '../../helpers/sampleData'
 import User from '../../../source/lib/models/User'
-
-const mockHelpers = require('../../helpers')
 
 let req
 

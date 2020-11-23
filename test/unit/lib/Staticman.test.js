@@ -5,9 +5,8 @@ import yaml from 'js-yaml'
 
 import config from '../../../source/config'
 import errorHandler from '../../../source/lib/ErrorHandler'
+import * as mockHelpers from '../../helpers'
 import User from '../../../source/lib/models/User'
-
-const mockHelpers = require('../../helpers')
 
 let mockConfig
 let mockParameters
