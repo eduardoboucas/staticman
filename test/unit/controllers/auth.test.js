@@ -50,11 +50,12 @@ describe('Auth controller', () => {
         .get('/user')
         .reply(200, mockUser)
 
-      const reqWithQuery = Object.assign({}, req, {
+      const reqWithQuery = {
+        ...req,
         query: {
           code: mockCode
         }
-      })
+      }
 
       await auth(reqWithQuery, res)
       expect(res.send).toHaveBeenCalledTimes(1)
@@ -91,7 +92,8 @@ describe('Auth controller', () => {
           .get('/user')
           .reply(200, mockUser)
 
-      const reqWithQuery = Object.assign({}, req, {
+      const reqWithQuery = {
+        ...req,
         params: {
           service: 'github',
           version: '2'
@@ -99,7 +101,7 @@ describe('Auth controller', () => {
         query: {
           code: mockCode
         }
-      })
+      }
 
       await auth(reqWithQuery, res)
       expect(res.send).toHaveBeenCalledTimes(1)
@@ -123,7 +125,8 @@ describe('Auth controller', () => {
           error: 'invalid_code'
         })
 
-      const reqWithQuery = Object.assign({}, req, {
+      const reqWithQuery = {
+        ...req,
         params: {
           service: 'github',
           version: '2'
@@ -131,7 +134,7 @@ describe('Auth controller', () => {
         query: {
           code: mockCode
         }
-      })
+      }
 
       await auth(reqWithQuery, res)
       expect(res.status.mock.calls[0][0]).toBe(401)
@@ -167,7 +170,8 @@ describe('Auth controller', () => {
             message: 'Unauthorized'
           })
 
-      const reqWithQuery = Object.assign({}, req, {
+      const reqWithQuery = {
+        ...req,
         params: {
           service: 'github',
           version: '2'
@@ -175,7 +179,7 @@ describe('Auth controller', () => {
         query: {
           code: mockCode
         }
-      })
+      }
 
       await auth(reqWithQuery, res)
       expect(res.status.mock.calls[0][0]).toBe(401)
@@ -217,14 +221,15 @@ describe('Auth controller', () => {
         .get('/api/v4/user')
         .reply(200, mockUser)
 
-      const reqWithQuery = Object.assign({}, req, {
+      const reqWithQuery = {
+        ...req,
         params: {
           service: 'gitlab'
         },
         query: {
           code: mockCode
         }
-      })
+      }
 
       return auth(reqWithQuery, res).then(result => {
         expect(res.send).toHaveBeenCalledTimes(1)
@@ -251,14 +256,15 @@ describe('Auth controller', () => {
           error: 'invalid_code'
         })
 
-      const reqWithQuery = Object.assign({}, req, {
+      const reqWithQuery = {
+        ...req,
         params: {
           service: 'gitlab'
         },
         query: {
           code: mockCode
         }
-      })
+      }
 
       return auth(reqWithQuery, res).then(result => {
         expect(res.status.mock.calls[0][0]).toBe(401)
@@ -296,14 +302,15 @@ describe('Auth controller', () => {
           message: '401 Unauthorized'
         })
 
-      const reqWithQuery = Object.assign({}, req, {
+      const reqWithQuery = {
+        ...req,
         params: {
           service: 'gitlab'
         },
         query: {
           code: mockCode
         }
-      })
+      }
 
       return auth(reqWithQuery, res).then(result => {
         expect(res.status.mock.calls[0][0]).toBe(401)

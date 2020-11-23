@@ -61,7 +61,7 @@ describe('GitLab interface', () => {
     const GitLab = require('./../../../source/lib/GitLab').default
 
     const oauthToken = 'test-oauth-token'
-    const gitlab = new GitLab(Object.assign({}, req.params, {oauthToken})) // eslint-disable-line no-unused-vars
+    const gitlab = new GitLab({ ...req.params, oauthToken })
 
     expect(mockConstructor.mock.calls[0][0]).toEqual({
       url: 'https://gitlab.com',

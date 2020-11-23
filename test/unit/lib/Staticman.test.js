@@ -36,7 +36,10 @@ describe('Staticman interface', () => {
     test('creates an instance of the GitLab module', async () => {
       const GitLab = require('../../../source/lib/GitLab').default
       const Staticman = require('../../../source/lib/Staticman').default
-      const staticman = await new Staticman(Object.assign({}, mockParameters, {service: 'gitlab'}))
+      const staticman = await new Staticman({
+        ...mockParameters,
+        service: 'gitlab'
+      })
 
       expect(staticman.git).toBeInstanceOf(GitLab)
       expect(staticman.git.username).toBe(mockParameters.username)
@@ -126,9 +129,10 @@ describe('Staticman interface', () => {
       const data = mockHelpers.getFields()
       const extendedData = staticman._applyInternalFields(data)
 
-      expect(extendedData).toEqual(Object.assign({}, data, {
+      expect(extendedData).toEqual({
+        ...data,
         _id: staticman.uid
-      }))
+      })
     })
 
     test('adds an _parent field if the parent option is defined', async () => {
@@ -146,14 +150,16 @@ describe('Staticman interface', () => {
       const extendedData1 = staticman1._applyInternalFields(data)
       const extendedData2 = staticman2._applyInternalFields(data)
 
-      expect(extendedData1).toEqual(Object.assign({}, data, {
+      expect(extendedData1).toEqual({
+        ...data,
         _id: staticman1.uid,
         _parent: staticman1.options.parent
-      }))
+      })
 
-      expect(extendedData2).toEqual(Object.assign({}, data, {
+      expect(extendedData2).toEqual({
+        ...data,
         _id: staticman2.uid
-      }))
+      })
     })
   })
 
@@ -196,10 +202,11 @@ describe('Staticman interface', () => {
       const extendedData = staticman._applyGeneratedFields(data)
 
       expect(staticman._createDate).toHaveBeenCalledTimes(1)
-      expect(extendedData).toEqual(Object.assign({}, data, {
+      expect(extendedData).toEqual({
+        ...data,
         date: 'generatedDate',
         slug: slugify(data.name).toLowerCase()
-      }))
+      })
     })
 
     test('adds the `user` generated fields to the data object', async () => {
@@ -227,10 +234,11 @@ describe('Staticman interface', () => {
       const data = mockHelpers.getFields()
       const extendedData = staticman._applyGeneratedFields(data)
 
-      expect(extendedData).toEqual(Object.assign({}, data, {
+      expect(extendedData).toEqual({
+        ...data,
         name: 'John Doe',
         username: 'johndoe'
-      }))
+      })
     })
 
     test('adds the `github` generated fields to the data object in the v2 API', async () => {
@@ -261,10 +269,11 @@ describe('Staticman interface', () => {
       const data = mockHelpers.getFields()
       const extendedData = staticman._applyGeneratedFields(data)
 
-      expect(extendedData).toEqual(Object.assign({}, data, {
+      expect(extendedData).toEqual({
+        ...data,
         name: 'John Doe',
         username: 'johndoe'
-      }))
+      })
     })
   })
 
@@ -294,10 +303,11 @@ describe('Staticman interface', () => {
       staticman.siteConfig = mockConfig
 
       const data = mockHelpers.getFields()
-      const extendedData = Object.assign({}, data, {
+      const extendedData = {
+        ...data,
         name: 'f710ffc7114e4dfe5239ce411c160a70',
         email: 'MAIL@EDUARDOBOUCAS.COM'
-      })
+      }
 
       return staticman._applyTransforms(data).then(transformedData => {
         expect(transformedData).toEqual(extendedData)
@@ -314,9 +324,10 @@ describe('Staticman interface', () => {
       staticman.siteConfig = mockConfig
 
       const data = mockHelpers.getFields()
-      const extendedData = Object.assign({}, data, {
+      const extendedData = {
+        ...data,
         email: '4F8072E22FAE3CD98B876DF304886BED'
-      })
+      }
 
       return staticman._applyTransforms(data).then(transformedData => {
         expect(transformedData).toEqual(extendedData)
@@ -844,7 +855,7 @@ describe('Staticman interface', () => {
       })
       staticman.siteConfig = mockConfig
 
-      let attributeFields = Object.assign({}, fields)
+      let attributeFields = { ...fields }
       delete attributeFields.message
 
       return staticman._createFile(fields).then(file => {
@@ -1201,7 +1212,7 @@ describe('Staticman interface', () => {
       const Staticman = require('../../../source/lib/Staticman').default
       const staticman = await new Staticman(mockParameters)
       const payload = mockHelpers.getFields()
-      const paddedPayload = Object.assign({}, payload)
+      const paddedPayload = { ...payload }
 
       paddedPayload.name = '   ' + payload.name
       paddedPayload.email = payload.email + ' '
@@ -1322,7 +1333,7 @@ describe('Staticman interface', () => {
       const Staticman = require('../../../source/lib/Staticman').default
       const staticman = await new Staticman(mockParameters)
       const configObject = mockHelpers.getConfigObject()
-      const mockRemoteConfig = Object.assign({}, mockConfig.getProperties())
+      const mockRemoteConfig = { ...mockConfig.getProperties() }
 
       mockRemoteConfig.branch = 'some-other-branch'
 

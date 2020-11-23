@@ -100,9 +100,10 @@ describe('Connect endpoint', () => {
 
 describe('Entry endpoint', () => {
   test('outputs a RECAPTCHA_CONFIG_MISMATCH error if reCaptcha options do not match (wrong site key)', async () => {
-    const data = Object.assign({}, helpers.getParameters(), {
+    const data = {
+      ...helpers.getParameters(),
       path: 'staticman.yml'
-    })
+    }
     const reCaptchaSecret = helpers.encrypt('Some little secret')
     const mockConfig = sampleData.config1
       .replace('@reCaptchaSecret@', reCaptchaSecret)
@@ -160,9 +161,10 @@ describe('Entry endpoint', () => {
   })
 
   test('outputs a RECAPTCHA_CONFIG_MISMATCH error if reCaptcha options do not match (wrong secret)', async () => {
-    const data = Object.assign({}, helpers.getParameters(), {
+    const data = {
+      ...helpers.getParameters(),
       path: 'staticman.yml'
-    })
+    }
     const reCaptchaSecret = 'Some little secret'
     const mockConfig = sampleData.config1
       .replace('@reCaptchaSecret@', helpers.encrypt(reCaptchaSecret))
@@ -220,9 +222,10 @@ describe('Entry endpoint', () => {
   })
 
   test('outputs a PARSING_ERROR error if the site config is malformed', async () => {
-    const data = Object.assign({}, helpers.getParameters(), {
+    const data = {
+      ...helpers.getParameters(),
       path: 'staticman.yml'
-    })
+    }
 
     const mockGetConfig = nock('https://api.github.com', {
       reqheaders: {
