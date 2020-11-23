@@ -19,7 +19,7 @@
     "url": "git+https://github.com/eduardoboucas/staticman.git"
   },
   "author": "Eduardo Boucas <mail@eduardoboucas.com> (https://eduardoboucas.com/)",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/eduardoboucas/staticman/issues"
   },
@@ -36,6 +36,7 @@
     "express": "^4.14.0",
     "express-brute": "^0.6.0",
     "express-github-webhook": "^1.0.5",
+    "express-jsdoc-swagger": "^1.2.0",
     "express-recaptcha": "^2.1.0",
     "gitlab": "^3.5.1",
     "js-yaml": "^3.10.0",

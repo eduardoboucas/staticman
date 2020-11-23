@@ -17,17 +17,16 @@ export default class GitHub extends GitService {
     return (async () => {
       const isAppAuth = config.get('githubAppID') &&
         config.get('githubPrivateKey')
-      const isLegacyAuth = config.get('githubToken') &&
-        ['1', '2'].includes(options.version)
+      const isLegacyAuth = config.get('githubToken')
 
       let authToken
 
       if (options.oauthToken) {
         authToken = options.oauthToken
-      } else if (isLegacyAuth) {
-        authToken = config.get('githubToken')
       } else if (isAppAuth) {
         authToken = await this._authenticate(options.username, options.repository)
+      } else if (isLegacyAuth) {
+        authToken = config.get('githubToken')
       } else {
         throw new Error('Require an `oauthToken` or `token` option')
       }

@@ -57,8 +57,10 @@ Staticman runs as a bot using a GitHub and/or GitLab account, as opposed to acce
 To add Staticman to a repository, you need to add the bot as a collaborator with write access to the repository and ask the bot to accept the invite by firing a `GET` request to this URL:
 
 ```
-http://your-staticman-url/v2/connect/GITHUB-USERNAME/GITHUB-REPOSITORY
+http://your-staticman-url/v3/connect/GITHUB-USERNAME/GITHUB-REPOSITORY
 ```
+
+The full Staticman API documentation [can be found here](https://api.staticman.net/api-docs).
 
 ## Site configuration
 
