@@ -1,10 +1,11 @@
+import NodeRSA from 'node-rsa'
+
 const config = require('../config')
-const NodeRSA = require('node-rsa')
 const key = new NodeRSA()
 
 key.importKey(config.get('rsaPrivateKey'), 'private')
 
-module.exports.encrypt = text => {
+export const encrypt = text => {
   try {
     const encryptedText = key.encrypt(text, 'base64')
 
@@ -14,7 +15,7 @@ module.exports.encrypt = text => {
   }
 }
 
-module.exports.decrypt = text => {
+export const decrypt = text => {
   try {
     return key.decrypt(text, 'utf8')
   } catch (err) {

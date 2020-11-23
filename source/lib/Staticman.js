@@ -1,3 +1,7 @@
+import * as RSA from './RSA'
+import SubscriptionsManager from './SubscriptionsManager'
+import * as Transforms from './Transforms'
+
 const akismetApi = require('akismet')
 const config = require('../config')
 const errorHandler = require('./ErrorHandler')
@@ -7,11 +11,8 @@ const moment = require('moment')
 const Mailgun = require('mailgun-js')
 const NodeRSA = require('node-rsa')
 const objectPath = require('object-path')
-const RSA = require('./RSA')
 const SiteConfig = require('../siteConfig')
 const slugify = require('slug')
-const SubscriptionsManager = require('./SubscriptionsManager')
-const Transforms = require('./Transforms')
 const uuidv1 = require('uuid/v1')
 const yaml = require('js-yaml')
 

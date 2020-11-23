@@ -1,11 +1,10 @@
-'use strict'
+import User from './models/User'
 
 const config = require('../config')
 const errorHandler = require('./ErrorHandler')
 const GitLabApi = require('gitlab/dist/es5').default
 const GitService = require('./GitService')
 const Review = require('./models/Review')
-const User = require('./models/User')
 
 class GitLab extends GitService {
   constructor (options = {}) {

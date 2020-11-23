@@ -1,6 +1,4 @@
-'use strict'
-
-const { assertString } = require('../TypeUtils')
+import { assertString } from '../TypeUtils'
 
 class Review {
   /**

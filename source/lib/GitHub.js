@@ -1,4 +1,4 @@
-'use strict'
+import User from './models/User'
 
 const config = require('../config')
 const errorHandler = require('./ErrorHandler')
@@ -7,7 +7,6 @@ const { App } = require('@octokit/app')
 const { request } = require('@octokit/request')
 const GitService = require('./GitService')
 const Review = require('./models/Review')
-const User = require('./models/User')
 
 const normalizeResponse = ({ data }) => data
 

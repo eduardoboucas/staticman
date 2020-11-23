@@ -1,4 +1,4 @@
-const Transforms = require('../../../source/lib/Transforms')
+import * as Transforms from '../../../source/lib/Transforms'
 
 describe('Transforms', () => {
   describe('md5', () => {

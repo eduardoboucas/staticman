@@ -1,3 +1,5 @@
+import User from '../../../source/lib/models/User'
+
 const config = require('../../../source/config')
 const errorHandler = require('../../../source/lib/ErrorHandler')
 const frontMatter = require('front-matter')
@@ -5,7 +7,6 @@ const moment = require('moment')
 const mockHelpers = require('../../helpers')
 const slugify = require('slug')
 const yaml = require('js-yaml')
-const User = require('../../../source/lib/models/User')
 
 let mockConfig
 let mockParameters

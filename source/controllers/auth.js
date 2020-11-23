@@ -1,8 +1,7 @@
-'use strict'
+import * as RSA from '../lib/RSA'
 
 const gitFactory = require('../lib/GitServiceFactory')
 const oauth = require('../lib/OAuth')
-const RSA = require('../lib/RSA')
 const Staticman = require('../lib/Staticman')
 
 module.exports = async (req, res) => {
