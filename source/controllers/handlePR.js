@@ -2,7 +2,7 @@ import config from '../config'
 import GitHub from '../lib/GitHub'
 import Staticman from '../lib/Staticman'
 
-module.exports = async (repo, data) => {
+export default async (repo, data) => {
   const ua = config.get('analytics.uaTrackingId')
     ? require('universal-analytics')(config.get('analytics.uaTrackingId'))
     : null

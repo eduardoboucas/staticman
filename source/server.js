@@ -4,17 +4,23 @@ import ExpressBrute from 'express-brute'
 import GithubWebHook from 'express-github-webhook'
 import objectPath from 'object-path'
 
+import auth from './controllers/auth'
 import config from './config'
+import connect from './controllers/connect'
+import encrypt from './controllers/encrypt'
+import handlePR from './controllers/handlePR'
+import home from './controllers/home'
+import process from './controllers/process'
 
 export default class StaticmanAPI {
   constructor () {
     this.controllers = {
-      connect: require('./controllers/connect'),
-      encrypt: require('./controllers/encrypt'),
-      auth: require('./controllers/auth'),
-      handlePR: require('./controllers/handlePR'),
-      home: require('./controllers/home'),
-      process: require('./controllers/process')
+      connect,
+      encrypt,
+      auth,
+      handlePR,
+      home,
+      process
     }
 
     this.server = express()

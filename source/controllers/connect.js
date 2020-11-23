@@ -1,7 +1,7 @@
 import config from '../config'
 import GitHub from '../lib/GitHub'
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   const ua = config.get('analytics.uaTrackingId')
     ? require('universal-analytics')(config.get('analytics.uaTrackingId'))
     : null

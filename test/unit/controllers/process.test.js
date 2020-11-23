@@ -1,6 +1,5 @@
 import { getInstance } from '../../../source/lib/ErrorHandler'
-
-const mockHelpers = require('../../helpers')
+import * as mockHelpers from '../../helpers'
 
 const errorHandler = getInstance()
 

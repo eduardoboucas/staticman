@@ -1,4 +1,4 @@
-const helpers = require('../../helpers')
+import * as helpers from '../../helpers'
 
 let encrypt
 let mockEncryptFn
@@ -20,7 +20,7 @@ beforeEach(() => {
     }))
   })
 
-  encrypt = require('../../../source/controllers/encrypt')
+  encrypt = require('../../../source/controllers/encrypt').default
 })
 
 describe('Encrypt controller', () => {

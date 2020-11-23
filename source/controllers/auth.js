@@ -3,7 +3,7 @@ import * as oauth from '../lib/OAuth'
 import * as RSA from '../lib/RSA'
 import Staticman from '../lib/Staticman'
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   const staticman = await new Staticman(req.params)
   staticman.setConfigPath()
 

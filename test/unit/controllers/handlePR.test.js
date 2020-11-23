@@ -58,7 +58,7 @@ describe('HandlePR controller', () => {
       })
     })
 
-    const handlePR = require('../../../source/controllers/handlePR')
+    const handlePR = require('../../../source/controllers/handlePR').default
 
     let response = await handlePR(req.params.repository, pr)
     expect(mockGetReview).toHaveBeenCalledTimes(1)
@@ -100,7 +100,7 @@ describe('HandlePR controller', () => {
         })
       })
 
-      const handlePR = require('../../../source/controllers/handlePR')
+      const handlePR = require('../../../source/controllers/handlePR').default
 
       await handlePR(req.params.repository, pr)
       expect(mockGetReview).toHaveBeenCalledTimes(1)
@@ -147,7 +147,7 @@ describe('HandlePR controller', () => {
         throw errorMessage
       })
 
-      const handlePR = require('../../../source/controllers/handlePR')
+      const handlePR = require('../../../source/controllers/handlePR').default
 
       expect.assertions(4)
       try {
@@ -196,7 +196,7 @@ describe('HandlePR controller', () => {
         })
       })
 
-      const handlePR = require('../../../source/controllers/handlePR')
+      const handlePR = require('../../../source/controllers/handlePR').default
 
       await handlePR(req.params.repository, pr)
       expect(mockGetReview).toHaveBeenCalledTimes(1)

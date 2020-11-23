@@ -1,11 +1,11 @@
+import reCaptcha from 'express-recaptcha'
+import universalAnalytics from 'universal-analytics'
+
 import config from '../config'
 import errorHandler, { getInstance as getErrorHandlerInstance } from '../lib/ErrorHandler'
 import Staticman from '../lib/Staticman'
 
-const reCaptcha = require('express-recaptcha')
-const universalAnalytics = require('universal-analytics')
-
-function checkRecaptcha (staticman, req) {
+export function checkRecaptcha (staticman, req) {
   return new Promise((resolve, reject) => {
     staticman.getSiteConfig().then(siteConfig => {
       if (!siteConfig.get('reCaptcha.enabled')) {
@@ -45,7 +45,7 @@ function checkRecaptcha (staticman, req) {
   })
 }
 
-function createConfigObject (apiVersion, property) {
+export function createConfigObject (apiVersion, property) {
   const remoteConfig = {}
 
   if (apiVersion === '1') {
@@ -59,7 +59,7 @@ function createConfigObject (apiVersion, property) {
   return remoteConfig
 }
 
-function process (staticman, req, res) {
+export function process (staticman, req, res) {
   const ua = config.get('analytics.uaTrackingId')
     ? universalAnalytics(config.get('analytics.uaTrackingId'))
     : null
@@ -78,7 +78,7 @@ function process (staticman, req, res) {
   })
 }
 
-function sendResponse (res, data) {
+export function sendResponse (res, data) {
   const error = data && data.err
   const statusCode = error ? 500 : 200
 
@@ -120,7 +120,7 @@ function sendResponse (res, data) {
   res.status(statusCode).send(payload)
 }
 
-module.exports = async (req, res, next) => {
+export default async (req, res, next) => {
   const staticman = await new Staticman(req.params)
 
   staticman.setConfigPath()
@@ -135,8 +135,3 @@ module.exports = async (req, res, next) => {
       redirectError: req.body.options && req.body.options.redirectError
     }))
 }
-
-module.exports.checkRecaptcha = checkRecaptcha
-module.exports.createConfigObject = createConfigObject
-module.exports.process = process
-module.exports.sendResponse = sendResponse

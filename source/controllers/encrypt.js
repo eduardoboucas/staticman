@@ -1,6 +1,6 @@
 import * as RSA from '../lib/RSA'
 
-module.exports = (req, res) => {
+export default (req, res) => {
   const encryptedText = RSA.encrypt(req.params.text)
 
   if (!encryptedText) {
