@@ -42,10 +42,16 @@ const schema = {
       env: 'EMAIL_DOMAIN'
     },
     fromAddress: {
-      doc: 'Email address to send notifications from. Will be overridden by a `notifications.fromAddress` parameter in the site config, if one is set.',
+      doc: 'Email address to send notifications from.',
       format: String,
       default: 'noreply@staticman.net',
       env: 'EMAIL_FROM'
+    },
+    fromName: {
+      doc: 'Name of the sender to put on notification emails.',
+      format: String,
+      default: 'Staticman',
+      env: 'EMAIL_FROM_NAME'
     }
   },
   env: {
