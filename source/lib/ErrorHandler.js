@@ -23,7 +23,7 @@ class ErrorHandler {
       'missing-input-response': 'reCAPTCHA: The response parameter is missing',
       'invalid-input-response': 'reCAPTCHA: The response parameter is invalid or malformed',
       RECAPTCHA_MISSING_CREDENTIALS: 'Missing reCAPTCHA API credentials',
-      ECAPTCHA_FAILED_DECRYPT: 'Could not decrypt reCAPTCHA secret',
+      RECAPTCHA_FAILED_DECRYPT: 'Could not decrypt reCAPTCHA secret',
       RECAPTCHA_CONFIG_MISMATCH: 'reCAPTCHA options do not match Staticman config',
       PARSING_ERROR: 'Error whilst parsing config file',
       GITHUB_AUTH_TOKEN_MISSING: 'The site requires a valid GitHub authentication token to be supplied in the `options[github-token]` field',
