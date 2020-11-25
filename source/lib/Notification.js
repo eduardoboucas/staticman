@@ -27,7 +27,7 @@ export default class Notification {
 
     return new Promise((resolve, reject) => {
       this.mailAgent.messages().send({
-        from: `Staticman <${config.get('email.fromAddress')}>`,
+        from: `${config.get('email.fromName')} <${config.get('email.fromAddress')}>`,
         to,
         subject,
         html: this._buildMessage(fields, options, data)
