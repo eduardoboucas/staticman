@@ -8,7 +8,7 @@ First, you need to install [Docker](https://docs.docker.com/engine/installation/
 
 In production mode, the project source is imported and dependencies installed to the container.
 
-To start the service:  
+To start the service:
 
 ```shell
 docker-compose up
@@ -18,9 +18,9 @@ docker-compose up
 
 In development mode, the source code is mounted from the host. You can see any changes you made in the sources by simply restarting the container.
 
-To start the service: 
+To start the service:
 
-```shell 
+```shell
 docker-compose -f docker-compose.development.yml up
 ```
 

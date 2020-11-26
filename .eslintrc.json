@@ -1,0 +1,22 @@
+{
+  "env": {
+    "jest": true
+  },
+  "extends": ["airbnb/base", "prettier"],
+  "parser": "@babel/eslint-parser",
+  "rules": {
+    "global-require": "off",
+    "no-console": "off",
+    "no-underscore-dangle": "off"
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/*.test.js"
+      ],
+      "rules": {
+          "no-unused-vars": ["error", { "args": "none" }]
+      }
+    }
+  ]
+}

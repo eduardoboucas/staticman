@@ -79,7 +79,7 @@ comments:
   gitlabAuth:
     clientId: "Rr9d1XmVVMe8ogldH6rBtdGhf49c29ldwcBVsiMn6DLRAiYWmHY08eKC6xLnP6mXwMe/qCHJ6JMKURDODL8Yjm+nQf09zynkIRCr4J7tRHh4bPAYXPG+W1+TK7l8QD4gC+WXamxJiggwGCaDtNylI1QQhbKtevv7n/T+Iq98rBj8SLxxpi3qR0oZeN/zsoQsDYgzZ+HgvA3hY+5H897ijx1oBjoTsfI1Sfx8Qqix/QLZoXorOUJyEo+83WWvTEgo8X3OyFbXGZ758Kw6A7fcHxu8oVAjDvtFJFiwrDb4iBz9rffx7llZXjkcjzYzfwFcjG7mzZnfYgn9WcCwO7zlsA=="
     clientSecret: "1zzjCrOZQ9dVs1p/WLgT8Lvwez3EKd1tp3D+7P5uGlEdqP1RN7kQvcaqOmOpm5SIY6g+yKJQGZq9G/IqUoKdsZDhA2VGYGXVzETU6eB48AL0OXlFumhjzJoGAXpnqDWzfevglkVuAkivBv6o9S1r/FL1GydwlRwWcYU6NNJjjkB04A00B4s0J7FRR3VFRxpJqDznHgXgT32E2+F3s6enh9/aErqi9uqn+iVtw7gvbd9PN1ejlo95R3BVNKUxNi2Dn4BbsH3MjQG4DyuzX8BiS9Nb+Xt+CwLygTT/i4C5Aj+KkMjAEiYOyttFbk3jkvYVXJ1XtW+taloBVPYCHgDzmg=="
-    redirectUri: "https://my-test-site-2.com"`
+    redirectUri: "https://my-test-site-2.com"`;
 
 export const config2 = `{
   "comments": {
@@ -124,7 +124,7 @@ export const config2 = `{
       "secret": "ZguqL+tEc+XPFmWZdaFxWqqB1xtwe79o5SLWrjuAIA/45N5hPQk3HcKKfLBl0ZyqVff+JEY76xLBVFn+jn4Wc8egnKtA7HJfjMpbR4WdSFVm/Hcca3L3id9JNYmGPFRJmzOlG2qjSr2Z8y3Y1i02EjQrzUcfqCuCfeEbZxmCNp0="
     }
   }
-}`
+}`;
 
 export const config3 = `comments:
   allowedFields: ["name", "email", "url", "message"]
@@ -148,14 +148,14 @@ export const config3 = `comments:
   reCaptcha:
     enabled: true
     siteKey: "123456789"
-    secret: "@reCaptchaSecret@"`
+    secret: "@reCaptchaSecret@"`;
 
 export const configInvalidYML = `invalid:
 - x
 y
     foo
 bar
-`
+`;
 
 export const prBody1 = `Dear human,
 
@@ -175,7 +175,7 @@ Merge the pull request to accept it, or close it to send it away.
 | message | This is a test entry             |
 | date    | 1485597255                       |
 
-<!--staticman_notification:{"configPath":{"file":"staticman.yml","path":"comments"},"fields":{"name":"John","email":"017dab421e1e1cf6257bcadc0d289c62","url":"http://johndoe.com","address":"","message":"This is a test entry","date":1485597255},"options":{"slug":"2015-05-11-rethinking-the-commenting-system-for-my-jekyll-site","parent":"2015-05-11-rethinking-the-commenting-system-for-my-jekyll-site","origin":"https://eduardoboucas.com/blog/2015/05/11/rethinking-the-commenting-system-for-my-jekyll-site.html","subscribe":"email"},"parameters":{"username":"eduardoboucas","repository":"eduardoboucas.github.io","branch":"master","property":"comments"}}-->`
+<!--staticman_notification:{"configPath":{"file":"staticman.yml","path":"comments"},"fields":{"name":"John","email":"017dab421e1e1cf6257bcadc0d289c62","url":"http://johndoe.com","address":"","message":"This is a test entry","date":1485597255},"options":{"slug":"2015-05-11-rethinking-the-commenting-system-for-my-jekyll-site","parent":"2015-05-11-rethinking-the-commenting-system-for-my-jekyll-site","origin":"https://eduardoboucas.com/blog/2015/05/11/rethinking-the-commenting-system-for-my-jekyll-site.html","subscribe":"email"},"parameters":{"username":"eduardoboucas","repository":"eduardoboucas.github.io","branch":"master","property":"comments"}}-->`;
 
 export const prBody2 = `Dear human,
 
@@ -193,4 +193,4 @@ Merge the pull request to accept it, or close it to send it away.
 | url     | http://johndoe.com               |
 | address |                                  |
 | message | This is a test entry             |
-| date    | 1485597255                       |`
+| date    | 1485597255                       |`;

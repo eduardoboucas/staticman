@@ -11,5 +11,6 @@ services:
       PORT: 3000
       GITHUB_TOKEN: #insert your GitHub token here
       RSA_PRIVATE_KEY: |
+
 #        RSA private key to encrypt sensitive configuration parameters with.
 #        the correct format starts with "-----BEGIN RSA PRIVATE KEY-----"

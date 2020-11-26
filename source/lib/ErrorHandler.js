@@ -1,22 +1,22 @@
-import { StatusCodeError, RequestError } from 'request-promise/errors'
+import { StatusCodeError, RequestError } from 'request-promise/errors';
 
 export class ApiError {
-  constructor (message, statusCode = 500, smErrorCode = '') {
-    this.message = message
-    this.statusCode = statusCode
-    this._smErrorCode = smErrorCode
+  constructor(message, statusCode = 500, smErrorCode = '') {
+    this.message = message;
+    this.statusCode = statusCode;
+    this._smErrorCode = smErrorCode;
   }
 
-  toJSON () {
+  toJSON() {
     return {
       message: this.message,
-      statusCode: this.statusCode
-    }
+      statusCode: this.statusCode,
+    };
   }
 }
 
 class ErrorHandler {
-  constructor () {
+  constructor() {
     this.ERROR_MESSAGES = {
       'missing-input-secret': 'reCAPTCHA: The secret parameter is missing',
       'invalid-input-secret': 'reCAPTCHA: The secret parameter is invalid or malformed',
@@ -26,80 +26,78 @@ class ErrorHandler {
       RECAPTCHA_FAILED_DECRYPT: 'Could not decrypt reCAPTCHA secret',
       RECAPTCHA_CONFIG_MISMATCH: 'reCAPTCHA options do not match Staticman config',
       PARSING_ERROR: 'Error whilst parsing config file',
-      GITHUB_AUTH_TOKEN_MISSING: 'The site requires a valid GitHub authentication token to be supplied in the `options[github-token]` field',
-      MISSING_CONFIG_BLOCK: 'Error whilst parsing Staticman config file'
-    }
+      GITHUB_AUTH_TOKEN_MISSING:
+        'The site requires a valid GitHub authentication token to be supplied in the `options[github-token]` field',
+      MISSING_CONFIG_BLOCK: 'Error whilst parsing Staticman config file',
+    };
 
     this.ERROR_CODE_ALIASES = {
       'missing-input-secret': 'RECAPTCHA_MISSING_INPUT_SECRET',
       'invalid-input-secret': 'RECAPTCHA_INVALID_INPUT_SECRET',
       'missing-input-response': 'RECAPTCHA_MISSING_INPUT_RESPONSE',
-      'invalid-input-response': 'RECAPTCHA_INVALID_INPUT_RESPONSE'
-    }
+      'invalid-input-response': 'RECAPTCHA_INVALID_INPUT_RESPONSE',
+    };
   }
 
-  getErrorCode (error) {
-    return this.ERROR_CODE_ALIASES[error] || error
+  getErrorCode(error) {
+    return this.ERROR_CODE_ALIASES[error] || error;
   }
 
-  getMessage (error) {
-    return this.ERROR_MESSAGES[error]
+  getMessage(error) {
+    return this.ERROR_MESSAGES[error];
   }
 
-  log (err, instance) {
-    let parameters = {}
-    let prefix = ''
+  log(err, instance) {
+    let parameters = {};
+    let prefix = '';
 
     if (instance) {
-      parameters = instance.getParameters()
+      parameters = instance.getParameters();
 
-      prefix += `${parameters.username}/${parameters.repository}`
+      prefix += `${parameters.username}/${parameters.repository}`;
     }
 
-    console.log(`${prefix}`, err)
+    console.log(`${prefix}`, err);
   }
 
-  _save (errorCode, data = {}) {
-    const { err } = data
+  _save(errorCode, data = {}) {
+    const { err } = data;
 
     if (err) {
-      err._smErrorCode = err._smErrorCode || errorCode
+      err._smErrorCode = err._smErrorCode || errorCode;
 
       // Re-wrap API request errors as these could expose
       // request/response details that the user should not
       // be allowed to see e.g. access tokens.
       // `request-promise` is the primary offender here,
       // but we similarly do not want others to leak too.
-      if (
-        err instanceof StatusCodeError ||
-        err instanceof RequestError
-      ) {
-        const statusCode = err.statusCode || err.code
+      if (err instanceof StatusCodeError || err instanceof RequestError) {
+        const statusCode = err.statusCode || err.code;
 
-        return new ApiError(err.message, statusCode, err._smErrorCode)
+        return new ApiError(err.message, statusCode, err._smErrorCode);
       }
 
-      return err
+      return err;
     }
 
     const payload = {
-      _smErrorCode: errorCode
-    }
+      _smErrorCode: errorCode,
+    };
 
     if (data.data) {
-      payload.data = data.data
+      payload.data = data.data;
     }
 
-    return payload
+    return payload;
   }
 }
 
-const errorHandler = new ErrorHandler()
+const errorHandler = new ErrorHandler();
 
 export default function () {
-  return errorHandler._save.apply(errorHandler, arguments)
+  return errorHandler._save.apply(errorHandler, arguments);
 }
 
 export const getInstance = function () {
-  return errorHandler
-}
+  return errorHandler;
+};

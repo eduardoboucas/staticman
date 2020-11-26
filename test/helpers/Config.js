@@ -1,22 +1,22 @@
-import objectPath from 'object-path'
-import yaml from 'js-yaml'
+import objectPath from 'object-path';
+import yaml from 'js-yaml';
 
 export default class Config {
-  constructor (rawContent) {
-    this.data = yaml.safeLoad(rawContent, 'utf8')
+  constructor(rawContent) {
+    this.data = yaml.safeLoad(rawContent, 'utf8');
   }
 
-  get (key) {
+  get(key) {
     if (key) {
-      return objectPath.get(this.data, key)  
+      return objectPath.get(this.data, key);
     }
-    
-    return this.data
+
+    return this.data;
   }
 
-  set (key, value) {
-    this.data = objectPath.set(this.data, key, value)
+  set(key, value) {
+    this.data = objectPath.set(this.data, key, value);
 
-    return this.data
+    return this.data;
   }
 }
