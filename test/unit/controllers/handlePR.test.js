@@ -1,11 +1,10 @@
-import { getMockRequest, getMockResponse } from '../../helpers';
+import { getMockRequest } from '../../helpers';
 import * as sampleData from '../../helpers/sampleData';
 import Review from '../../../source/lib/models/Review';
 
 let mockSetConfigPathFn;
 let mockProcessMergeFn;
 let req;
-let res;
 
 // Mock Staticman module
 jest.mock('../../../source/lib/Staticman', () => {
@@ -22,7 +21,6 @@ beforeEach(() => {
   mockSetConfigPathFn = jest.fn();
   mockProcessMergeFn = jest.fn();
   req = getMockRequest();
-  res = getMockResponse();
 });
 
 describe('HandlePR controller', () => {
@@ -60,9 +58,8 @@ describe('HandlePR controller', () => {
 
     const handlePR = require('../../../source/controllers/handlePR').default;
 
-    const response = await handlePR(req.params.repository, pr);
+    await handlePR(req.params.repository, pr);
     expect(mockGetReview).toHaveBeenCalledTimes(1);
-    expect(response).toBe(null);
   });
 
   describe('processes notifications if the pull request has been merged', () => {
@@ -105,61 +102,6 @@ describe('HandlePR controller', () => {
       await handlePR(req.params.repository, pr);
       expect(mockGetReview).toHaveBeenCalledTimes(1);
       expect(mockDeleteBranch).not.toHaveBeenCalled();
-    });
-
-    test('abort and return an error if `processMerge` fails', async () => {
-      const pr = {
-        number: 123,
-        title: 'Add Staticman data',
-        body: sampleData.prBody1,
-        head: {
-          ref: 'staticman_1234567',
-        },
-        base: {
-          ref: 'master',
-        },
-        merged: true,
-        repository: {
-          name: req.params.repository,
-          owner: {
-            login: req.params.username,
-          },
-        },
-        state: 'closed',
-      };
-
-      const mockReview = new Review(pr.title, pr.body, 'merged', pr.head.ref, pr.base.ref);
-      const mockGetReview = jest.fn().mockResolvedValue(mockReview);
-      const mockDeleteBranch = jest.fn();
-
-      jest.mock('../../../source/lib/GitHub', () => {
-        return jest.fn().mockImplementation(() => {
-          return {
-            getReview: mockGetReview,
-            deleteBranch: mockDeleteBranch,
-          };
-        });
-      });
-
-      const errorMessage = 'some error';
-
-      mockProcessMergeFn = jest.fn(() => {
-        throw errorMessage;
-      });
-
-      const handlePR = require('../../../source/controllers/handlePR').default;
-
-      expect.assertions(4);
-      try {
-        await handlePR(req.params.repository, pr);
-      } catch (e) {
-        expect(e).toBe(errorMessage);
-        expect(mockGetReview).toHaveBeenCalledTimes(1);
-        // expect(mockSetConfigPathFn.mock.calls.length).toBe(1)
-        // expect(mockProcessMergeFn.mock.calls.length).toBe(1)
-        expect(mockSetConfigPathFn).toHaveBeenCalledTimes(1);
-        expect(mockProcessMergeFn).toHaveBeenCalledTimes(1);
-      }
     });
 
     test('delete the branch if the pull request is closed', async () => {

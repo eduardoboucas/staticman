@@ -55,9 +55,12 @@ export default class Staticman {
   }
 
   _applyGeneratedFields(data) {
+    // TODO: Are these actually parsed fields? Is there a more accurate descriptor?
+    const parsedFields = data;
+
     const generatedFields = this.siteConfig.get('generatedFields');
 
-    if (!generatedFields) return data;
+    if (!generatedFields) return parsedFields;
 
     Object.keys(generatedFields).forEach((field) => {
       const generatedField = generatedFields[field];
@@ -67,7 +70,7 @@ export default class Staticman {
 
         switch (generatedField.type) {
           case 'date':
-            data[field] = this._createDate(options);
+            parsedFields[field] = Staticman._createDate(options);
 
             break;
 
@@ -75,24 +78,31 @@ export default class Staticman {
           case 'github':
           case 'user':
             if (this.gitUser && typeof options.property === 'string') {
-              data[field] = objectPath.get(this.gitUser, options.property);
+              parsedFields[field] = objectPath.get(this.gitUser, options.property);
             }
 
             break;
 
           case 'slugify':
-            if (typeof options.field === 'string' && typeof data[options.field] === 'string') {
-              data[field] = slugify(data[options.field]).toLowerCase();
+            if (
+              typeof options.field === 'string' &&
+              typeof parsedFields[options.field] === 'string'
+            ) {
+              parsedFields[field] = slugify(parsedFields[options.field]).toLowerCase();
             }
 
             break;
+
+          default:
+            // TODO: Handle this better
+            throw Error('No match for generated field');
         }
       } else {
-        data[field] = generatedField;
+        parsedFields[field] = generatedField;
       }
     });
 
-    return data;
+    return parsedFields;
   }
 
   _applyTransforms(fields) {
@@ -118,7 +128,7 @@ export default class Staticman {
       });
     });
 
-    return Promise.all(queue).then((results) => {
+    return Promise.all(queue).then(() => {
       return fields;
     });
   }
@@ -212,12 +222,10 @@ export default class Staticman {
     });
   }
 
-  _createDate(options) {
-    options = options || {};
-
+  static _createDate(dateOptions) {
     const date = new Date();
 
-    switch (options.format) {
+    switch (dateOptions?.format) {
       case 'timestamp':
         return date.getTime();
 
@@ -326,12 +334,12 @@ export default class Staticman {
 
     const extension = this.siteConfig.get('extension').length
       ? this.siteConfig.get('extension')
-      : this._getExtensionForFormat(this.siteConfig.get('format'));
+      : Staticman._getExtensionForFormat(this.siteConfig.get('format'));
 
     return `${path}/${filename}.${extension}`;
   }
 
-  _getExtensionForFormat(format) {
+  static _getExtensionForFormat(format) {
     switch (format.toLowerCase()) {
       case 'json':
         return 'json';
@@ -342,6 +350,9 @@ export default class Staticman {
 
       case 'frontmatter':
         return 'md';
+
+      default:
+        throw Error('File format could not be identified.');
     }
   }
 

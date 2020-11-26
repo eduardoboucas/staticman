@@ -17,40 +17,32 @@ export default async (req, res) => {
   const isAppAuth = config.get('githubAppID') && config.get('githubPrivateKey');
 
   if (isAppAuth) {
-    return res.send('OK!');
+    return res.send('Staticman connected!');
   }
 
   return github.api.repos.listInvitationsForAuthenticatedUser({}).then(({ data }) => {
-    let invitationId = null;
+    const expectedRepoName = `${req.params.username}/${req.params.repository}`;
 
-    const invitation =
+    const collaborationInvite =
       Array.isArray(data) &&
-      data.some((invitation) => {
-        if (invitation.repository.full_name === `${req.params.username  }/${  req.params.repository}`) {
-          invitationId = invitation.id;
+      data.find((invitation) => invitation.repository.full_name === expectedRepoName);
 
-          return true;
-        }
-        return false;
-      });
-
-    if (!invitation) {
+    if (!collaborationInvite) {
       return res.status(404).send('Invitation not found');
     }
 
     return github.api.repos
       .acceptInvitation({
-        invitation_id: invitationId,
+        invitation_id: collaborationInvite.id,
       })
-      .then((response) => {
-        res.send('OK!');
+      .then(() => {
+        res.send('Staticman connected!');
 
         if (ua) {
           ua.event('Repositories', 'Connect').send();
         }
       })
       .catch(() => {
-        // eslint-disable-line handle-callback-err
         res.status(500).send('Error');
 
         if (ua) {

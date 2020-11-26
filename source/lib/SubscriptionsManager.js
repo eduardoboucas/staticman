@@ -23,8 +23,8 @@ export default class SubscriptionsManager {
           return reject(err);
         }
 
-        if (err || !value || !value.list) {
-          return resolve(null);
+        if (err || !value?.list) {
+          return reject(Error('Mailing list not found'));
         }
 
         return resolve(listAddress);
@@ -34,13 +34,11 @@ export default class SubscriptionsManager {
 
   send(entryId, fields, options, siteConfig) {
     return this._get(entryId).then((list) => {
-      if (list) {
-        const notifications = new Notification(this.mailAgent);
+      const notifications = new Notification(this.mailAgent);
 
-        return notifications.send(list, fields, options, {
-          siteName: siteConfig.get('name'),
-        });
-      }
+      return notifications.send(list, fields, options, {
+        siteName: siteConfig.get('name'),
+      });
     });
   }
 
@@ -53,15 +51,15 @@ export default class SubscriptionsManager {
       return this._get(entryId).then((list) => {
         if (!list) {
           queue.push(
-            new Promise((resolve, reject) => {
+            new Promise((resolveList, rejectList) => {
               this.mailAgent.lists().create(
                 {
                   address: listAddress,
                 },
                 (err, result) => {
-                  if (err) return reject(err);
+                  if (err) return rejectList(err);
 
-                  return resolve(result);
+                  return resolveList(result);
                 }
               );
             })

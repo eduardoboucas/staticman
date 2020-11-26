@@ -1,3 +1,4 @@
+/* eslint-disable-next-line max-classes-per-file */
 import { StatusCodeError, RequestError } from 'request-promise/errors';
 
 export class ApiError {
@@ -47,7 +48,7 @@ class ErrorHandler {
     return this.ERROR_MESSAGES[error];
   }
 
-  log(err, instance) {
+  static log(err, instance) {
     let parameters = {};
     let prefix = '';
 
@@ -60,7 +61,7 @@ class ErrorHandler {
     console.log(`${prefix}`, err);
   }
 
-  _save(errorCode, data = {}) {
+  static _save(errorCode, data = {}) {
     const { err } = data;
 
     if (err) {
@@ -92,12 +93,10 @@ class ErrorHandler {
   }
 }
 
-const errorHandler = new ErrorHandler();
+export default (errorCode, data) => {
+  return ErrorHandler._save(errorCode, data);
+};
 
-export default function () {
-  return errorHandler._save.apply(errorHandler, arguments);
-}
-
-export const getInstance = function () {
-  return errorHandler;
+export const getInstance = () => {
+  return new ErrorHandler();
 };

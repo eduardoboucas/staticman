@@ -81,7 +81,7 @@ export default class StaticmanAPI {
      * @param {string} repository.path - Github repository name
      * @return {string} 200 - Success - text/html
      * @example response - 200 - Example success response
-     * OK!
+     * Staticman connected!
      * @return {string} 404 - Invitation not found - text/html
      * @example response - 404 - Example invitation not found response
      * Invitation not found
@@ -92,7 +92,7 @@ export default class StaticmanAPI {
     this.server.get(
       '/v:version/connect/:username/:repository',
       this.bruteforce.prevent,
-      this.requireApiVersion([1, 2, 3]),
+      StaticmanAPI.requireApiVersion([1, 2, 3]),
       this.controllers.connect
     );
 
@@ -111,8 +111,8 @@ export default class StaticmanAPI {
     this.server.post(
       '/v:version/entry/:username/:repository/:branch',
       this.bruteforce.prevent,
-      this.requireApiVersion([1, 2]),
-      this.requireParams(['fields']),
+      StaticmanAPI.requireApiVersion([1, 2]),
+      StaticmanAPI.requireParams(['fields']),
       this.controllers.process
     );
 
@@ -132,8 +132,8 @@ export default class StaticmanAPI {
     this.server.post(
       '/v:version/entry/:username/:repository/:branch/:property',
       this.bruteforce.prevent,
-      this.requireApiVersion([2]),
-      this.requireParams(['fields']),
+      StaticmanAPI.requireApiVersion([2]),
+      StaticmanAPI.requireParams(['fields']),
       this.controllers.process
     );
 
@@ -153,9 +153,9 @@ export default class StaticmanAPI {
     this.server.post(
       '/v:version/entry/:service/:username/:repository/:branch/:property',
       this.bruteforce.prevent,
-      this.requireApiVersion([3]),
-      this.requireService(['github', 'gitlab']),
-      this.requireParams(['fields']),
+      StaticmanAPI.requireApiVersion([3]),
+      StaticmanAPI.requireService(['github', 'gitlab']),
+      StaticmanAPI.requireParams(['fields']),
       this.controllers.process
     );
 
@@ -171,7 +171,7 @@ export default class StaticmanAPI {
     this.server.get(
       '/v:version/encrypt/:text',
       this.bruteforce.prevent,
-      this.requireApiVersion([2, 3]),
+      StaticmanAPI.requireApiVersion([2, 3]),
       this.controllers.encrypt
     );
 
@@ -191,8 +191,8 @@ export default class StaticmanAPI {
     this.server.get(
       '/v:version/auth/:service/:username/:repository/:branch/:property',
       this.bruteforce.prevent,
-      this.requireApiVersion([2, 3]),
-      this.requireService(['github', 'gitlab']),
+      StaticmanAPI.requireApiVersion([2, 3]),
+      StaticmanAPI.requireService(['github', 'gitlab']),
       this.controllers.auth
     );
 
@@ -217,7 +217,7 @@ export default class StaticmanAPI {
     this.server.use(webhookHandler);
   }
 
-  requireApiVersion(versions) {
+  static requireApiVersion(versions) {
     return (req, res, next) => {
       const versionMatch = versions.some((version) => {
         return version.toString() === req.params.version;
@@ -234,7 +234,7 @@ export default class StaticmanAPI {
     };
   }
 
-  requireService(services) {
+  static requireService(services) {
     return (req, res, next) => {
       const serviceMatch = services.some((service) => service === req.params.service);
 
@@ -249,8 +249,8 @@ export default class StaticmanAPI {
     };
   }
 
-  requireParams(params) {
-    return function (req, res, next) {
+  static requireParams(params) {
+    return (req, res, next) => {
       const missingParams = [];
 
       params.forEach((param) => {

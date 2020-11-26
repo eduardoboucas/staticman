@@ -1,4 +1,4 @@
-import { assertString } from '../TypeUtils';
+import assertString from '../TypeUtils';
 
 export default class User {
   /**

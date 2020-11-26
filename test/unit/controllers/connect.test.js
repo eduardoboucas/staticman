@@ -1,6 +1,7 @@
 import * as helpers from '../../helpers';
 
-let req; let res;
+let req;
+let res;
 
 beforeEach(() => {
   req = helpers.getMockRequest();
@@ -11,7 +12,7 @@ beforeEach(() => {
 });
 
 describe('Connect controller', () => {
-  test('accepts the invitation if one is found and replies with "OK!"', () => {
+  test('accepts the invitation if one is found and replies with "Staticman connected!"', () => {
     const invitationId = 123;
     const mockAcceptRepoInvite = jest.fn(() => Promise.resolve());
     const mockGetRepoInvites = jest.fn(() =>
@@ -40,7 +41,7 @@ describe('Connect controller', () => {
     return connect(req, res).then((response) => {
       expect(mockGetRepoInvites).toHaveBeenCalledTimes(1);
       expect(mockAcceptRepoInvite).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toBe('OK!');
+      expect(res.send.mock.calls[0][0]).toBe('Staticman connected!');
     });
   });
 

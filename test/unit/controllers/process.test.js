@@ -25,7 +25,7 @@ describe('Process controller', () => {
         }));
       });
 
-      const {checkRecaptcha} = require('../../../source/controllers/process');
+      const { checkRecaptcha } = require('../../../source/controllers/process');
       const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
 
@@ -41,7 +41,7 @@ describe('Process controller', () => {
         }));
       });
 
-      const {checkRecaptcha} = require('../../../source/controllers/process');
+      const { checkRecaptcha } = require('../../../source/controllers/process');
       const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
 
@@ -63,7 +63,7 @@ describe('Process controller', () => {
         }));
       });
 
-      const {checkRecaptcha} = require('../../../source/controllers/process');
+      const { checkRecaptcha } = require('../../../source/controllers/process');
       const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
 
@@ -87,7 +87,7 @@ describe('Process controller', () => {
         }));
       });
 
-      const {checkRecaptcha} = require('../../../source/controllers/process');
+      const { checkRecaptcha } = require('../../../source/controllers/process');
       const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
 
@@ -108,13 +108,13 @@ describe('Process controller', () => {
       jest.mock('../../../source/lib/Staticman', () => {
         return jest.fn((parameters) => ({
           decrypt: () => {
-            throw 'someError';
+            throw Error('someError');
           },
           getSiteConfig: () => Promise.resolve(mockSiteConfig),
         }));
       });
 
-      const {checkRecaptcha} = require('../../../source/controllers/process');
+      const { checkRecaptcha } = require('../../../source/controllers/process');
       const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
 
@@ -139,7 +139,7 @@ describe('Process controller', () => {
         }));
       });
 
-      const {checkRecaptcha} = require('../../../source/controllers/process');
+      const { checkRecaptcha } = require('../../../source/controllers/process');
       const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
 
@@ -164,7 +164,7 @@ describe('Process controller', () => {
         }));
       });
 
-      const {checkRecaptcha} = require('../../../source/controllers/process');
+      const { checkRecaptcha } = require('../../../source/controllers/process');
       const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
 
@@ -184,7 +184,7 @@ describe('Process controller', () => {
 
     test('initialises and triggers a verification from the reCaptcha module', () => {
       const mockInitFn = jest.fn();
-      const mockVerifyFn = jest.fn((req, reCaptchaCallback) => {
+      const mockVerifyFn = jest.fn((mockReq, reCaptchaCallback) => {
         reCaptchaCallback(false);
       });
 
@@ -202,7 +202,7 @@ describe('Process controller', () => {
         }));
       });
 
-      const {checkRecaptcha} = require('../../../source/controllers/process');
+      const { checkRecaptcha } = require('../../../source/controllers/process');
       const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
 
@@ -227,7 +227,7 @@ describe('Process controller', () => {
     test('displays an error if the reCaptcha verification fails', () => {
       const reCaptchaError = new Error('someError');
       const mockInitFn = jest.fn();
-      const mockVerifyFn = jest.fn((req, reCaptchaCallback) => {
+      const mockVerifyFn = jest.fn((verifyReq, reCaptchaCallback) => {
         reCaptchaCallback(reCaptchaError);
       });
 
@@ -245,7 +245,7 @@ describe('Process controller', () => {
         }));
       });
 
-      const {checkRecaptcha} = require('../../../source/controllers/process');
+      const { checkRecaptcha } = require('../../../source/controllers/process');
       const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
 
@@ -267,7 +267,7 @@ describe('Process controller', () => {
   });
 
   describe('createConfigObject', () => {
-    const {createConfigObject} = require('../../../source/controllers/process');
+    const { createConfigObject } = require('../../../source/controllers/process');
 
     test('creates a config object for version 1 of API', () => {
       const configv1 = {
@@ -305,7 +305,7 @@ describe('Process controller', () => {
   });
 
   describe('process', () => {
-    const processFn = require('../../../source/controllers/process').process;
+    const processFn = require('../../../source/controllers/process').processEntry;
 
     test('send a redirect to the URL provided, if the `redirect` option is provided, if `processEntry` succeeds', () => {
       const redirectUrl = 'https://eduardoboucas.com';
@@ -324,7 +324,6 @@ describe('Process controller', () => {
 
       const res = mockHelpers.getMockResponse();
 
-      const {checkRecaptcha} = require('../../../source/controllers/process');
       const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
 
@@ -354,7 +353,7 @@ describe('Process controller', () => {
         name: 'Eduardo Boucas',
         email: 'mail@eduardoboucas.com',
       };
-      const mockProcessEntry = jest.fn((fields, options) =>
+      const mockProcessEntry = jest.fn((mockFields, options) =>
         Promise.resolve({
           fields,
         })
@@ -368,7 +367,6 @@ describe('Process controller', () => {
 
       const res = mockHelpers.getMockResponse();
 
-      const {checkRecaptcha} = require('../../../source/controllers/process');
       const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
 
@@ -383,7 +381,7 @@ describe('Process controller', () => {
       };
       req.query = {};
 
-      return processFn(staticman, req, res).then((response) => {
+      return processFn(staticman, req, res).then(() => {
         expect(res.send.mock.calls.length).toBe(1);
         expect(res.send.mock.calls[0][0]).toEqual({
           fields,
@@ -406,7 +404,6 @@ describe('Process controller', () => {
 
       const res = mockHelpers.getMockResponse();
 
-      const {checkRecaptcha} = require('../../../source/controllers/process');
       const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
 
@@ -431,7 +428,7 @@ describe('Process controller', () => {
   });
 
   describe('sendResponse', () => {
-    const {sendResponse} = require('../../../source/controllers/process');
+    const { sendResponse } = require('../../../source/controllers/process');
 
     test('redirects if there is a `redirect` option and no errors', () => {
       const data = {

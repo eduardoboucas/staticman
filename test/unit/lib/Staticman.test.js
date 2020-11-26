@@ -182,7 +182,7 @@ describe('Staticman interface', () => {
       const Staticman = require('../../../source/lib/Staticman').default;
       const staticman = await new Staticman(mockParameters);
 
-      staticman._createDate = jest.fn(() => 'generatedDate');
+      Staticman._createDate = jest.fn(() => 'generatedDate');
 
       mockConfig.set('generatedFields', {
         date: {
@@ -203,7 +203,7 @@ describe('Staticman interface', () => {
       const data = mockHelpers.getFields();
       const extendedData = staticman._applyGeneratedFields(data);
 
-      expect(staticman._createDate).toHaveBeenCalledTimes(1);
+      expect(Staticman._createDate).toHaveBeenCalledTimes(1);
       expect(extendedData).toEqual({
         ...data,
         date: 'generatedDate',
@@ -773,7 +773,7 @@ describe('Staticman interface', () => {
       const Staticman = require('../../../source/lib/Staticman').default;
       const staticman = await new Staticman(mockParameters);
 
-      const date = staticman._createDate({
+      const date = Staticman._createDate({
         format: 'timestamp',
       });
 
@@ -784,7 +784,7 @@ describe('Staticman interface', () => {
       const Staticman = require('../../../source/lib/Staticman').default;
       const staticman = await new Staticman(mockParameters);
 
-      const date = staticman._createDate({
+      const date = Staticman._createDate({
         format: 'timestamp-seconds',
       });
 
@@ -795,13 +795,13 @@ describe('Staticman interface', () => {
       const Staticman = require('../../../source/lib/Staticman').default;
       const staticman = await new Staticman(mockParameters);
 
-      const date1 = staticman._createDate({
+      const date1 = Staticman._createDate({
         format: 'iso8601',
       });
-      const date2 = staticman._createDate({
+      const date2 = Staticman._createDate({
         format: 'somethingNotValid',
       });
-      const date3 = staticman._createDate();
+      const date3 = Staticman._createDate();
 
       expect(date1).toBe(mockDate.toISOString());
       expect(date2).toBe(mockDate.toISOString());
@@ -1052,12 +1052,11 @@ describe('Staticman interface', () => {
 
     test('gets the correct extension for each supported format', async () => {
       const Staticman = require('../../../source/lib/Staticman').default;
-      const staticman = await new Staticman(mockParameters);
 
-      const extension1 = staticman._getExtensionForFormat('json');
-      const extension2 = staticman._getExtensionForFormat('yaml');
-      const extension3 = staticman._getExtensionForFormat('yml');
-      const extension4 = staticman._getExtensionForFormat('frontmatter');
+      const extension1 = Staticman._getExtensionForFormat('json');
+      const extension2 = Staticman._getExtensionForFormat('yaml');
+      const extension3 = Staticman._getExtensionForFormat('yml');
+      const extension4 = Staticman._getExtensionForFormat('frontmatter');
 
       expect(extension1).toBe('json');
       expect(extension2).toBe('yml');
@@ -1486,7 +1485,7 @@ describe('Staticman interface', () => {
       staticman.git.writeFile = jest.fn(() => Promise.resolve());
 
       return staticman.processEntry(fields, options).catch((err) => {
-        expect(err._smErrorCode).toEqual('AUTH_TOKEN_INVALID')
+        expect(err._smErrorCode).toEqual('AUTH_TOKEN_INVALID');
       });
     });
 

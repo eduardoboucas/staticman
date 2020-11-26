@@ -9,34 +9,42 @@ export default class GitService {
     this.branch = branch;
   }
 
-  _pullFile(filePath, branch) {
+  // eslint-disable-next-line class-methods-use-this, no-unused-vars
+  _pullFile(_filePath, _branch) {
     throw new Error('Abstract method `_pullFile` should be implemented');
   }
 
-  _commitFile(filePath, contents, commitTitle, branch) {
+  // eslint-disable-next-line class-methods-use-this, no-unused-vars
+  _commitFile(_filePath, _contents, _commitTitle, _branch) {
     throw new Error('Abstract method `_commitFile` should be implemented');
   }
 
-  getBranchHeadCommit(branch) {
+  // eslint-disable-next-line class-methods-use-this, no-unused-vars
+  getBranchHeadCommit(_branch) {
     throw new Error('Abstract method `getBranchHeadCommit` should be implemented');
   }
 
-  createBranch(branch, sha) {
+  // eslint-disable-next-line class-methods-use-this, no-unused-vars
+  createBranch(_branch, _sha) {
     throw new Error('Abstract method `createBranch` should be implemented');
   }
 
-  deleteBranch(branch) {
+  // eslint-disable-next-line class-methods-use-this, no-unused-vars
+  deleteBranch(_branch) {
     throw new Error('Abstract method `deleteBranch` should be implemented');
   }
 
-  createReview(commitTitle, branch, reviewBody) {
+  // eslint-disable-next-line class-methods-use-this, no-unused-vars
+  createReview(_commitTitle, _branch, _reviewBody) {
     throw new Error('Abstract method `createReview` should be implemented');
   }
 
-  getReview(reviewId) {
+  // eslint-disable-next-line class-methods-use-this, no-unused-vars
+  getReview(_reviewId) {
     throw new Error('Abstract method `getReview` should be implemented');
   }
 
+  // eslint-disable-next-line class-methods-use-this, no-unused-vars
   getCurrentUser() {
     throw new Error('Abstract method `getCurrentUser` should be implemented');
   }
@@ -58,12 +66,13 @@ export default class GitService {
         case 'yml':
         case 'yaml':
           content = yaml.safeLoad(content, 'utf8');
-
           break;
 
         case 'json':
           content = JSON.parse(content);
+          break;
 
+        default:
           break;
       }
 

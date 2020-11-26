@@ -208,7 +208,7 @@ export const schema = {
 export default (data, rsa) => {
   convict.addFormat({
     name: 'EncryptedString',
-    validate: (val) => true,
+    validate: () => true,
     coerce: (val) => {
       return rsa.decrypt(val, 'utf8');
     },

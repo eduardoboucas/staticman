@@ -20,11 +20,11 @@ export default async (repo, data) => {
   try {
     const review = await github.getReview(data.number);
     if (review.sourceBranch.indexOf('staticman_')) {
-      return null;
+      return;
     }
 
     if (review.state !== 'merged' && review.state !== 'closed') {
-      return null;
+      return;
     }
 
     if (review.state === 'merged') {
@@ -38,7 +38,11 @@ export default async (repo, data) => {
           staticman.setConfigPath(parsedBody.configPath);
           staticman.processMerge(parsedBody.fields, parsedBody.options);
         } catch (err) {
-          return Promise.reject(err);
+          console.log(err);
+
+          if (ua) {
+            ua.event('Hooks', 'Process merge error').send();
+          }
         }
       }
     }
@@ -46,14 +50,12 @@ export default async (repo, data) => {
     if (ua) {
       ua.event('Hooks', 'Delete branch').send();
     }
-    return github.deleteBranch(review.sourceBranch);
-  } catch (e) {
-    console.log(e.stack || e);
+    github.deleteBranch(review.sourceBranch);
+  } catch (err) {
+    console.log(err);
 
     if (ua) {
       ua.event('Hooks', 'Delete branch error').send();
     }
-
-    return Promise.reject(e);
   }
 };

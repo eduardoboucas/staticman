@@ -89,7 +89,6 @@ describe('GitHub interface', () => {
 
     test('returns an error if GitHub API call errors', async () => {
       const filePath = 'path/to/file.yml';
-      const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8');
 
       const scope = nock(/api\.github\.com/, {
         reqheaders: {

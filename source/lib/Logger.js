@@ -12,7 +12,7 @@ class Logger {
     };
 
     if (typeof config.get('logging.slackWebhook') === 'string') {
-      this.formatFn = (t) => `\`\`\`\n${  t  }\n\`\`\``;
+      this.formatFn = (t) => `\`\`\`\n${t}\n\`\`\``;
 
       options.stream = new BunyanSlack({
         webhook_url: config.get('logging.slackWebhook'),
@@ -29,4 +29,4 @@ class Logger {
   }
 }
 
-export const instance = new Logger();
+export default new Logger();

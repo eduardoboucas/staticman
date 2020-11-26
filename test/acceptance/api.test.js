@@ -28,7 +28,7 @@ afterAll((done) => {
 });
 
 describe('Connect endpoint', () => {
-  test('accepts the invitation if one is found and replies with "OK!"', async () => {
+  test('accepts the invitation if one is found and replies with "Staticman connected!"', async () => {
     const invitationId = 123;
 
     const reqListInvititations = nock('https://api.github.com', {
@@ -57,7 +57,7 @@ describe('Connect endpoint', () => {
     const response = await request('/v2/connect/johndoe/foobar');
     expect(reqListInvititations.isDone()).toBe(true);
     expect(reqAcceptInvitation.isDone()).toBe(true);
-    expect(response).toBe('OK!');
+    expect(response).toBe('Staticman connected!');
   });
 
   test('returns a 404 and an error message if a matching invitation is not found', async () => {
@@ -264,7 +264,7 @@ describe('Entry endpoint', () => {
     };
     const formData = querystring.stringify(form);
 
-    expect.assertions(4);
+    expect.assertions(5);
 
     try {
       await request({
@@ -282,6 +282,7 @@ describe('Entry endpoint', () => {
       expect(error.errorCode).toBe('PARSING_ERROR');
       expect(error.message).toBe('Error whilst parsing config file');
       expect(error.rawError).toBeDefined();
+      expect(mockGetConfig.isDone()).toBe(true);
     }
   });
 });

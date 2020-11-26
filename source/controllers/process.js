@@ -2,7 +2,7 @@ import reCaptcha from 'express-recaptcha';
 import universalAnalytics from 'universal-analytics';
 
 import config from '../config';
-import errorHandler, { getInstance as getErrorHandlerInstance } from '../lib/ErrorHandler';
+import errorHandler, { getInstance } from '../lib/ErrorHandler';
 import Staticman from '../lib/Staticman';
 
 export function checkRecaptcha(staticman, req) {
@@ -36,13 +36,10 @@ export function checkRecaptcha(staticman, req) {
         }
 
         reCaptcha.init(reCaptchaOptions.siteKey, decryptedSecret);
-        reCaptcha.verify(req, (err) => {
-          if (err) {
-            return reject(errorHandler(err));
-          }
-
-          return resolve(true);
-        });
+        reCaptcha.verify(req, () =>
+          req?.recaptcha?.error ? reject(errorHandler(req.reCaptcha.error)) : resolve(true)
+        );
+        return resolve(true);
       })
       .catch((err) => reject(err));
   });
@@ -62,7 +59,7 @@ export function createConfigObject(apiVersion, property) {
   return remoteConfig;
 }
 
-export function process(staticman, req, res) {
+export function processEntry(staticman, req, res) {
   const ua = config.get('analytics.uaTrackingId')
     ? universalAnalytics(config.get('analytics.uaTrackingId'))
     : null;
@@ -98,8 +95,8 @@ export function sendResponse(res, data) {
   };
 
   if (error && error._smErrorCode) {
-    const errorCode = getErrorHandlerInstance().getErrorCode(error._smErrorCode);
-    const errorMessage = getErrorHandlerInstance().getMessage(error._smErrorCode);
+    const errorCode = getInstance().getErrorCode(error._smErrorCode);
+    const errorMessage = getInstance().getMessage(error._smErrorCode);
 
     if (errorMessage) {
       payload.message = errorMessage;
@@ -120,10 +117,10 @@ export function sendResponse(res, data) {
     payload.fields = data.fields;
   }
 
-  res.status(statusCode).send(payload);
+  return res.status(statusCode).send(payload);
 }
 
-export default async (req, res, next) => {
+export default async (req, res) => {
   const staticman = await new Staticman(req.params);
 
   staticman.setConfigPath();
@@ -131,12 +128,12 @@ export default async (req, res, next) => {
   staticman.setUserAgent(req.headers['user-agent']);
 
   return checkRecaptcha(staticman, req)
-    .then((usedRecaptcha) => process(staticman, req, res))
+    .then(() => processEntry(staticman, req, res))
     .catch((err) =>
       sendResponse(res, {
         err,
-        redirect: req.body.options && req.body.options.redirect,
-        redirectError: req.body.options && req.body.options.redirectError,
+        redirect: req?.body?.options?.redirect,
+        redirectError: req?.body?.options?.redirectError,
       })
     );
 };

@@ -5,7 +5,7 @@ import * as helpers from '../../helpers';
 import Staticman from '../../../source/lib/Staticman';
 import User from '../../../source/lib/models/User';
 
-Staticman.prototype.getSiteConfig = function () {
+Staticman.prototype.getSiteConfig = function getMockSiteConfig() {
   return Promise.resolve(helpers.getConfig());
 };
 

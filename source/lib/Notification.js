@@ -5,7 +5,7 @@ export default class Notification {
     this.mailAgent = mailAgent;
   }
 
-  _buildMessage(fields, options, data) {
+  static _buildMessage(fields, options, data) {
     return `
     <html>
       <body>
@@ -35,7 +35,7 @@ export default class Notification {
           from: `${config.get('email.fromName')} <${config.get('email.fromAddress')}>`,
           to,
           subject,
-          html: this._buildMessage(fields, options, data),
+          html: Notification._buildMessage(fields, options, data),
         },
         (err, res) => {
           if (err) {

@@ -54,10 +54,10 @@ export function getCatchAllApiMock(callback) {
 }
 
 export function getConfig() {
-  const config = cloneDeep(siteConfig);
-  config.getRaw = (key) => objectPath.get(parsedConfig, `comments.${key}`);
+  const siteConfigCopy = cloneDeep(siteConfig);
+  siteConfigCopy.getRaw = (key) => objectPath.get(parsedConfig, `comments.${key}`);
 
-  return config;
+  return siteConfigCopy;
 }
 
 export function getConfigObject() {
@@ -93,7 +93,8 @@ export function getMockRequest() {
 export function getMockResponse() {
   const redirectFn = jest.fn();
   const sendFn = jest.fn();
-  const statusFn = jest.fn((code) => ({
+  // eslint-disable-next-line no-unused-vars
+  const statusFn = jest.fn((_code) => ({
     send: sendFn,
   }));
 
