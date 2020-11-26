@@ -39,7 +39,7 @@ describe('GitLab interface', () => {
       };
     });
 
-    const GitLab = require('./../../../source/lib/GitLab').default;
+    const GitLab = require('../../../source/lib/GitLab').default;
     const gitlab = new GitLab(req.params); // eslint-disable-line no-unused-vars
 
     expect(mockConstructor.mock.calls[0][0]).toEqual({
@@ -60,14 +60,14 @@ describe('GitLab interface', () => {
       };
     });
 
-    const GitLab = require('./../../../source/lib/GitLab').default;
+    const GitLab = require('../../../source/lib/GitLab').default;
 
     const oauthToken = 'test-oauth-token';
     const gitlab = new GitLab({ ...req.params, oauthToken });
 
     expect(mockConstructor.mock.calls[0][0]).toEqual({
       url: 'https://gitlab.com',
-      oauthToken: oauthToken,
+      oauthToken,
     });
   });
 
@@ -89,7 +89,7 @@ describe('GitLab interface', () => {
 
       jest.mock('gitlab/dist/es5', () => {
         return {
-          default: function () {
+          default: function mockGitlab() {
             return {
               RepositoryFiles: {
                 show: mockRepoShowFile,
@@ -99,7 +99,7 @@ describe('GitLab interface', () => {
         };
       });
 
-      const GitLab = require('./../../../source/lib/GitLab').default;
+      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
 
       return gitlab.readFile(filePath).then((contents) => {
@@ -117,7 +117,7 @@ describe('GitLab interface', () => {
 
       jest.mock('gitlab/dist/es5', () => {
         return {
-          default: function () {
+          default: function mockGitlab() {
             return {
               RepositoryFiles: {
                 show: mockShowRepoFile,
@@ -127,7 +127,7 @@ describe('GitLab interface', () => {
         };
       });
 
-      const GitLab = require('./../../../source/lib/GitLab').default;
+      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
 
       return gitlab.readFile(filePath).catch((err) => {
@@ -157,7 +157,7 @@ describe('GitLab interface', () => {
 
       jest.mock('gitlab/dist/es5', () => {
         return {
-          default: function () {
+          default: function mockGitlab() {
             return {
               RepositoryFiles: {
                 show: mockShowRepoFile,
@@ -167,7 +167,7 @@ describe('GitLab interface', () => {
         };
       });
 
-      const GitLab = require('./../../../source/lib/GitLab').default;
+      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
 
       return gitlab.readFile(filePath).catch((err) => {
@@ -192,7 +192,7 @@ describe('GitLab interface', () => {
 
       jest.mock('gitlab/dist/es5', () => {
         return {
-          default: function () {
+          default: function mockGitlab() {
             return {
               RepositoryFiles: {
                 show: mockShowRepoFile,
@@ -202,7 +202,7 @@ describe('GitLab interface', () => {
         };
       });
 
-      const GitLab = require('./../../../source/lib/GitLab').default;
+      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
 
       return gitlab.readFile(filePath).then((contents) => {
@@ -225,7 +225,7 @@ describe('GitLab interface', () => {
 
       jest.mock('gitlab/dist/es5', () => {
         return {
-          default: function () {
+          default: function mockGitlab() {
             return {
               RepositoryFiles: {
                 show: mockShowRepoFile,
@@ -235,7 +235,7 @@ describe('GitLab interface', () => {
         };
       });
 
-      const GitLab = require('./../../../source/lib/GitLab').default;
+      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
 
       return gitlab.readFile(filePath, true).then((response) => {
@@ -255,7 +255,7 @@ describe('GitLab interface', () => {
 
       jest.mock('gitlab/dist/es5', () => {
         return {
-          default: function () {
+          default: function mockGitlab() {
             return {
               RepositoryFiles: {
                 show: mockShowRepoFile,
@@ -265,7 +265,7 @@ describe('GitLab interface', () => {
         };
       });
 
-      const GitLab = require('./../../../source/lib/GitLab').default;
+      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
 
       return gitlab.readFile(filePath).then((contents) => {
@@ -283,7 +283,7 @@ describe('GitLab interface', () => {
 
       jest.mock('gitlab/dist/es5', () => {
         return {
-          default: function () {
+          default: function mockGitlab() {
             return {
               RepositoryFiles: {
                 show: mockShowRepoFile,
@@ -293,7 +293,7 @@ describe('GitLab interface', () => {
         };
       });
 
-      const GitLab = require('./../../../source/lib/GitLab').default;
+      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
 
       return gitlab.readFile(filePath, true).then((response) => {
@@ -315,7 +315,7 @@ describe('GitLab interface', () => {
 
       jest.mock('gitlab/dist/es5', () => {
         return {
-          default: function () {
+          default: function mockGitlab() {
             return {
               RepositoryFiles: {
                 create: mockCreateRepoFile,
@@ -325,7 +325,7 @@ describe('GitLab interface', () => {
         };
       });
 
-      const GitLab = require('./../../../source/lib/GitLab').default;
+      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
 
       return gitlab
@@ -350,7 +350,7 @@ describe('GitLab interface', () => {
 
       jest.mock('gitlab/dist/es5', () => {
         return {
-          default: function () {
+          default: function mockGitlab() {
             return {
               RepositoryFiles: {
                 create: mockCreateRepoFile,
@@ -360,7 +360,7 @@ describe('GitLab interface', () => {
         };
       });
 
-      const GitLab = require('./../../../source/lib/GitLab').default;
+      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
       const options = {
         content: 'This is a new file',
@@ -385,7 +385,7 @@ describe('GitLab interface', () => {
     test('returns an error object if the save operation fails', () => {
       jest.mock('gitlab/dist/es5', () => {
         return {
-          default: function () {
+          default: function mockGitlab() {
             return {
               RepositoryFiles: {
                 create: () => Promise.reject(new Error()),
@@ -395,7 +395,7 @@ describe('GitLab interface', () => {
         };
       });
 
-      const GitLab = require('./../../../source/lib/GitLab').default;
+      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
       const options = {
         branch: 'master',
@@ -443,7 +443,7 @@ describe('GitLab interface', () => {
 
       jest.mock('gitlab/dist/es5', () => {
         return {
-          default: function () {
+          default: function mockGitlab() {
             return {
               Branches: {
                 create: mockCreateBranch,
@@ -460,7 +460,7 @@ describe('GitLab interface', () => {
         };
       });
 
-      const GitLab = require('./../../../source/lib/GitLab').default;
+      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
 
       return gitlab
@@ -499,7 +499,7 @@ describe('GitLab interface', () => {
     test('returns an error if any of the API calls fail', () => {
       jest.mock('gitlab/dist/es5', () => {
         return {
-          default: function () {
+          default: function mockGitlab() {
             return {
               Branches: {
                 create: () => Promise.resolve(),
@@ -513,7 +513,7 @@ describe('GitLab interface', () => {
         };
       });
 
-      const GitLab = require('./../../../source/lib/GitLab').default;
+      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
       const options = {
         commitBody: '',
@@ -549,7 +549,7 @@ describe('GitLab interface', () => {
 
       jest.mock('gitlab/dist/es5', () => {
         return {
-          default: function () {
+          default: function mockGitlab() {
             return {
               Users: {
                 current: () => Promise.resolve(mockUser),
@@ -559,7 +559,7 @@ describe('GitLab interface', () => {
         };
       });
 
-      const GitLab = require('./../../../source/lib/GitLab').default;
+      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
 
       return gitlab.getCurrentUser().then((user) => {
@@ -570,7 +570,7 @@ describe('GitLab interface', () => {
     test('throws an error if unable to retrieve the current unauthenticated user', () => {
       jest.mock('gitlab/dist/es5', () => {
         return {
-          default: function () {
+          default: function mockGitlab() {
             return {
               Users: {
                 current: () => Promise.reject(new Error()),
@@ -580,7 +580,7 @@ describe('GitLab interface', () => {
         };
       });
 
-      const GitLab = require('./../../../source/lib/GitLab').default;
+      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
 
       return gitlab.getCurrentUser().catch((err) => {

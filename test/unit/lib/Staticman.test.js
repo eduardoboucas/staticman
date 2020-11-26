@@ -584,10 +584,11 @@ describe('Staticman interface', () => {
     });
 
     test('sets the `gitUser` property to the authenticated User and returns true for GitHub authentication', async () => {
+      const mockUser = new User('github', 'johndoe', 'johndoe@test.com', 'John Doe');
       const mockGetCurrentUser = jest.fn(() => Promise.resolve(mockUser));
 
       jest.mock('../../../source/lib/GitHub', () => {
-        return function () {
+        return function mockGithub() {
           return {
             getCurrentUser: mockGetCurrentUser,
           };
@@ -607,8 +608,6 @@ describe('Staticman interface', () => {
       staticman.siteConfig = mockConfig;
       staticman.parameters.version = '3';
 
-      const mockUser = new User('github', 'johndoe', 'johndoe@test.com', 'John Doe');
-
       const result = await staticman._checkAuth();
       expect(mockGetCurrentUser).toHaveBeenCalledTimes(1);
       expect(staticman.gitUser).toEqual(mockUser);
@@ -616,10 +615,11 @@ describe('Staticman interface', () => {
     });
 
     test('sets the `gitUser` property to the authenticated User and returns true for GitLab authentication', async () => {
+      const mockUser = new User('github', 'johndoe', 'johndoe@test.com', 'John Doe');
       const mockGetCurrentUser = jest.fn(() => Promise.resolve(mockUser));
 
       jest.mock('../../../source/lib/GitLab', () => {
-        return function () {
+        return function mockGitlab() {
           return {
             getCurrentUser: mockGetCurrentUser,
           };
@@ -639,8 +639,6 @@ describe('Staticman interface', () => {
       staticman.options = options;
       staticman.siteConfig = mockConfig;
       staticman.parameters.version = '3';
-
-      const mockUser = new User('github', 'johndoe', 'johndoe@test.com', 'John Doe');
 
       const result = await staticman._checkAuth();
       expect(mockGetCurrentUser).toHaveBeenCalledTimes(1);
@@ -726,7 +724,7 @@ describe('Staticman interface', () => {
       );
 
       jest.mock('../../../source/lib/GitHub', () => {
-        return function () {
+        return function mockGitlab() {
           return {
             api: {
               users: {
@@ -1166,12 +1164,12 @@ describe('Staticman interface', () => {
     test('throws an error if the config provided is missing any of the required fields', async () => {
       const Staticman = require('../../../source/lib/Staticman').default;
       const staticman = await new Staticman(mockParameters);
-      const config = {
+      const expectedSiteConfig = {
         allowedFields: ['name', 'email'],
         format: 'json',
       };
 
-      expect(staticman._validateConfig(config)).toEqual({
+      expect(staticman._validateConfig(expectedSiteConfig)).toEqual({
         _smErrorCode: 'MISSING_CONFIG_FIELDS',
         data: ['branch', 'path'],
       });
@@ -1180,19 +1178,19 @@ describe('Staticman interface', () => {
     test('creates a SiteConfig object and assigns it to the Staticman instance', async () => {
       const Staticman = require('../../../source/lib/Staticman').default;
       const staticman = await new Staticman(mockParameters);
-      const config = {
+      const expectedSiteConfig = {
         allowedFields: ['name', 'email'],
         branch: 'master',
         format: 'json',
         path: 'some/path',
       };
 
-      staticman._validateConfig(config);
+      staticman._validateConfig(expectedSiteConfig);
 
-      expect(staticman.siteConfig.get('allowedFields')).toEqual(config.allowedFields);
-      expect(staticman.siteConfig.get('branch')).toEqual(config.branch);
-      expect(staticman.siteConfig.get('format')).toEqual(config.format);
-      expect(staticman.siteConfig.get('path')).toEqual(config.path);
+      expect(staticman.siteConfig.get('allowedFields')).toEqual(expectedSiteConfig.allowedFields);
+      expect(staticman.siteConfig.get('branch')).toEqual(expectedSiteConfig.branch);
+      expect(staticman.siteConfig.get('format')).toEqual(expectedSiteConfig.format);
+      expect(staticman.siteConfig.get('path')).toEqual(expectedSiteConfig.path);
     });
   });
 
@@ -1260,8 +1258,8 @@ describe('Staticman interface', () => {
 
       staticman.siteConfig = mockConfig;
 
-      return staticman.getSiteConfig().then((config) => {
-        expect(config).toEqual(mockConfig);
+      return staticman.getSiteConfig().then((siteConfig) => {
+        expect(siteConfig).toEqual(mockConfig);
       });
     });
 
@@ -1285,13 +1283,11 @@ describe('Staticman interface', () => {
       staticman.siteConfig = mockConfig;
       staticman.git = {
         readFile: jest.fn(() => {
-          const config = mockHelpers.getParsedConfig();
-
-          return Promise.resolve(config);
+          return Promise.resolve(mockHelpers.getParsedConfig());
         }),
       };
 
-      return staticman.getSiteConfig(true).then((config) => {
+      return staticman.getSiteConfig(true).then(() => {
         expect(staticman.git.readFile).toHaveBeenCalledTimes(1);
         expect(staticman.git.readFile.mock.calls[0][0]).toBe(configObject.file);
       });
@@ -1365,8 +1361,8 @@ describe('Staticman interface', () => {
         }),
       };
 
-      return staticman.getSiteConfig().then((config) => {
-        expect(config.getProperties()).toEqual(mockConfig.getProperties());
+      return staticman.getSiteConfig().then((siteConfig) => {
+        expect(siteConfig.getProperties()).toEqual(mockConfig.getProperties());
       });
     });
   });
@@ -1446,7 +1442,7 @@ describe('Staticman interface', () => {
       const mockGetCurrentUser = jest.fn(() => Promise.resolve(mockUser));
 
       jest.mock('../../../source/lib/GitHub', () => {
-        return function () {
+        return function mockGithub() {
           return {
             getCurrentUser: mockGetCurrentUser,
           };
@@ -1490,7 +1486,7 @@ describe('Staticman interface', () => {
       staticman.git.writeFile = jest.fn(() => Promise.resolve());
 
       return staticman.processEntry(fields, options).catch((err) => {
-        err._smErrorCode = 'AUTH_TOKEN_INVALID';
+        expect(err._smErrorCode).toEqual('AUTH_TOKEN_INVALID')
       });
     });
 
