@@ -217,7 +217,7 @@ describe('Process controller', () => {
 
       return checkRecaptcha(staticman, req).then((response) => {
         expect(response).toBe(true);
-        expect(mockInitFn.mock.calls.length).toBe(1);
+        expect(mockInitFn.mock.calls).toHaveLength(1);
         expect(mockInitFn.mock.calls[0][0]).toBe(mockSiteConfig.get('reCaptcha.siteKey'));
         expect(mockInitFn.mock.calls[0][1]).toBe(mockSiteConfig.get('reCaptcha.secret'));
         expect(mockVerifyFn.mock.calls[0][0]).toBe(req);
@@ -343,7 +343,7 @@ describe('Process controller', () => {
       req.query = {};
 
       return processFn(staticman, req, res).then((response) => {
-        expect(res.redirect.mock.calls.length).toBe(1);
+        expect(res.redirect.mock.calls).toHaveLength(1);
         expect(res.redirect.mock.calls[0][0]).toBe(redirectUrl);
       });
     });
@@ -382,7 +382,7 @@ describe('Process controller', () => {
       req.query = {};
 
       return processFn(staticman, req, res).then(() => {
-        expect(res.send.mock.calls.length).toBe(1);
+        expect(res.send.mock.calls).toHaveLength(1);
         expect(res.send.mock.calls[0][0]).toEqual({
           fields,
           success: true,
@@ -439,7 +439,7 @@ describe('Process controller', () => {
 
       sendResponse(res, data);
 
-      expect(res.redirect.mock.calls.length).toBe(1);
+      expect(res.redirect.mock.calls).toHaveLength(1);
       expect(res.redirect.mock.calls[0][0]).toBe(data.redirect);
     });
 
@@ -454,7 +454,7 @@ describe('Process controller', () => {
 
       sendResponse(res, data);
 
-      expect(res.redirect.mock.calls.length).toBe(1);
+      expect(res.redirect.mock.calls).toHaveLength(1);
       expect(res.redirect.mock.calls[0][0]).toBe(data.redirectError);
     });
 
@@ -470,12 +470,12 @@ describe('Process controller', () => {
 
       sendResponse(res, data);
 
-      expect(res.send.mock.calls.length).toBe(1);
+      expect(res.send.mock.calls).toHaveLength(1);
       expect(res.send.mock.calls[0][0]).toEqual({
         success: true,
         fields: data.fields,
       });
-      expect(res.status.mock.calls.length).toBe(1);
+      expect(res.status.mock.calls).toHaveLength(1);
       expect(res.status.mock.calls[0][0]).toBe(200);
     });
 
@@ -491,7 +491,7 @@ describe('Process controller', () => {
 
       sendResponse(res, data);
 
-      expect(res.send.mock.calls.length).toBe(1);
+      expect(res.send.mock.calls).toHaveLength(1);
       expect(res.send.mock.calls[0][0].success).toBe(false);
       expect(res.send.mock.calls[0][0].message).toBe(
         errorHandler.getMessage(data.err._smErrorCode)
@@ -499,7 +499,7 @@ describe('Process controller', () => {
       expect(res.send.mock.calls[0][0].errorCode).toBe(
         errorHandler.getErrorCode(data.err._smErrorCode)
       );
-      expect(res.status.mock.calls.length).toBe(1);
+      expect(res.status.mock.calls).toHaveLength(1);
       expect(res.status.mock.calls[0][0]).toBe(500);
     });
   });

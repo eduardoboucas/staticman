@@ -1,4 +1,4 @@
-/* eslint-disable max-classes-per-file */
+/* eslint-disable max-classes-per-file, no-shadow */
 
 import yaml from 'js-yaml';
 
@@ -63,6 +63,7 @@ describe('GitLab interface', () => {
     const GitLab = require('../../../source/lib/GitLab').default;
 
     const oauthToken = 'test-oauth-token';
+    // eslint-disable-next-line no-unused-vars
     const gitlab = new GitLab({ ...req.params, oauthToken });
 
     expect(mockConstructor.mock.calls[0][0]).toEqual({
@@ -74,7 +75,7 @@ describe('GitLab interface', () => {
   test('throws error if no personal access token or OAuth token is provided', () => {
     jest.spyOn(config, 'get').mockImplementation(() => null);
 
-    expect(() => new GitLab({})).toThrowError('Require an `oauthToken` or `token` option');
+    expect(() => new GitLab({})).toThrow('Require an `oauthToken` or `token` option');
   });
 
   describe('readFile', () => {

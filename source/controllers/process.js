@@ -14,7 +14,7 @@ export function checkRecaptcha(staticman, req) {
           return resolve(false);
         }
 
-        const reCaptchaOptions = req.body.options && req.body.options.reCaptcha;
+        const reCaptchaOptions = req?.body?.options?.reCaptcha;
 
         if (!reCaptchaOptions || !reCaptchaOptions.siteKey || !reCaptchaOptions.secret) {
           return reject(errorHandler('RECAPTCHA_MISSING_CREDENTIALS'));
@@ -79,7 +79,7 @@ export function processEntry(staticman, req, res) {
 }
 
 export function sendResponse(res, data) {
-  const error = data && data.err;
+  const error = data?.err;
   const statusCode = error ? 500 : 200;
 
   if (!error && data.redirect) {
@@ -94,7 +94,7 @@ export function sendResponse(res, data) {
     success: !error,
   };
 
-  if (error && error._smErrorCode) {
+  if (error?._smErrorCode) {
     const errorCode = getInstance().getErrorCode(error._smErrorCode);
     const errorMessage = getInstance().getMessage(error._smErrorCode);
 

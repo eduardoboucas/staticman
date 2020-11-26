@@ -31,8 +31,8 @@ describe('Notification interface', () => {
   test('builds an email message from the template, replacing the placeholders with the data provided', () => {
     const message = Notification._buildMessage(mockData.fields, mockData.options, mockData.data);
 
-    expect(message.includes(mockData.data.siteName)).toBe(true);
-    expect(message.includes(mockData.options.origin)).toBe(true);
+    expect(message).toContain(mockData.data.siteName);
+    expect(message).toContain(mockData.options.origin);
   });
 
   test('sends an email through the mail agent', () => {
@@ -42,7 +42,7 @@ describe('Notification interface', () => {
 
     notification.send(recipient, mockData.fields, mockData.options, mockData.data);
 
-    expect(mockSendFn.mock.calls.length).toBe(1);
+    expect(mockSendFn.mock.calls).toHaveLength(1);
     expect(mockSendFn.mock.calls[0][0]).toEqual({
       from: `${config.get('email.fromName')} <${config.get('email.fromAddress')}>`,
       to: recipient,

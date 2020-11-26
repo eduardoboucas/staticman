@@ -29,11 +29,7 @@ export default class GitLab extends GitService {
   }
 
   get repositoryId() {
-    if (this.username && this.repository) {
-      return `${this.username}/${this.repository}`;
-    }
-
-    return '';
+    return this.username && this.repository ? `${this.username}/${this.repository}` : '';
   }
 
   _pullFile(path, branch) {
@@ -89,7 +85,7 @@ export default class GitLab extends GitService {
 
   writeFile(filePath, data, targetBranch, commitTitle) {
     return super.writeFile(filePath, data, targetBranch, commitTitle).catch((err) => {
-      if (err.error && err.error.message === 'A file with this name already exists') {
+      if (err?.error?.message === 'A file with this name already exists') {
         return Promise.reject(errorHandler('GITLAB_FILE_ALREADY_EXISTS', { err }));
       }
 

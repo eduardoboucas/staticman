@@ -106,6 +106,7 @@ export default class Staticman {
   }
 
   _applyTransforms(fields) {
+    const transformedFields = fields;
     const transforms = this.siteConfig.get('transforms');
 
     if (!transforms) return Promise.resolve(fields);
@@ -123,13 +124,13 @@ export default class Staticman {
         const transformFn = Transforms[transformName];
 
         if (transformFn) {
-          fields[field] = transformFn(fields[field]);
+          transformedFields[field] = transformFn(transformedFields[field]);
         }
       });
     });
 
     return Promise.all(queue).then(() => {
-      return fields;
+      return transformedFields;
     });
   }
 
@@ -314,13 +315,12 @@ export default class Staticman {
 
   _getNewFilePath(data) {
     const configFilename = this.siteConfig.get('filename');
-    const filename =
-      configFilename && configFilename.length
-        ? this._resolvePlaceholders(configFilename, {
-            fields: data,
-            options: this.options,
-          })
-        : this.uid;
+    const filename = configFilename?.length
+      ? this._resolvePlaceholders(configFilename, {
+          fields: data,
+          options: this.options,
+        })
+      : this.uid;
 
     let path = this._resolvePlaceholders(this.siteConfig.get('path'), {
       fields: data,
@@ -372,9 +372,10 @@ export default class Staticman {
   }
 
   _resolvePlaceholders(subject, baseObject) {
-    const matches = subject.match(/{(.*?)}/g);
+    let completedSubject = subject;
+    const matches = completedSubject.match(/{(.*?)}/g);
 
-    if (!matches) return subject;
+    if (!matches) return completedSubject;
 
     matches.forEach((match) => {
       const escapedMatch = match.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&');
@@ -404,14 +405,14 @@ export default class Staticman {
           }
       }
 
-      subject = subject.replace(new RegExp(escapedMatch, 'g'), newText);
+      completedSubject = completedSubject.replace(new RegExp(escapedMatch, 'g'), newText);
     });
 
-    return subject;
+    return completedSubject;
   }
 
-  _validateConfig(config) {
-    if (!config) {
+  _validateConfig(siteConfig) {
+    if (!siteConfig) {
       return errorHandler('MISSING_CONFIG_BLOCK');
     }
 
@@ -421,7 +422,7 @@ export default class Staticman {
 
     // Checking for missing required fields
     requiredFields.forEach((requiredField) => {
-      if (objectPath.get(config, requiredField) === undefined) {
+      if (objectPath.get(siteConfig, requiredField) === undefined) {
         missingFields.push(requiredField);
       }
     });
@@ -432,30 +433,34 @@ export default class Staticman {
       });
     }
 
-    this.siteConfig = SiteConfig(config, this.rsa);
+    this.siteConfig = SiteConfig(siteConfig, this.rsa);
 
     return null;
   }
 
   _validateFields(fields) {
+    const validatedConfigFields = fields;
     const missingRequiredFields = [];
     const invalidFields = [];
 
-    Object.keys(fields).forEach((field) => {
+    Object.keys(validatedConfigFields).forEach((field) => {
       // Check for any invalid fields
-      if (this.siteConfig.get('allowedFields').indexOf(field) === -1 && fields[field] !== '') {
+      if (
+        this.siteConfig.get('allowedFields').indexOf(field) === -1 &&
+        validatedConfigFields[field] !== ''
+      ) {
         invalidFields.push(field);
       }
 
       // Trim fields
-      if (typeof fields[field] === 'string') {
-        fields[field] = fields[field].trim();
+      if (typeof validatedConfigFields[field] === 'string') {
+        validatedConfigFields[field] = validatedConfigFields[field].trim();
       }
     });
 
     // Check for missing required fields
     this.siteConfig.get('requiredFields').forEach((field) => {
-      if (fields[field] === undefined || fields[field] === '') {
+      if (!validatedConfigFields[field]) {
         missingRequiredFields.push(field);
       }
     });
@@ -489,14 +494,14 @@ export default class Staticman {
     if (!this.configPath) return Promise.reject(errorHandler('NO_CONFIG_PATH'));
 
     return this.git.readFile(this.configPath.file).then((data) => {
-      const config = objectPath.get(data, this.configPath.path);
-      const validationErrors = this._validateConfig(config);
+      const siteConfig = objectPath.get(data, this.configPath.path);
+      const validationErrors = this._validateConfig(siteConfig);
 
       if (validationErrors) {
         return Promise.reject(validationErrors);
       }
 
-      if (config.branch !== this.parameters.branch) {
+      if (siteConfig.branch !== this.parameters.branch) {
         return Promise.reject(errorHandler('BRANCH_MISMATCH'));
       }
 
@@ -509,23 +514,24 @@ export default class Staticman {
     this.options = { ...options };
 
     return this.getSiteConfig()
-      .then((config) => {
+      .then(() => {
         return this._checkAuth();
       })
       .then(() => {
         return this._checkForSpam(fields);
       })
-      .then((fields) => {
+      .then((siteConfigFields) => {
+        let transformedFields = siteConfigFields;
         // Validate fields
-        const fieldErrors = this._validateFields(fields);
+        const fieldErrors = this._validateFields(transformedFields);
 
         if (fieldErrors) return Promise.reject(fieldErrors);
 
         // Add generated fields
-        fields = this._applyGeneratedFields(fields);
+        transformedFields = this._applyGeneratedFields(transformedFields);
 
         // Apply transforms
-        return this._applyTransforms(fields);
+        return this._applyTransforms(transformedFields);
       })
       .then((transformedFields) => {
         return this._applyInternalFields(transformedFields);
@@ -571,7 +577,7 @@ export default class Staticman {
 
         return this.git.writeFile(filePath, data, this.parameters.branch, commitMessage);
       })
-      .then((result) => {
+      .then(() => {
         return {
           fields,
           redirect: options.redirect ? options.redirect : false,
@@ -592,7 +598,7 @@ export default class Staticman {
     this.options = { ...options };
 
     return this.getSiteConfig()
-      .then((config) => {
+      .then(() => {
         const subscriptions = this._initialiseSubscriptions();
 
         return subscriptions.send(options.parent, fields, options, this.siteConfig);

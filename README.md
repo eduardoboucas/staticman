@@ -16,7 +16,7 @@ You can download and run the Staticman API on your own infrastructure. The easie
 
 ## Requirements
 
-- Node.js 8.11.3+
+- Node.js 14.15.1+
 - npm
 - A [personal access token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) for the GitHub and/or GitLab account you want to run Staticman with
 - An RSA key in PEM format

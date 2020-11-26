@@ -96,7 +96,7 @@ export default class GitHub extends GitService {
   writeFile(filePath, data, targetBranch, commitTitle) {
     return super.writeFile(filePath, data, targetBranch, commitTitle).catch((err) => {
       try {
-        const message = err && err.message;
+        const message = err?.message;
 
         if (message) {
           const parsedError = JSON.parse(message);

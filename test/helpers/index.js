@@ -10,13 +10,6 @@ import config from '../../source/config';
 import * as sampleData from './sampleData';
 import SiteConfig from '../../source/siteConfig';
 
-// Disable console.log() for tests
-if (process.env.TEST_DEV !== 'true') {
-  console.debug = console.log;
-  console.log = jest.fn();
-  console.warn = jest.fn();
-}
-
 const rsa = new NodeRSA();
 const rsaKey = config.get('rsaPrivateKey');
 rsa.importKey(rsaKey, 'private');

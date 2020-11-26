@@ -771,7 +771,6 @@ describe('Staticman interface', () => {
 
     test('creates a timestamp in milliseconds if the format is set to `timestamp`', async () => {
       const Staticman = require('../../../source/lib/Staticman').default;
-      const staticman = await new Staticman(mockParameters);
 
       const date = Staticman._createDate({
         format: 'timestamp',
@@ -782,7 +781,6 @@ describe('Staticman interface', () => {
 
     test('creates a timestamp in seconds if the format is set to `timestamp-seconds`', async () => {
       const Staticman = require('../../../source/lib/Staticman').default;
-      const staticman = await new Staticman(mockParameters);
 
       const date = Staticman._createDate({
         format: 'timestamp-seconds',
@@ -793,7 +791,6 @@ describe('Staticman interface', () => {
 
     test('creates a ISO-8601 representation of the date if the format is set to `iso8601`, absent, or set to none of the other supported formats', async () => {
       const Staticman = require('../../../source/lib/Staticman').default;
-      const staticman = await new Staticman(mockParameters);
 
       const date1 = Staticman._createDate({
         format: 'iso8601',

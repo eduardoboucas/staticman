@@ -1,8 +1,8 @@
 {
   "env": {
-    "jest": true
+    "node": true
   },
-  "extends": ["airbnb/base", "prettier"],
+  "extends": ["airbnb/base", "plugin:jest/style", "prettier"],
   "parser": "@babel/eslint-parser",
   "rules": {
     "global-require": "off",
@@ -12,11 +12,13 @@
   },
   "overrides": [
     {
-      "files": [
-        "**/*.test.js"
-      ],
+      "env": {
+        "jest": true
+      },
+      "files": ["test/**/*.js"],
+      "plugins": ["jest"],
       "rules": {
-          "no-unused-vars": ["error", { "args": "none" }]
+        "no-unused-vars": ["error", { "args": "none" }]
       }
     }
   ]

@@ -30,7 +30,7 @@ export default async (repo, data) => {
     if (review.state === 'merged') {
       const bodyMatch = review.body.match(/(?:.*?)<!--staticman_notification:(.+?)-->(?:.*?)/i);
 
-      if (bodyMatch && bodyMatch.length === 2) {
+      if (bodyMatch?.length === 2) {
         try {
           const parsedBody = JSON.parse(bodyMatch[1]);
           const staticman = await new Staticman(parsedBody.parameters);

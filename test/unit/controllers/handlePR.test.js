@@ -144,8 +144,8 @@ describe('HandlePR controller', () => {
       expect(mockGetReview).toHaveBeenCalledTimes(1);
       expect(mockGetReview.mock.calls[0][0]).toEqual(123);
       expect(mockDeleteBranch).toHaveBeenCalledTimes(1);
-      expect(mockSetConfigPathFn.mock.calls.length).toBe(1);
-      expect(mockProcessMergeFn.mock.calls.length).toBe(1);
+      expect(mockSetConfigPathFn.mock.calls).toHaveLength(1);
+      expect(mockProcessMergeFn.mock.calls).toHaveLength(1);
     });
   });
 });
