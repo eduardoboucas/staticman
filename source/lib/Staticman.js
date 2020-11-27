@@ -55,12 +55,10 @@ export default class Staticman {
   }
 
   _applyGeneratedFields(data) {
-    // TODO: Are these actually parsed fields? Is there a more accurate descriptor?
-    const parsedFields = data;
-
+    const siteConfigFields = data;
     const generatedFields = this.siteConfig.get('generatedFields');
 
-    if (!generatedFields) return parsedFields;
+    if (!generatedFields) return siteConfigFields;
 
     Object.keys(generatedFields).forEach((field) => {
       const generatedField = generatedFields[field];
@@ -70,7 +68,7 @@ export default class Staticman {
 
         switch (generatedField.type) {
           case 'date':
-            parsedFields[field] = Staticman._createDate(options);
+            siteConfigFields[field] = Staticman._createDate(options);
 
             break;
 
@@ -78,7 +76,7 @@ export default class Staticman {
           case 'github':
           case 'user':
             if (this.gitUser && typeof options.property === 'string') {
-              parsedFields[field] = objectPath.get(this.gitUser, options.property);
+              siteConfigFields[field] = objectPath.get(this.gitUser, options.property);
             }
 
             break;
@@ -86,23 +84,22 @@ export default class Staticman {
           case 'slugify':
             if (
               typeof options.field === 'string' &&
-              typeof parsedFields[options.field] === 'string'
+              typeof siteConfigFields[options.field] === 'string'
             ) {
-              parsedFields[field] = slugify(parsedFields[options.field]).toLowerCase();
+              siteConfigFields[field] = slugify(siteConfigFields[options.field]).toLowerCase();
             }
 
             break;
 
           default:
-            // TODO: Handle this better
-            throw Error('No match for generated field');
+            console.log('No match for generated field');
         }
       } else {
-        parsedFields[field] = generatedField;
+        siteConfigFields[field] = generatedField;
       }
     });
 
-    return parsedFields;
+    return siteConfigFields;
   }
 
   _applyTransforms(fields) {
