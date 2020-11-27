@@ -75,7 +75,7 @@
     "jest": "^26.6.3",
     "lint-staged": "^10.5.2",
     "lodash": "^4.17.15",
-    "nock": "^11.7.0",
+    "nock": "^13.0.5",
     "prettier": "^2.2.0",
     "regenerator-runtime": "^0.13.7"
   },
