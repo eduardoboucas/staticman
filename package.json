@@ -111,5 +111,55 @@
     "*.{json,md,yml}": [
       "npx prettier --write"
     ]
+  },
+  "eslintConfig": {
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "airbnb/base",
+      "plugin:jest/style",
+      "prettier"
+    ],
+    "ignorePatterns": [
+      "build/*"
+    ],
+    "parser": "@babel/eslint-parser",
+    "rules": {
+      "global-require": "off",
+      "no-console": "off",
+      "no-underscore-dangle": "off",
+      "no-use-before-define": [
+        "error",
+        {
+          "functions": false
+        }
+      ]
+    },
+    "overrides": [
+      {
+        "env": {
+          "jest": true
+        },
+        "files": [
+          "test/**/*.js"
+        ],
+        "plugins": [
+          "jest"
+        ],
+        "rules": {
+          "no-unused-vars": [
+            "error",
+            {
+              "args": "none"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true
   }
 }
