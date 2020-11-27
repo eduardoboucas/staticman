@@ -1,101 +1,17 @@
 import nock from 'nock';
-import querystring from 'querystring';
+import request from 'supertest';
 
 import config from '../../source/config';
 import * as helpers from '../helpers';
 import * as sampleData from '../helpers/sampleData';
 import StaticmanAPI from '../../source/server';
 
-const githubToken = config.get('githubToken');
-const request = helpers.wrappedRequest;
-
 const btoa = (contents) => Buffer.from(contents).toString('base64');
+const githubToken = config.get('githubToken');
+const staticman = new StaticmanAPI().server;
 
-let server;
-
-beforeAll((done) => {
-  server = new StaticmanAPI();
-
-  server.start(() => {});
-
-  done();
-});
-
-afterAll((done) => {
-  server.close();
-
-  done();
-});
-
-describe('Connect endpoint', () => {
-  test('accepts the invitation if one is found and replies with "Staticman connected!"', async () => {
-    const invitationId = 123;
-
-    const reqListInvititations = nock('https://api.github.com', {
-      reqheaders: {
-        authorization: `token ${githubToken}`,
-      },
-    })
-      .get('/user/repository_invitations')
-      .reply(200, [
-        {
-          id: invitationId,
-          repository: {
-            full_name: `johndoe/foobar`,
-          },
-        },
-      ]);
-
-    const reqAcceptInvitation = nock('https://api.github.com', {
-      reqheaders: {
-        authorization: `token ${githubToken}`,
-      },
-    })
-      .patch(`/user/repository_invitations/${invitationId}`)
-      .reply(204);
-
-    const response = await request('/v2/connect/johndoe/foobar');
-    expect(reqListInvititations.isDone()).toBe(true);
-    expect(reqAcceptInvitation.isDone()).toBe(true);
-    expect(response).toBe('Staticman connected!');
-  });
-
-  test('returns a 404 and an error message if a matching invitation is not found', async () => {
-    const invitationId = 123;
-    const reqListInvititations = nock('https://api.github.com', {
-      reqheaders: {
-        authorization: `token ${githubToken}`,
-      },
-    })
-      .get('/user/repository_invitations')
-      .reply(200, [
-        {
-          id: invitationId,
-          repository: {
-            full_name: `johndoe/anotherrepo`,
-          },
-        },
-      ]);
-
-    const reqAcceptInvitation = nock('https://api.github.com', {
-      reqheaders: {
-        authorization: `token ${githubToken}`,
-      },
-    })
-      .patch(`/user/repository_invitations/${invitationId}`)
-      .reply(204);
-
-    expect.assertions(4);
-
-    try {
-      await request('/v2/connect/johndoe/foobar');
-    } catch (err) {
-      expect(reqListInvititations.isDone()).toBe(true);
-      expect(reqAcceptInvitation.isDone()).toBe(false);
-      expect(err.response.body).toBe('Invitation not found');
-      expect(err.statusCode).toBe(404);
-    }
-  });
+afterEach(() => {
+  nock.cleanAll();
 });
 
 describe('Entry endpoint', () => {
@@ -134,31 +50,28 @@ describe('Entry endpoint', () => {
         },
       });
 
-    const form = {
-      'fields[name]': 'Eduardo Boucas',
-      'options[reCaptcha][siteKey]': 'wrongSiteKey',
-      'options[reCaptcha][secret]': reCaptchaSecret,
-    };
-    const formData = querystring.stringify(form);
-
-    expect.assertions(3);
-
-    try {
-      await request({
-        body: formData,
-        method: 'POST',
-        uri: `/v2/entry/${data.username}/${data.repository}/${data.branch}/${data.property}`,
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
+    await request(staticman)
+      .post(`/v2/entry/${data.username}/${data.repository}/${data.branch}/${data.property}`)
+      .send({
+        fields: {
+          name: 'Eduardo Boucas',
         },
+        options: {
+          reCaptcha: {
+            siteKey: 'wrongSiteKey',
+            secret: reCaptchaSecret,
+          },
+        },
+      })
+      .set('Content-Type', 'application/x-www-form-urlencoded')
+      .expect('Content-Type', 'application/json; charset=utf-8')
+      .expect((response) => {
+        expect(JSON.parse(response.text)).toMatchObject({
+          success: false,
+          errorCode: 'RECAPTCHA_CONFIG_MISMATCH',
+          message: 'reCAPTCHA options do not match Staticman config',
+        });
       });
-    } catch (response) {
-      const error = JSON.parse(response.error);
-
-      expect(error.success).toBe(false);
-      expect(error.errorCode).toBe('RECAPTCHA_CONFIG_MISMATCH');
-      expect(error.message).toBe('reCAPTCHA options do not match Staticman config');
-    }
   });
 
   test('outputs a RECAPTCHA_CONFIG_MISMATCH error if reCaptcha options do not match (wrong secret)', async () => {
@@ -199,31 +112,28 @@ describe('Entry endpoint', () => {
         },
       });
 
-    const form = {
-      'fields[name]': 'Eduardo Boucas',
-      'options[reCaptcha][siteKey]': '123456789',
-      'options[reCaptcha][secret]': 'foo',
-    };
-    const formData = querystring.stringify(form);
-
-    expect.assertions(3);
-
-    try {
-      await request({
-        body: formData,
-        method: 'POST',
-        uri: '/v2/entry/johndoe/foobar/master/comments',
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
+    await request(staticman)
+      .post('/v2/entry/johndoe/foobar/master/comments')
+      .send({
+        fields: {
+          name: 'Eduardo+Boucas',
         },
+        options: {
+          reCaptcha: {
+            siteKey: '123456789',
+            secret: 'foo',
+          },
+        },
+      })
+      .expect('Content-Type', 'application/json; charset=utf-8')
+      .expect('Content-Type', 'application/json; charset=utf-8')
+      .expect((response) => {
+        expect(JSON.parse(response.text)).toMatchObject({
+          success: false,
+          errorCode: 'RECAPTCHA_CONFIG_MISMATCH',
+          message: 'reCAPTCHA options do not match Staticman config',
+        });
       });
-    } catch (response) {
-      const error = JSON.parse(response.error);
-
-      expect(error.success).toBe(false);
-      expect(error.errorCode).toBe('RECAPTCHA_CONFIG_MISMATCH');
-      expect(error.message).toBe('reCAPTCHA options do not match Staticman config');
-    }
   });
 
   test('outputs a PARSING_ERROR error if the site config is malformed', async () => {
@@ -259,30 +169,25 @@ describe('Entry endpoint', () => {
         },
       });
 
-    const form = {
-      'fields[name]': 'Eduardo Boucas',
-    };
-    const formData = querystring.stringify(form);
-
-    expect.assertions(5);
-
-    try {
-      await request({
-        body: formData,
-        method: 'POST',
-        uri: '/v2/entry/johndoe/foobar/master/comments',
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
+    await request(staticman)
+      .post('/v2/entry/johndoe/foobar/master/comments')
+      .send({
+        fields: {
+          name: 'Eduardo+Boucas',
         },
+      })
+      .set('Content-Type', 'application/x-www-form-urlencoded')
+      .expect('Content-Type', 'application/json; charset=utf-8')
+      .expect((response) => {
+        const error = JSON.parse(response.text);
+        expect(error).toHaveProperty('rawError');
+        expect(error).toMatchObject({
+          success: false,
+          errorCode: 'PARSING_ERROR',
+          message: 'Error whilst parsing config file',
+        });
       });
-    } catch (response) {
-      const error = JSON.parse(response.error);
 
-      expect(error.success).toBe(false);
-      expect(error.errorCode).toBe('PARSING_ERROR');
-      expect(error.message).toBe('Error whilst parsing config file');
-      expect(error.rawError).toBeDefined();
-      expect(mockGetConfig.isDone()).toBe(true);
-    }
+    expect(mockGetConfig.isDone()).toBe(true);
   });
 });

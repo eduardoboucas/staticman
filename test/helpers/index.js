@@ -2,7 +2,6 @@ import cloneDeep from 'lodash/cloneDeep';
 import objectPath from 'object-path';
 import markdownTable from 'markdown-table';
 import NodeRSA from 'node-rsa';
-import request from 'request-promise';
 import yaml from 'js-yaml';
 
 import CatchAllApiMock from './CatchAllApiMock';
@@ -108,16 +107,4 @@ export function getParsedConfig() {
 
 export function getUserAgent() {
   return 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36';
-}
-
-export function wrappedRequest(options) {
-  const newOptions =
-    typeof options === 'string'
-      ? `http://localhost:${config.get('port')}${options}`
-      : {
-          ...options,
-          uri: `http://localhost:${config.get('port')}${options.uri}`,
-        };
-
-  return request(newOptions);
 }

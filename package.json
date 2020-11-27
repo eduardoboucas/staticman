@@ -77,7 +77,8 @@
     "lodash": "^4.17.15",
     "nock": "^13.0.5",
     "prettier": "^2.2.0",
-    "regenerator-runtime": "^0.13.7"
+    "regenerator-runtime": "^0.13.7",
+    "supertest": "^6.0.1"
   },
   "jest": {
     "collectCoverage": true,
@@ -89,13 +90,8 @@
     "coverageReporters": [
       "cobertura"
     ],
-    "moduleDirectories": [
-      "node_modules",
-      "<rootDir>"
-    ],
     "testMatch": [
-      "*/**/test/acceptance/**/*.test.js",
-      "*/**/test/unit/**/*.test.js"
+      "**/test/**/*.test.js"
     ]
   },
   "husky": {
@@ -131,9 +127,7 @@
       "no-underscore-dangle": "off",
       "no-use-before-define": [
         "error",
-        {
-          "functions": false
-        }
+        "nofunc"
       ]
     },
     "overrides": [
