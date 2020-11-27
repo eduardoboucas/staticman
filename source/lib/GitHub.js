@@ -1,17 +1,16 @@
-'use strict'
+import { App } from '@octokit/app'
+import GithubApi from '@octokit/rest'
+import { request } from '@octokit/request'
 
-const config = require('../config')
-const errorHandler = require('./ErrorHandler')
-const GithubApi = require('@octokit/rest')
-const { App } = require('@octokit/app')
-const { request } = require('@octokit/request')
-const GitService = require('./GitService')
-const Review = require('./models/Review')
-const User = require('./models/User')
+import config from '../config'
+import errorHandler from './ErrorHandler'
+import GitService from './GitService'
+import Review from './models/Review'
+import User from './models/User'
 
-const normalizeResponse = ({data}) => data
+const normalizeResponse = ({ data }) => data
 
-class GitHub extends GitService {
+export default class GitHub extends GitService {
   constructor (options = {}) {
     super(options.username, options.repository, options.branch)
 
@@ -56,7 +55,7 @@ class GitHub extends GitService {
 
     const jwt = app.getSignedJsonWebToken()
 
-    const {data} = await request('GET /repos/:owner/:repo/installation', {
+    const { data } = await request('GET /repos/:owner/:repo/installation', {
       owner: username,
       repo: repository,
       headers: {
@@ -67,7 +66,7 @@ class GitHub extends GitService {
 
     const installationId = data.id
 
-    let token = await app.getInstallationAccessToken({installationId})
+    const token = await app.getInstallationAccessToken({ installationId })
 
     return token
   }
@@ -80,7 +79,7 @@ class GitHub extends GitService {
       ref: branch
     })
       .then(normalizeResponse)
-      .catch(err => Promise.reject(errorHandler('GITHUB_READING_FILE', {err})))
+      .catch(err => Promise.reject(errorHandler('GITHUB_READING_FILE', { err })))
   }
 
   _commitFile (filePath, content, commitMessage, branch) {
@@ -109,7 +108,7 @@ class GitHub extends GitService {
               parsedError.message &&
               parsedError.message.includes('"sha" wasn\'t supplied')
             ) {
-              return Promise.reject(errorHandler('GITHUB_FILE_ALREADY_EXISTS', {err}))
+              return Promise.reject(errorHandler('GITHUB_FILE_ALREADY_EXISTS', { err }))
             }
           }
         } catch (err) {
@@ -166,7 +165,7 @@ class GitHub extends GitService {
       pull_number: reviewId
     })
       .then(normalizeResponse)
-      .then(({base, body, head, merged, state, title}) =>
+      .then(({ base, body, head, merged, state, title }) =>
         new Review(
           title,
           body,
@@ -181,23 +180,21 @@ class GitHub extends GitService {
     try {
       return await super.readFile(filePath, getFullResponse)
     } catch (err) {
-      throw errorHandler('GITHUB_READING_FILE', {err})
+      throw errorHandler('GITHUB_READING_FILE', { err })
     }
   }
 
   writeFileAndSendReview (filePath, data, branch, commitTitle, reviewBody) {
     return super.writeFileAndSendReview(filePath, data, branch, commitTitle, reviewBody)
-      .catch(err => Promise.reject(errorHandler('GITHUB_CREATING_PR', {err})))
+      .catch(err => Promise.reject(errorHandler('GITHUB_CREATING_PR', { err })))
   }
 
   getCurrentUser () {
     return this.api.users.getAuthenticated({})
       .then(normalizeResponse)
-      .then(({login, email, avatar_url, name, bio, company, blog}) =>
-        new User('github', login, email, name, avatar_url, bio, blog, company)
+      .then(({ login, email, avatar_url: avatarUrl, name, bio, company, blog }) =>
+        new User('github', login, email, name, avatarUrl, bio, blog, company)
       )
-      .catch(err => Promise.reject(errorHandler('GITHUB_GET_USER', {err})))
+      .catch(err => Promise.reject(errorHandler('GITHUB_GET_USER', { err })))
   }
 }
-
-module.exports = GitHub

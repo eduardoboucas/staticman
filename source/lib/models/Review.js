@@ -1,8 +1,6 @@
-'use strict'
+import { assertString } from '../TypeUtils'
 
-const {assertString} = require('../TypeUtils')
-
-class Review {
+export default class Review {
   /**
    * @param {string} title
    * @param {string} body
@@ -24,5 +22,3 @@ class Review {
     this.targetBranch = targetBranch
   }
 }
-
-module.exports = Review

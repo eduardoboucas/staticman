@@ -1,9 +1,6 @@
-'use strict'
+import * as RSA from '../lib/RSA'
 
-const path = require('path')
-const RSA = require(path.join(__dirname, '/../lib/RSA'))
-
-module.exports = (req, res) => {
+export default (req, res) => {
   const encryptedText = RSA.encrypt(req.params.text)
 
   if (!encryptedText) {

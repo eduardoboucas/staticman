@@ -5,13 +5,17 @@
   "main": "index.js",
   "scripts": {
     "prestart": "if [ ! -d node_modules ]; then npm install; fi",
-    "start": "node index.js",
+    "clean": "rm -rf build && mkdir build",
+    "build:babel": "babel source -d ./build",
+    "build": "npm run clean && npm run build:babel",
+    "start": "npm run build && node build/index.js",
+    "start:dev": "nodemon --exec babel-node -- source/index.js",
     "test": "standard && jest",
     "test-dev": "TEST_DEV=true jest --watch",
-    "debug": "nodemon --inspect index.js"
+    "debug": "nodemon --inspect source/index.js"
   },
   "engines": {
-    "node": ">=8.11.3"
+    "node": ">=14.15.1"
   },
   "repository": {
     "type": "git",
@@ -31,7 +35,7 @@
     "akismet": "^1.0.0",
     "body-parser": "^1.17.x",
     "bunyan-slack": "0.0.10",
-    "convict": "^4.3.0",
+    "convict": "^6.0.0",
     "express": "^4.14.0",
     "express-brute": "^0.6.0",
     "express-github-webhook": "^1.0.5",
@@ -54,19 +58,24 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "@babel/cli": "^7.12.7",
+    "@babel/core": "^7.12.7",
+    "@babel/node": "^7.12.6",
+    "@babel/preset-env": "^7.12.7",
     "front-matter": "^2.1.2",
     "istanbul-cobertura-badger": "^1.3.0",
-    "jest": "^23.6.0",
+    "jest": "^26.6.3",
     "lodash": "^4.17.15",
     "nock": "^11.7.0",
-    "standard": "^10.0.2"
+    "regenerator-runtime": "^0.13.7",
+    "standard": "^16.0.3"
   },
   "jest": {
     "collectCoverage": true,
     "collectCoverageFrom": [
-      "controllers/**/*.js",
-      "lib/**/*.js",
-      "*.js"
+      "source/controllers/**/*.js",
+      "source/lib/**/*.js",
+      "source/*.js"
     ],
     "coverageReporters": [
       "cobertura"

@@ -1,8 +1,6 @@
-'use strict'
+import { assertString } from '../TypeUtils'
 
-const {assertString} = require('../TypeUtils')
-
-class User {
+export default class User {
   /**
    * @param {string} type
    * @param {string} username
@@ -33,5 +31,3 @@ class User {
     this.organisation = organisation
   }
 }
-
-module.exports = User

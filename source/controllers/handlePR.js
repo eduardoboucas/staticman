@@ -1,10 +1,8 @@
-'use strict'
+import config from '../config'
+import GitHub from '../lib/GitHub'
+import Staticman from '../lib/Staticman'
 
-const config = require('../config')
-const GitHub = require('../lib/GitHub')
-const Staticman = require('../lib/Staticman')
-
-module.exports = async (repo, data) => {
+export default async (repo, data) => {
   const ua = config.get('analytics.uaTrackingId')
     ? require('universal-analytics')(config.get('analytics.uaTrackingId'))
     : null
@@ -20,7 +18,7 @@ module.exports = async (repo, data) => {
   })
 
   try {
-    let review = await github.getReview(data.number)
+    const review = await github.getReview(data.number)
     if (review.sourceBranch.indexOf('staticman_')) {
       return null
     }

@@ -1,13 +1,20 @@
-const bodyParser = require('body-parser')
-const config = require('./config')
-const express = require('express')
-const expressJSDocSwagger = require('express-jsdoc-swagger')
-const ExpressBrute = require('express-brute')
-const GithubWebHook = require('express-github-webhook')
-const objectPath = require('object-path')
-const pkg = require('./package.json')
+import bodyParser from 'body-parser'
+import express from 'express'
+import ExpressBrute from 'express-brute'
+import expressJSDocSwagger from 'express-jsdoc-swagger'
+import GithubWebHook from 'express-github-webhook'
+import objectPath from 'object-path'
 
-class StaticmanAPI {
+import auth from './controllers/auth'
+import config from './config'
+import connect from './controllers/connect'
+import encrypt from './controllers/encrypt'
+import handlePR from './controllers/handlePR'
+import home from './controllers/home'
+import process from './controllers/process'
+import pkg from '../package.json'
+
+export default class StaticmanAPI {
   constructor () {
     const swaggerOptions = {
       info: {
@@ -23,12 +30,12 @@ class StaticmanAPI {
     }
 
     this.controllers = {
-      connect: require('./controllers/connect'),
-      encrypt: require('./controllers/encrypt'),
-      auth: require('./controllers/auth'),
-      handlePR: require('./controllers/handlePR'),
-      home: require('./controllers/home'),
-      process: require('./controllers/process')
+      connect,
+      encrypt,
+      auth,
+      handlePR,
+      home,
+      process
     }
 
     this.server = express()
@@ -244,7 +251,7 @@ class StaticmanAPI {
 
   requireParams (params) {
     return function (req, res, next) {
-      let missingParams = []
+      const missingParams = []
 
       params.forEach(param => {
         if (
@@ -279,5 +286,3 @@ class StaticmanAPI {
     this.instance.close()
   }
 }
-
-module.exports = StaticmanAPI

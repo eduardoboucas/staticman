@@ -1,11 +1,9 @@
-'use strict'
+import * as gitFactory from '../lib/GitServiceFactory'
+import * as oauth from '../lib/OAuth'
+import * as RSA from '../lib/RSA'
+import Staticman from '../lib/Staticman'
 
-const gitFactory = require('../lib/GitServiceFactory')
-const oauth = require('../lib/OAuth')
-const RSA = require('../lib/RSA')
-const Staticman = require('../lib/Staticman')
-
-module.exports = async (req, res) => {
+export default async (req, res) => {
   const staticman = await new Staticman(req.params)
   staticman.setConfigPath()
 
@@ -41,7 +39,7 @@ module.exports = async (req, res) => {
 
       // TODO: Simplify this when v2 support is dropped.
       const getUser = req.params.version === '2' && req.params.service === 'github'
-        ? git.api.users.getAuthenticated({}).then(({data}) => data)
+        ? git.api.users.getAuthenticated({}).then(({ data }) => data)
         : git.getCurrentUser()
 
       return getUser

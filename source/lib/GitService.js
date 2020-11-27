@@ -1,9 +1,8 @@
-'use strict'
+import yaml from 'js-yaml'
 
-const errorHandler = require('./ErrorHandler')
-const yaml = require('js-yaml')
+import errorHandler from './ErrorHandler'
 
-class GitService {
+export default class GitService {
   constructor (username, repository, branch) {
     this.username = username
     this.repository = repository
@@ -45,13 +44,13 @@ class GitService {
   async readFile (path, getFullResponse) {
     const extension = path.split('.').pop()
 
-    let res = await this._pullFile(path, this.branch)
+    const res = await this._pullFile(path, this.branch)
 
     let content
     try {
       content = Buffer.from(res.content, 'base64').toString()
     } catch (err) {
-      throw errorHandler('GITHUB_READING_FILE', {err})
+      throw errorHandler('GITHUB_READING_FILE', { err })
     }
 
     try {
@@ -79,7 +78,7 @@ class GitService {
 
       return content
     } catch (err) {
-      let errorData = {err}
+      const errorData = { err }
 
       if (err.message) {
         errorData.data = err.message
@@ -100,5 +99,3 @@ class GitService {
       .then(() => this.createReview(commitTitle, branch, reviewBody))
   }
 }
-
-module.exports = GitService

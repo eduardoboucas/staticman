@@ -1,5 +1,6 @@
+import StaticmanAPI from './server'
+
 try {
-  const StaticmanAPI = require('./server')
   const api = new StaticmanAPI()
 
   api.start(port => {

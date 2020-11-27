@@ -1,13 +1,13 @@
-'use strict'
+import config from '../config'
+import errorHandler from './ErrorHandler'
+import GitService from './GitService'
+import Review from './models/Review'
+import User from './models/User'
 
-const config = require('../config')
-const errorHandler = require('./ErrorHandler')
+// TODO: Replace this. Import is ugly and dependency is deprecated.
 const GitLabApi = require('gitlab/dist/es5').default
-const GitService = require('./GitService')
-const Review = require('./models/Review')
-const User = require('./models/User')
 
-class GitLab extends GitService {
+export default class GitLab extends GitService {
   constructor (options = {}) {
     super(options.username, options.repository, options.branch)
 
@@ -38,7 +38,7 @@ class GitLab extends GitService {
 
   _pullFile (path, branch) {
     return this.api.RepositoryFiles.show(this.repositoryId, path, branch)
-      .catch(err => Promise.reject(errorHandler('GITLAB_READING_FILE', {err})))
+      .catch(err => Promise.reject(errorHandler('GITLAB_READING_FILE', { err })))
   }
 
   _commitFile (filePath, content, commitMessage, branch) {
@@ -72,49 +72,47 @@ class GitLab extends GitService {
   getReview (reviewId) {
     return this.api.MergeRequests.show(this.repositoryId, reviewId)
       .then(({
-          description: body,
-          source_branch: sourceBranch,
-          target_branch: targetBranch,
-          state,
-          title
-        }) => new Review(
-          title,
-          body,
-          state,
-          sourceBranch,
-          targetBranch
-        )
+        description: body,
+        source_branch: sourceBranch,
+        target_branch: targetBranch,
+        state,
+        title
+      }) => new Review(
+        title,
+        body,
+        state,
+        sourceBranch,
+        targetBranch
+      )
       )
   }
 
   readFile (filePath, getFullResponse) {
     return super.readFile(filePath, getFullResponse)
-      .catch(err => Promise.reject(errorHandler('GITLAB_READING_FILE', {err})))
+      .catch(err => Promise.reject(errorHandler('GITLAB_READING_FILE', { err })))
   }
 
   writeFile (filePath, data, targetBranch, commitTitle) {
     return super.writeFile(filePath, data, targetBranch, commitTitle)
       .catch(err => {
         if (err.error && err.error.message === 'A file with this name already exists') {
-          return Promise.reject(errorHandler('GITLAB_FILE_ALREADY_EXISTS', {err}))
+          return Promise.reject(errorHandler('GITLAB_FILE_ALREADY_EXISTS', { err }))
         }
 
-        return Promise.reject(errorHandler('GITLAB_WRITING_FILE', {err}))
+        return Promise.reject(errorHandler('GITLAB_WRITING_FILE', { err }))
       })
   }
 
   writeFileAndSendReview (filePath, data, branch, commitTitle, reviewBody) {
     return super.writeFileAndSendReview(filePath, data, branch, commitTitle, reviewBody)
-      .catch(err => Promise.reject(errorHandler('GITLAB_CREATING_PR', {err})))
+      .catch(err => Promise.reject(errorHandler('GITLAB_CREATING_PR', { err })))
   }
 
   getCurrentUser () {
     return this.api.Users.current()
-      .then(({username, email, name, avatar_url, bio, website_url, organisation}) =>
-        new User('gitlab', username, email, name, avatar_url, bio, website_url, organisation)
+      .then(({ username, email, name, avatar_url: avatarUrl, bio, website_url: websiteUrl, organisation }) =>
+        new User('gitlab', username, email, name, avatarUrl, bio, websiteUrl, organisation)
       )
-      .catch(err => Promise.reject(errorHandler('GITLAB_GET_USER', {err})))
+      .catch(err => Promise.reject(errorHandler('GITLAB_GET_USER', { err })))
   }
 }
-
-module.exports = GitLab

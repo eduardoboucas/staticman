@@ -1,21 +1,19 @@
-'use strict'
+import convict from 'convict'
+import path from 'path'
 
-const convict = require('convict')
-const path = require('path')
-
-const schema = {
+export const schema = {
   akismet: {
     site: {
       doc: 'URL of an Akismet account used for spam checking.',
       docExample: 'http://yourdomain.com',
       format: String,
-      default: null,
+      default: '',
       env: 'AKISMET_SITE'
     },
     apiKey: {
       doc: 'API key to be used with Akismet.',
       format: String,
-      default: null,
+      default: '',
       env: 'AKISMET_API_KEY'
     }
   },
@@ -24,7 +22,7 @@ const schema = {
       doc: 'Universal Analytics account ID.',
       docExample: 'uaTrackingId: "UA-XXXX-XX"',
       format: String,
-      default: null,
+      default: '',
       env: 'UA_TRACKING_ID'
     }
   },
@@ -32,7 +30,7 @@ const schema = {
     apiKey: {
       doc: 'Mailgun API key to be used for email notifications. Will be overridden by a `notifications.apiKey` parameter in the site config, if one is set.',
       format: String,
-      default: null,
+      default: '',
       env: 'EMAIL_API_KEY'
     },
     domain: {
@@ -69,7 +67,7 @@ const schema = {
   githubAppID: {
     doc: 'ID of the GitHub App.',
     format: String,
-    default: null,
+    default: '',
     env: 'GITHUB_APP_ID'
   },
   githubBaseUrl: {
@@ -81,13 +79,13 @@ const schema = {
   githubPrivateKey: {
     doc: 'Private key for the GitHub App.',
     format: String,
-    default: null,
+    default: '',
     env: 'GITHUB_PRIVATE_KEY'
   },
   githubToken: {
     doc: 'Access token to the GitHub account (legacy)',
     format: String,
-    default: null,
+    default: '',
     env: 'GITHUB_TOKEN'
   },
   gitlabAccessTokenUri: {
@@ -105,7 +103,7 @@ const schema = {
   gitlabToken: {
     doc: 'Access token to the GitLab account being used to push files with.',
     format: String,
-    default: null,
+    default: '',
     env: 'GITLAB_TOKEN'
   },
   port: {
@@ -118,14 +116,14 @@ const schema = {
     doc: 'RSA private key to encrypt sensitive configuration parameters with.',
     docExample: 'rsaPrivateKey: "-----BEGIN RSA PRIVATE KEY-----\\nkey\\n-----END RSA PRIVATE KEY-----"',
     format: String,
-    default: null,
+    default: '',
     env: 'RSA_PRIVATE_KEY'
   },
   logging: {
     slackWebhook: {
       doc: 'Slack webhook URL to pipe log output to',
       format: String,
-      default: null,
+      default: '',
       env: 'SLACK_WEBHOOK'
     }
   }
@@ -136,15 +134,12 @@ let config
 try {
   config = convict(schema)
 
-  const fileName = 'config.' + config.get('env') + '.json'
+  const fileName = config.get('env') + '.json'
 
-  config.loadFile(path.join(__dirname, fileName))
+  config.loadFile(path.join('config', fileName))
   config.validate()
-
-  console.log('(*) Local config file loaded')
 } catch (e) {
-
+  console.log(e)
 }
 
-module.exports = config
-module.exports.schema = schema
+export default config

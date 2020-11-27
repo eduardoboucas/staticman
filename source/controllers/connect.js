@@ -1,10 +1,7 @@
-'use strict'
+import config from '../config'
+import GitHub from '../lib/GitHub'
 
-const path = require('path')
-const config = require(path.join(__dirname, '/../config'))
-const GitHub = require(path.join(__dirname, '/../lib/GitHub'))
-
-module.exports = async (req, res) => {
+export default async (req, res) => {
   const ua = config.get('analytics.uaTrackingId')
     ? require('universal-analytics')(config.get('analytics.uaTrackingId'))
     : null
@@ -32,6 +29,7 @@ module.exports = async (req, res) => {
 
         return true
       }
+      return false
     })
 
     if (!invitation) {
@@ -46,7 +44,7 @@ module.exports = async (req, res) => {
       if (ua) {
         ua.event('Repositories', 'Connect').send()
       }
-    }).catch(err => { // eslint-disable-line handle-callback-err
+    }).catch(() => { // eslint-disable-line handle-callback-err
       res.status(500).send('Error')
 
       if (ua) {

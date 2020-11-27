@@ -1,4 +1,4 @@
-const helpers = require('./../../helpers')
+import * as helpers from '../../helpers'
 
 let req, res
 
@@ -35,7 +35,7 @@ describe('Connect controller', () => {
       })
     )
 
-    const connect = require('./../../../controllers/connect')
+    const connect = require('../../../source/controllers/connect').default
 
     return connect(req, res).then(response => {
       expect(mockGetRepoInvites).toHaveBeenCalledTimes(1)
@@ -68,7 +68,7 @@ describe('Connect controller', () => {
       })
     )
 
-    const connect = require('./../../../controllers/connect')
+    const connect = require('../../../source/controllers/connect').default
 
     return connect(req, res).then(response => {
       expect(mockGetRepoInvites).toHaveBeenCalledTimes(1)
@@ -96,7 +96,7 @@ describe('Connect controller', () => {
       })
     )
 
-    const connect = require('./../../../controllers/connect')
+    const connect = require('../../../source/controllers/connect').default
 
     return connect(req, res).then(response => {
       expect(mockGetRepoInvites).toHaveBeenCalledTimes(1)

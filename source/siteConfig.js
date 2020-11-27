@@ -1,8 +1,6 @@
-'use strict'
+import convict from 'convict'
 
-const convict = require('convict')
-
-const schema = {
+export const schema = {
   allowedFields: {
     doc: 'An array with the names of the allowed fields. If any of the fields sent is not part of this list, the entry will be discarded and an error will be thrown.',
     docExample: 'allowedFields: ["name", "email", "message"]',
@@ -89,12 +87,12 @@ const schema = {
     clientId: {
       doc: 'The client ID to the GitHub Application used for GitHub OAuth.',
       format: 'EncryptedString',
-      default: null
+      default: ''
     },
     clientSecret: {
       doc: 'The client secret to the GitHub Application used for GitHub OAuth.',
       format: 'EncryptedString',
-      default: null
+      default: ''
     },
     redirectUri: {
       doc: 'The URL to redirect to after authenticating with GitHub.',
@@ -111,12 +109,12 @@ const schema = {
     clientId: {
       doc: 'The client ID to the GitLab Application used for GitLab OAuth.',
       format: 'EncryptedString',
-      default: null
+      default: ''
     },
     clientSecret: {
       doc: 'The client secret to the GitLab Application used for GitLab OAuth.',
       format: 'EncryptedString',
-      default: null
+      default: ''
     },
     redirectUri: {
       doc: 'The URL to redirect to after authenticating with GitLab.',
@@ -144,12 +142,12 @@ const schema = {
     apiKey: {
       doc: 'Mailgun API key',
       format: 'EncryptedString',
-      default: null
+      default: ''
     },
     domain: {
       doc: 'Mailgun domain',
       format: 'EncryptedString',
-      default: null
+      default: ''
     }
   },
   path: {
@@ -192,7 +190,7 @@ const schema = {
   }
 }
 
-module.exports = (data, rsa) => {
+export default (data, rsa) => {
   convict.addFormat({
     name: 'EncryptedString',
     validate: val => true,
@@ -203,14 +201,8 @@ module.exports = (data, rsa) => {
 
   const config = convict(schema)
 
-  try {
-    config.load(data)
-    config.validate()
+  config.load(data)
+  config.validate()
 
-    return config
-  } catch (e) {
-    throw e
-  }
+  return config
 }
-
-module.exports.schema = schema

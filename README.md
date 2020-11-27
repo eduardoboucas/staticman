@@ -35,7 +35,7 @@ NOTE: The below steps are not required if deploying to Heroku. To deploy to Hero
 - Create a development config file from the sample file.
 
   ```
-  cp config.sample.json config.development.json
+  cp config/sample.json config/development.json
   ```
 
 - Edit the newly-created config file with your GitHub and/or GitLab access token, SSH private key and the port to run the server. Click [here](https://staticman.net/docs/api) for the list of available configuration parameters.

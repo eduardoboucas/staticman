@@ -1,11 +1,13 @@
-const config = require('../../config')
+import nock from 'nock'
+import querystring from 'querystring'
+
+import config from '../../source/config'
+import * as helpers from '../helpers'
+import * as sampleData from '../helpers/sampleData'
+import StaticmanAPI from '../../source/server'
+
 const githubToken = config.get('githubToken')
-const helpers = require('../helpers')
-const nock = require('nock')
-const querystring = require('querystring')
 const request = helpers.wrappedRequest
-const sampleData = require('../helpers/sampleData')
-const StaticmanAPI = require('../../server')
 
 const btoa = contents => Buffer.from(contents).toString('base64')
 
@@ -98,9 +100,10 @@ describe('Connect endpoint', () => {
 
 describe('Entry endpoint', () => {
   test('outputs a RECAPTCHA_CONFIG_MISMATCH error if reCaptcha options do not match (wrong site key)', async () => {
-    const data = Object.assign({}, helpers.getParameters(), {
+    const data = {
+      ...helpers.getParameters(),
       path: 'staticman.yml'
-    })
+    }
     const reCaptchaSecret = helpers.encrypt('Some little secret')
     const mockConfig = sampleData.config1
       .replace('@reCaptchaSecret@', reCaptchaSecret)
@@ -158,9 +161,10 @@ describe('Entry endpoint', () => {
   })
 
   test('outputs a RECAPTCHA_CONFIG_MISMATCH error if reCaptcha options do not match (wrong secret)', async () => {
-    const data = Object.assign({}, helpers.getParameters(), {
+    const data = {
+      ...helpers.getParameters(),
       path: 'staticman.yml'
-    })
+    }
     const reCaptchaSecret = 'Some little secret'
     const mockConfig = sampleData.config1
       .replace('@reCaptchaSecret@', helpers.encrypt(reCaptchaSecret))
@@ -218,9 +222,10 @@ describe('Entry endpoint', () => {
   })
 
   test('outputs a PARSING_ERROR error if the site config is malformed', async () => {
-    const data = Object.assign({}, helpers.getParameters(), {
+    const data = {
+      ...helpers.getParameters(),
       path: 'staticman.yml'
-    })
+    }
 
     const mockGetConfig = nock('https://api.github.com', {
       reqheaders: {
