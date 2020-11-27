@@ -6,10 +6,10 @@
   "scripts": {
     "prestart": "if [ ! -d node_modules ]; then npm install; fi",
     "clean": "rm -rf build && mkdir build",
-    "build:babel": "babel source -d ./build",
-    "build": "npm run clean && npm run build:babel",
+    "build-babel": "babel source -d ./build",
+    "build": "npm run clean && npm run build-babel",
     "start": "npm run build && node build/index.js",
-    "start:dev": "nodemon --exec babel-node -- source/index.js",
+    "start-dev": "nodemon --exec babel-node -- source/index.js",
     "pretest": "eslint .",
     "test": "jest",
     "test-dev": "jest --watch --silent",

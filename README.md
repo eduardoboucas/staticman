@@ -75,6 +75,8 @@ Would you like to contribute to Staticman? That's great! Here's how:
 
 1. Read the [contributing guidelines](CONTRIBUTING.md)
 1. Pull the repository and start hacking
+1. Run the dev server with `npm start-dev`
+1. Generated API docs are accessible at the `/api-docs` endpoint
 1. Make sure tests are passing by running `npm test`
 1. Send a pull request and celebrate
 
