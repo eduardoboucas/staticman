@@ -64,6 +64,7 @@ describe('Entry endpoint', () => {
         },
       })
       .set('Content-Type', 'application/x-www-form-urlencoded')
+      .expect(500)
       .expect('Content-Type', 'application/json; charset=utf-8')
       .expect((response) => {
         expect(JSON.parse(response.text)).toMatchObject({
@@ -125,7 +126,8 @@ describe('Entry endpoint', () => {
           },
         },
       })
-      .expect('Content-Type', 'application/json; charset=utf-8')
+      .set('Content-Type', 'application/x-www-form-urlencoded')
+      .expect(500)
       .expect('Content-Type', 'application/json; charset=utf-8')
       .expect((response) => {
         expect(JSON.parse(response.text)).toMatchObject({
@@ -177,6 +179,7 @@ describe('Entry endpoint', () => {
         },
       })
       .set('Content-Type', 'application/x-www-form-urlencoded')
+      .expect(500)
       .expect('Content-Type', 'application/json; charset=utf-8')
       .expect((response) => {
         const error = JSON.parse(response.text);
