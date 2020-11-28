@@ -11,7 +11,7 @@
     "start": "npm run build && node build/index.js",
     "start-dev": "nodemon --exec babel-node -- source/index.js",
     "pretest": "eslint .",
-    "test": "jest",
+    "test": "jest --silent",
     "test-dev": "jest --watch --silent",
     "debug": "nodemon --inspect source/index.js"
   },

@@ -50,6 +50,7 @@ export default class StaticmanAPI {
 
     this.initialiseWebhookHandler();
     this.initialiseCORS();
+
     this.initialiseBruteforceProtection();
     this.initialiseRoutes();
 
@@ -58,8 +59,13 @@ export default class StaticmanAPI {
 
   initialiseBruteforceProtection() {
     const store = new ExpressBrute.MemoryStore();
-
     this.bruteforce = new ExpressBrute(store);
+
+    if (config.get('env') === 'test') {
+      this.bruteforce = {
+        prevent: (req, res, next) => next(),
+      };
+    }
   }
 
   initialiseCORS() {

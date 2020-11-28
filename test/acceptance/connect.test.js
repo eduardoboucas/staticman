@@ -36,13 +36,15 @@ const _mockAcceptGitHubCollaboratorInvitation = () =>
     .patch('/user/repository_invitations/123')
     .reply(204);
 
-describe('Connect endpoint', () => {
+const supportedApiVersions = [['v1'], ['v2'], ['v3']];
+
+describe.each(supportedApiVersions)('API %s - Connect endpoint', (version) => {
   it('accepts the collaboration invitation and replies with "Staticman connected!"', async () => {
     const reqListInvititations = _mockFetchGitHubCollaboratorInvitations();
     const reqAcceptInvitation = _mockAcceptGitHubCollaboratorInvitation();
 
     await request(staticman)
-      .get('/v2/connect/johndoe/foobar')
+      .get(`/${version}/connect/johndoe/foobar`)
       .expect(200)
       .expect('Staticman connected!');
     expect(reqListInvititations.isDone()).toBe(true);
@@ -54,7 +56,7 @@ describe('Connect endpoint', () => {
     const reqAcceptInvitation = _mockAcceptGitHubCollaboratorInvitation();
 
     await request(staticman)
-      .get('/v2/connect/johndoe/anotherrepo')
+      .get(`/${version}/connect/johndoe/anotherrepo`)
       .expect(404)
       .expect('Invitation not found');
     expect(reqListInvititations.isDone()).toBe(true);
