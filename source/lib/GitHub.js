@@ -1,5 +1,5 @@
 import { App } from '@octokit/app';
-import GithubApi from '@octokit/rest';
+import { Octokit as GithubApi } from '@octokit/rest';
 import { request } from '@octokit/request';
 
 import config from '../config';
@@ -30,7 +30,7 @@ export default class GitHub extends GitService {
         throw new Error('Require an `oauthToken` or `token` option');
       }
 
-      this.api = GithubApi({
+      this.api = new GithubApi({
         auth: `token ${authToken}`,
         userAgent: 'Staticman',
         baseUrl: config.get('githubBaseUrl'),
@@ -70,7 +70,7 @@ export default class GitHub extends GitService {
 
   _pullFile(filePath, branch) {
     return this.api.repos
-      .getContents({
+      .getContent({
         owner: this.username,
         repo: this.repository,
         path: filePath,
@@ -82,12 +82,20 @@ export default class GitHub extends GitService {
 
   _commitFile(filePath, content, commitMessage, branch) {
     return this.api.repos
-      .createOrUpdateFile({
+      .createOrUpdateFileContents({
         owner: this.username,
         repo: this.repository,
         path: filePath,
         message: commitMessage,
         content,
+        committer: {
+          name: 'Staticman',
+          email: 'noreply@staticman.net',
+        },
+        author: {
+          name: 'Staticman',
+          email: 'noreply@staticman.net',
+        },
         branch,
       })
       .then(normalizeResponse);
@@ -143,7 +151,7 @@ export default class GitHub extends GitService {
   }
 
   createReview(reviewTitle, branch, reviewBody) {
-    return this.api.pullRequests
+    return this.api.pulls
       .create({
         owner: this.username,
         repo: this.repository,

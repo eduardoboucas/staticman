@@ -11,7 +11,7 @@
     "start": "npm run build && node build/index.js",
     "start-dev": "nodemon --exec babel-node -- source/index.js",
     "pretest": "eslint .",
-    "test": "jest --silent",
+    "test": "jest",
     "test-dev": "jest --watch --silent",
     "debug": "nodemon --inspect source/index.js"
   },
@@ -32,7 +32,7 @@
     "@dadi/logger": "^1.4.1",
     "@octokit/app": "^4.1.0",
     "@octokit/request": "^5.3.1",
-    "@octokit/rest": "^16.35.0",
+    "@octokit/rest": "^18.0.9",
     "akismet": "^1.0.0",
     "body-parser": "^1.17.x",
     "bunyan-slack": "0.0.10",

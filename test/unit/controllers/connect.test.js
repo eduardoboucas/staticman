@@ -1,4 +1,8 @@
+// eslint-disable-next-line no-unused-vars
+import { Octokit } from '@octokit/rest';
 import * as helpers from '../../helpers';
+
+jest.mock('@octokit/rest');
 
 let req;
 let res;
@@ -7,8 +11,8 @@ beforeEach(() => {
   req = helpers.getMockRequest();
   res = helpers.getMockResponse();
 
-  jest.resetModules();
-  jest.unmock('@octokit/rest');
+  // jest.resetModules();
+  // jest.unmock('@octokit/rest');
 });
 
 describe('Connect controller', () => {
@@ -28,11 +32,10 @@ describe('Connect controller', () => {
       })
     );
 
-    jest.mock('@octokit/rest', () => (_) => ({
-      authenticate: jest.fn(),
+    Octokit.mockImplementation(() => ({
       repos: {
-        acceptInvitation: mockAcceptRepoInvite,
         listInvitationsForAuthenticatedUser: mockGetRepoInvites,
+        acceptInvitation: mockAcceptRepoInvite,
       },
     }));
 
@@ -61,11 +64,10 @@ describe('Connect controller', () => {
       })
     );
 
-    jest.mock('@octokit/rest', () => (_) => ({
-      authenticate: jest.fn(),
+    Octokit.mockImplementation(() => ({
       repos: {
-        acceptInvitation: mockAcceptRepoInvite,
         listInvitationsForAuthenticatedUser: mockGetRepoInvites,
+        acceptInvitation: mockAcceptRepoInvite,
       },
     }));
 
@@ -89,11 +91,10 @@ describe('Connect controller', () => {
       })
     );
 
-    jest.mock('@octokit/rest', () => (_) => ({
-      authenticate: jest.fn(),
+    Octokit.mockImplementation(() => ({
       repos: {
-        acceptInvitation: mockAcceptRepoInvite,
         listInvitationsForAuthenticatedUser: mockGetRepoInvites,
+        acceptInvitation: mockAcceptRepoInvite,
       },
     }));
 

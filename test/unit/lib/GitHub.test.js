@@ -311,7 +311,7 @@ describe('GitHub interface', () => {
         },
       })
         .put('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.txt')
-        .replyWithError('An error');
+        .replyWithError({ message: 'Error writing file' });
 
       const githubInstance = await new GitHub(req.params);
 
