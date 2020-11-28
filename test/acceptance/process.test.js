@@ -78,6 +78,8 @@ describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
 
     const configMock = _mockFetchConfigFile(mockConfig, version);
 
+    expect.assertions(2);
+
     await request(staticman)
       .post(_constructEntryEndpoint(version))
       .send({
@@ -114,6 +116,8 @@ describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
 
     const configMock = _mockFetchConfigFile(mockConfig, version);
 
+    expect.assertions(2);
+
     await request(staticman)
       .post(_constructEntryEndpoint(version))
       .send({
@@ -143,6 +147,8 @@ describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
 
   it('outputs a PARSING_ERROR error if the site config is malformed', async () => {
     const configMock = _mockFetchConfigFile(sampleData.config3, version);
+
+    expect.assertions(3);
 
     await request(staticman)
       .post(_constructEntryEndpoint(version))

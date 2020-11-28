@@ -42,6 +42,8 @@ describe.each(supportedApiVersions)('API %s - Connect endpoint', (version) => {
     const reqListInvititations = _mockFetchGitHubCollaboratorInvitations();
     const reqAcceptInvitation = _mockAcceptGitHubCollaboratorInvitation();
 
+    expect.assertions(2);
+
     await request(staticman)
       .get(`/${version}/connect/johndoe/foobar`)
       .expect(200)
@@ -53,6 +55,8 @@ describe.each(supportedApiVersions)('API %s - Connect endpoint', (version) => {
   it('returns a 404 and an error message when collaboration invitation is not found', async () => {
     const reqListInvititations = _mockFetchGitHubCollaboratorInvitations();
     const reqAcceptInvitation = _mockAcceptGitHubCollaboratorInvitation();
+
+    expect.assertions(2);
 
     await request(staticman)
       .get(`/${version}/connect/johndoe/anotherrepo`)

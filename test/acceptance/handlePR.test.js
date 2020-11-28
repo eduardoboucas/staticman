@@ -55,6 +55,8 @@ describe.each(supportedApiVersions)('API %s - Webhook endpoint', (version) => {
       },
     };
 
+    expect.assertions(1);
+
     await request(staticman)
       .post(`/${version}/webhook`)
       .set('X-GitHub-Delivery', 'id')
@@ -100,6 +102,8 @@ describe.each(supportedApiVersions)('API %s - Webhook endpoint', (version) => {
         state: 'merged',
       });
 
+    expect.assertions(1);
+
     await request(staticman)
       .post(`/${version}/webhook`)
       .set('X-GitHub-Delivery', 'id')
@@ -144,6 +148,8 @@ describe.each(supportedApiVersions)('API %s - Webhook endpoint', (version) => {
         sourceBranch: 'staticman_somebranch',
         state: 'open',
       });
+
+    expect.assertions(1);
 
     await request(staticman)
       .post(`/${version}/webhook`)

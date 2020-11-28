@@ -58,6 +58,8 @@ describe('HandlePR controller', () => {
 
     const handlePR = require('../../../source/controllers/handlePR').default;
 
+    expect.assertions(1);
+
     await handlePR(req.params.repository, pr);
     expect(mockGetReview).toHaveBeenCalledTimes(1);
   });
@@ -99,6 +101,8 @@ describe('HandlePR controller', () => {
 
       const handlePR = require('../../../source/controllers/handlePR').default;
 
+      expect.assertions(2);
+
       await handlePR(req.params.repository, pr);
       expect(mockGetReview).toHaveBeenCalledTimes(1);
       expect(mockDeleteBranch).not.toHaveBeenCalled();
@@ -139,6 +143,8 @@ describe('HandlePR controller', () => {
       });
 
       const handlePR = require('../../../source/controllers/handlePR').default;
+
+      expect.assertions(5);
 
       await handlePR(req.params.repository, pr);
       expect(mockGetReview).toHaveBeenCalledTimes(1);

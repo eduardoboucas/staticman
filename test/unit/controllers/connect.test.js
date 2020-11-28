@@ -38,6 +38,8 @@ describe('Connect controller', () => {
       },
     }));
 
+    expect.assertions(3);
+
     await connect(req, res);
     expect(mockGetRepoInvites).toHaveBeenCalledTimes(1);
     expect(mockAcceptRepoInvite).toHaveBeenCalledTimes(1);
@@ -67,6 +69,8 @@ describe('Connect controller', () => {
       },
     }));
 
+    expect.assertions(4);
+
     await connect(req, res);
     expect(mockGetRepoInvites).toHaveBeenCalledTimes(1);
     expect(mockAcceptRepoInvite).not.toHaveBeenCalled();
@@ -90,6 +94,8 @@ describe('Connect controller', () => {
         acceptInvitation: mockAcceptRepoInvite,
       },
     }));
+
+    expect.assertions(4);
 
     await connect(req, res);
     expect(mockGetRepoInvites).toHaveBeenCalledTimes(1);

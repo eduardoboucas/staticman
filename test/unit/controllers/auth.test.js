@@ -57,6 +57,8 @@ describe('Auth controller', () => {
         },
       };
 
+      expect.assertions(3);
+
       await auth(reqWithQuery, res);
       expect(res.send).toHaveBeenCalledTimes(1);
       expect(helpers.decrypt(res.send.mock.calls[0][0].accessToken)).toBe(mockAccessToken);
@@ -105,6 +107,8 @@ describe('Auth controller', () => {
         },
       };
 
+      expect.assertions(3);
+
       await auth(reqWithQuery, res);
       expect(res.send).toHaveBeenCalledTimes(1);
       expect(helpers.decrypt(res.send.mock.calls[0][0].accessToken)).toBe(mockAccessToken);
@@ -137,6 +141,8 @@ describe('Auth controller', () => {
           code: mockCode,
         },
       };
+
+      expect.assertions(3);
 
       await auth(reqWithQuery, res);
       expect(res.status.mock.calls[0][0]).toBe(401);
@@ -182,6 +188,8 @@ describe('Auth controller', () => {
           code: mockCode,
         },
       };
+
+      expect.assertions(3);
 
       await auth(reqWithQuery, res);
       expect(res.status.mock.calls[0][0]).toBe(401);
