@@ -14,44 +14,52 @@ afterEach(() => {
   nock.cleanAll();
 });
 
-describe('Entry endpoint', () => {
-  test('outputs a RECAPTCHA_CONFIG_MISMATCH error if reCaptcha options do not match (wrong site key)', async () => {
-    const data = {
-      ...helpers.getParameters(),
+const repoData = {
+  ...helpers.getParameters(),
+  path: 'staticman.yml',
+};
+
+const _mockFetchConfigFile = (mockConfig) =>
+  nock('https://api.github.com', {
+    reqheaders: {
+      Authorization: `token ${githubToken}`,
+    },
+  })
+    .get(
+      `/repos/${repoData.username}/${repoData.repository}/contents/${repoData.path}?ref=${repoData.branch}`
+    )
+    .reply(200, {
+      type: 'file',
+      encoding: 'base64',
+      size: 5362,
+      name: 'staticman.yml',
       path: 'staticman.yml',
-    };
+      content: btoa(mockConfig),
+      sha: '3d21ec53a331a6f037a91c368710b99387d012c1',
+      url: 'https://api.github.com/repos/octokit/octokit.rb/contents/staticman.yml',
+      git_url:
+        'https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21ec53a331a6f037a91c368710b99387d012c1',
+      html_url: 'https://github.com/octokit/octokit.rb/blob/master/staticman.yml',
+      download_url: 'https://raw.githubusercontent.com/octokit/octokit.rb/master/staticman.yml',
+      _links: {
+        git:
+          'https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21ec53a331a6f037a91c368710b99387d012c1',
+        self: 'https://api.github.com/repos/octokit/octokit.rb/contents/staticman.yml',
+        html: 'https://github.com/octokit/octokit.rb/blob/master/staticman.yml',
+      },
+    });
+
+describe('Entry endpoint', () => {
+  it('returns a RECAPTCHA_CONFIG_MISMATCH error if reCaptcha options contain the wrong site key', async () => {
     const reCaptchaSecret = helpers.encrypt('Some little secret');
     const mockConfig = sampleData.config1.replace('@reCaptchaSecret@', reCaptchaSecret);
 
-    nock('https://api.github.com', {
-      reqheaders: {
-        Authorization: `token ${githubToken}`,
-      },
-    })
-      .get(`/repos/${data.username}/${data.repository}/contents/${data.path}?ref=${data.branch}`)
-      .reply(200, {
-        type: 'file',
-        encoding: 'base64',
-        size: 5362,
-        name: 'staticman.yml',
-        path: 'staticman.yml',
-        content: btoa(mockConfig),
-        sha: '3d21ec53a331a6f037a91c368710b99387d012c1',
-        url: 'https://api.github.com/repos/octokit/octokit.rb/contents/staticman.yml',
-        git_url:
-          'https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21ec53a331a6f037a91c368710b99387d012c1',
-        html_url: 'https://github.com/octokit/octokit.rb/blob/master/staticman.yml',
-        download_url: 'https://raw.githubusercontent.com/octokit/octokit.rb/master/staticman.yml',
-        _links: {
-          git:
-            'https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21ec53a331a6f037a91c368710b99387d012c1',
-          self: 'https://api.github.com/repos/octokit/octokit.rb/contents/staticman.yml',
-          html: 'https://github.com/octokit/octokit.rb/blob/master/staticman.yml',
-        },
-      });
+    const configMock = _mockFetchConfigFile(mockConfig);
 
     await request(staticman)
-      .post(`/v2/entry/${data.username}/${data.repository}/${data.branch}/${data.property}`)
+      .post(
+        `/v2/entry/${repoData.username}/${repoData.repository}/${repoData.branch}/${repoData.property}`
+      )
       .send({
         fields: {
           name: 'Eduardo Boucas',
@@ -73,45 +81,18 @@ describe('Entry endpoint', () => {
           message: 'reCAPTCHA options do not match Staticman config',
         });
       });
+
+    expect(configMock.isDone()).toBe(true);
   });
 
-  test('outputs a RECAPTCHA_CONFIG_MISMATCH error if reCaptcha options do not match (wrong secret)', async () => {
-    const data = {
-      ...helpers.getParameters(),
-      path: 'staticman.yml',
-    };
+  it('returns a RECAPTCHA_CONFIG_MISMATCH error if reCaptcha secret does not match', async () => {
     const reCaptchaSecret = 'Some little secret';
     const mockConfig = sampleData.config1.replace(
       '@reCaptchaSecret@',
       helpers.encrypt(reCaptchaSecret)
     );
 
-    nock('https://api.github.com', {
-      reqHeaders: {
-        Authorization: `token ${githubToken}`,
-      },
-    })
-      .get(`/repos/${data.username}/${data.repository}/contents/${data.path}?ref=${data.branch}`)
-      .reply(200, {
-        type: 'file',
-        encoding: 'base64',
-        size: 5362,
-        name: 'staticman.yml',
-        path: 'staticman.yml',
-        content: btoa(mockConfig),
-        sha: '3d21ec53a331a6f037a91c368710b99387d012c1',
-        url: 'https://api.github.com/repos/octokit/octokit.rb/contents/staticman.yml',
-        git_url:
-          'https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21ec53a331a6f037a91c368710b99387d012c1',
-        html_url: 'https://github.com/octokit/octokit.rb/blob/master/staticman.yml',
-        download_url: 'https://raw.githubusercontent.com/octokit/octokit.rb/master/staticman.yml',
-        _links: {
-          git:
-            'https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21ec53a331a6f037a91c368710b99387d012c1',
-          self: 'https://api.github.com/repos/octokit/octokit.rb/contents/staticman.yml',
-          html: 'https://github.com/octokit/octokit.rb/blob/master/staticman.yml',
-        },
-      });
+    const configMock = _mockFetchConfigFile(mockConfig);
 
     await request(staticman)
       .post('/v2/entry/johndoe/foobar/master/comments')
@@ -136,40 +117,12 @@ describe('Entry endpoint', () => {
           message: 'reCAPTCHA options do not match Staticman config',
         });
       });
+
+    expect(configMock.isDone()).toBe(true);
   });
 
-  test('outputs a PARSING_ERROR error if the site config is malformed', async () => {
-    const data = {
-      ...helpers.getParameters(),
-      path: 'staticman.yml',
-    };
-
-    const mockGetConfig = nock('https://api.github.com', {
-      reqheaders: {
-        Authorization: `token ${githubToken}`,
-      },
-    })
-      .get(`/repos/${data.username}/${data.repository}/contents/${data.path}?ref=${data.branch}`)
-      .reply(200, {
-        type: 'file',
-        encoding: 'base64',
-        size: 5362,
-        name: 'staticman.yml',
-        path: 'staticman.yml',
-        content: btoa(sampleData.config3),
-        sha: '3d21ec53a331a6f037a91c368710b99387d012c1',
-        url: 'https://api.github.com/repos/octokit/octokit.rb/contents/staticman.yml',
-        git_url:
-          'https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21ec53a331a6f037a91c368710b99387d012c1',
-        html_url: 'https://github.com/octokit/octokit.rb/blob/master/staticman.yml',
-        download_url: 'https://raw.githubusercontent.com/octokit/octokit.rb/master/staticman.yml',
-        _links: {
-          git:
-            'https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21ec53a331a6f037a91c368710b99387d012c1',
-          self: 'https://api.github.com/repos/octokit/octokit.rb/contents/staticman.yml',
-          html: 'https://github.com/octokit/octokit.rb/blob/master/staticman.yml',
-        },
-      });
+  it('outputs a PARSING_ERROR error if the site config is malformed', async () => {
+    const configMock = _mockFetchConfigFile(sampleData.config3);
 
     await request(staticman)
       .post('/v2/entry/johndoe/foobar/master/comments')
@@ -191,6 +144,6 @@ describe('Entry endpoint', () => {
         });
       });
 
-    expect(mockGetConfig.isDone()).toBe(true);
+    expect(configMock.isDone()).toBe(true);
   });
 });

@@ -37,7 +37,7 @@ const _mockAcceptGitHubCollaboratorInvitation = () =>
     .reply(204);
 
 describe('Connect endpoint', () => {
-  test('accepts the invitation if one is found and replies with "Staticman connected!"', async () => {
+  it('accepts the collaboration invitation and replies with "Staticman connected!"', async () => {
     const reqListInvititations = _mockFetchGitHubCollaboratorInvitations();
     const reqAcceptInvitation = _mockAcceptGitHubCollaboratorInvitation();
 
@@ -49,7 +49,7 @@ describe('Connect endpoint', () => {
     expect(reqAcceptInvitation.isDone()).toBe(true);
   });
 
-  test('returns a 404 and an error message if a matching invitation is not found', async () => {
+  it('returns a 404 and an error message when collaboration invitation is not found', async () => {
     const reqListInvititations = _mockFetchGitHubCollaboratorInvitations();
     const reqAcceptInvitation = _mockAcceptGitHubCollaboratorInvitation();
 
