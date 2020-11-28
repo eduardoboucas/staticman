@@ -37,6 +37,7 @@ describe.each(supportedApiVersions)('API %s - Webhook endpoint', (version) => {
           },
         },
         state: 'merged',
+        merged: true,
       });
 
     const mockBody = {
@@ -100,6 +101,7 @@ describe.each(supportedApiVersions)('API %s - Webhook endpoint', (version) => {
           },
         },
         state: 'merged',
+        merged: true,
       });
 
     expect.assertions(1);
@@ -147,6 +149,7 @@ describe.each(supportedApiVersions)('API %s - Webhook endpoint', (version) => {
         },
         sourceBranch: 'staticman_somebranch',
         state: 'open',
+        merged: false,
       });
 
     expect.assertions(1);
