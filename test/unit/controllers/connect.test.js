@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import { Octokit } from '@octokit/rest';
 
 import connect from '../../../source/controllers/connect';
@@ -17,19 +16,17 @@ beforeEach(() => {
 describe('Connect controller', () => {
   test('accepts the invitation if one is found and replies with "Staticman connected!"', async () => {
     const invitationId = 123;
-    const mockAcceptRepoInvite = jest.fn(() => Promise.resolve());
-    const mockGetRepoInvites = jest.fn(() =>
-      Promise.resolve({
-        data: [
-          {
-            id: invitationId,
-            repository: {
-              full_name: `${req.params.username}/${req.params.repository}`,
-            },
+    const mockAcceptRepoInvite = jest.fn().mockResolvedValue();
+    const mockGetRepoInvites = jest.fn().mockResolvedValue({
+      data: [
+        {
+          id: invitationId,
+          repository: {
+            full_name: `${req.params.username}/${req.params.repository}`,
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     Octokit.mockImplementation(() => ({
       repos: {
@@ -48,19 +45,17 @@ describe('Connect controller', () => {
 
   test('returns a 404 and an error message if a matching invitation is not found', async () => {
     const invitationId = 123;
-    const mockAcceptRepoInvite = jest.fn(() => Promise.resolve());
-    const mockGetRepoInvites = jest.fn(() =>
-      Promise.resolve({
-        data: [
-          {
-            id: invitationId,
-            repository: {
-              full_name: `${req.params.username}/anotherrepo`,
-            },
+    const mockAcceptRepoInvite = jest.fn().mockResolvedValue();
+    const mockGetRepoInvites = jest.fn().mockResolvedValue({
+      data: [
+        {
+          id: invitationId,
+          repository: {
+            full_name: `${req.params.username}/anotherrepo`,
           },
-        ],
-      })
-    );
+        },
+      ],
+    });
 
     Octokit.mockImplementation(() => ({
       repos: {
@@ -79,14 +74,12 @@ describe('Connect controller', () => {
   });
 
   test('returns a 404 and an error message if the response from GitHub is invalid', async () => {
-    const mockAcceptRepoInvite = jest.fn(() => Promise.resolve());
-    const mockGetRepoInvites = jest.fn(() =>
-      Promise.resolve({
-        data: {
-          invalidProperty: 'invalidValue',
-        },
-      })
-    );
+    const mockAcceptRepoInvite = jest.fn().mockResolvedValue();
+    const mockGetRepoInvites = jest.fn().mockResolvedValue({
+      data: {
+        invalidProperty: 'invalidValue',
+      },
+    });
 
     Octokit.mockImplementation(() => ({
       repos: {
