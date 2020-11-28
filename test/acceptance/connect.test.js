@@ -4,8 +4,9 @@ import request from 'supertest';
 import config from '../../source/config';
 import StaticmanAPI from '../../source/server';
 
-const githubToken = config.get('githubToken');
 const staticman = new StaticmanAPI().server;
+const githubToken = config.get('githubToken');
+const supportedApiVersions = [['v1'], ['v2'], ['v3']];
 
 afterEach(() => {
   nock.cleanAll();
@@ -35,8 +36,6 @@ const _mockAcceptGitHubCollaboratorInvitation = () =>
   })
     .patch('/user/repository_invitations/123')
     .reply(204);
-
-const supportedApiVersions = [['v1'], ['v2'], ['v3']];
 
 describe.each(supportedApiVersions)('API %s - Connect endpoint', (version) => {
   it('accepts the collaboration invitation and replies with "Staticman connected!"', async () => {

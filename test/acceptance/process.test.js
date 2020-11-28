@@ -6,13 +6,15 @@ import * as helpers from '../helpers';
 import * as sampleData from '../helpers/sampleData';
 import StaticmanAPI from '../../source/server';
 
-const btoa = (contents) => Buffer.from(contents).toString('base64');
-const githubToken = config.get('githubToken');
 const staticman = new StaticmanAPI().server;
+const githubToken = config.get('githubToken');
+const supportedApiVersions = [['v1'], ['v2'], ['v3']];
 
 afterEach(() => {
   nock.cleanAll();
 });
+
+const btoa = (contents) => Buffer.from(contents).toString('base64');
 
 const repoData = {
   ...helpers.getParameters(),
@@ -69,7 +71,6 @@ const _mockFetchConfigFile = (configContents, version) => {
     });
 };
 
-const supportedApiVersions = [['v1'], ['v2'], ['v3']];
 describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
   it('returns a RECAPTCHA_CONFIG_MISMATCH error if reCaptcha options contain the wrong site key', async () => {
     const reCaptchaSecret = helpers.encrypt('Some little secret');
@@ -117,7 +118,7 @@ describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
       .post(_constructEntryEndpoint(version))
       .send({
         fields: {
-          name: 'Eduardo+Boucas',
+          name: 'Eduardo Boucas',
         },
         options: {
           reCaptcha: {
