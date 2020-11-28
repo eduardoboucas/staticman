@@ -21,8 +21,21 @@ describe.each(supportedApiVersions)('API %s - Webhook endpoint', (version) => {
     })
       .get(`/repos/${username}/${repository}/pulls/1`)
       .reply(200, {
-        id: 1,
-        sourceBranch: branch,
+        number: 1,
+        title: 'Some PR title',
+        body: 'Some PR body text',
+        head: {
+          ref: 'some-other-branch',
+        },
+        base: {
+          ref: 'master',
+        },
+        repository: {
+          name: repository,
+          owner: {
+            login: username,
+          },
+        },
         state: 'merged',
       });
 
@@ -69,8 +82,21 @@ describe.each(supportedApiVersions)('API %s - Webhook endpoint', (version) => {
     })
       .get('/repos/johndoe/foobar/pulls/1')
       .reply(200, {
-        id: 1,
-        sourceBranch: 'somebranch',
+        number: 1,
+        title: 'Some PR title',
+        body: 'Some PR body text',
+        head: {
+          ref: 'some-other-branch',
+        },
+        base: {
+          ref: 'master',
+        },
+        repository: {
+          name: 'foobar',
+          owner: {
+            login: 'johndoe',
+          },
+        },
         state: 'merged',
       });
 
@@ -100,7 +126,21 @@ describe.each(supportedApiVersions)('API %s - Webhook endpoint', (version) => {
     })
       .get('/repos/johndoe/foobar/pulls/1')
       .reply(200, {
-        id: 1,
+        number: 1,
+        title: 'Some PR title',
+        body: 'Some PR body text',
+        head: {
+          ref: 'some-other-branch',
+        },
+        base: {
+          ref: 'master',
+        },
+        repository: {
+          name: 'foobar',
+          owner: {
+            login: 'johndoe',
+          },
+        },
         sourceBranch: 'staticman_somebranch',
         state: 'open',
       });

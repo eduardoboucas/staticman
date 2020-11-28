@@ -12,7 +12,7 @@
     "start-dev": "nodemon --exec babel-node -- source/index.js",
     "pretest": "eslint .",
     "test": "jest",
-    "test-dev": "jest --watch --silent",
+    "test-dev": "jest --watch",
     "debug": "nodemon --inspect source/index.js"
   },
   "engines": {
