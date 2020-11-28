@@ -1,5 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 import { Octokit } from '@octokit/rest';
+
+import connect from '../../../source/controllers/connect';
 import * as helpers from '../../helpers';
 
 jest.mock('@octokit/rest');
@@ -10,13 +12,10 @@ let res;
 beforeEach(() => {
   req = helpers.getMockRequest();
   res = helpers.getMockResponse();
-
-  // jest.resetModules();
-  // jest.unmock('@octokit/rest');
 });
 
 describe('Connect controller', () => {
-  test('accepts the invitation if one is found and replies with "Staticman connected!"', () => {
+  test('accepts the invitation if one is found and replies with "Staticman connected!"', async () => {
     const invitationId = 123;
     const mockAcceptRepoInvite = jest.fn(() => Promise.resolve());
     const mockGetRepoInvites = jest.fn(() =>
@@ -39,16 +38,13 @@ describe('Connect controller', () => {
       },
     }));
 
-    const connect = require('../../../source/controllers/connect').default;
-
-    return connect(req, res).then((response) => {
-      expect(mockGetRepoInvites).toHaveBeenCalledTimes(1);
-      expect(mockAcceptRepoInvite).toHaveBeenCalledTimes(1);
-      expect(res.send.mock.calls[0][0]).toBe('Staticman connected!');
-    });
+    await connect(req, res);
+    expect(mockGetRepoInvites).toHaveBeenCalledTimes(1);
+    expect(mockAcceptRepoInvite).toHaveBeenCalledTimes(1);
+    expect(res.send.mock.calls[0][0]).toBe('Staticman connected!');
   });
 
-  test('returns a 404 and an error message if a matching invitation is not found', () => {
+  test('returns a 404 and an error message if a matching invitation is not found', async () => {
     const invitationId = 123;
     const mockAcceptRepoInvite = jest.fn(() => Promise.resolve());
     const mockGetRepoInvites = jest.fn(() =>
@@ -71,17 +67,14 @@ describe('Connect controller', () => {
       },
     }));
 
-    const connect = require('../../../source/controllers/connect').default;
-
-    return connect(req, res).then((response) => {
-      expect(mockGetRepoInvites).toHaveBeenCalledTimes(1);
-      expect(mockAcceptRepoInvite).not.toHaveBeenCalled();
-      expect(res.send.mock.calls[0][0]).toBe('Invitation not found');
-      expect(res.status.mock.calls[0][0]).toBe(404);
-    });
+    await connect(req, res);
+    expect(mockGetRepoInvites).toHaveBeenCalledTimes(1);
+    expect(mockAcceptRepoInvite).not.toHaveBeenCalled();
+    expect(res.send.mock.calls[0][0]).toBe('Invitation not found');
+    expect(res.status.mock.calls[0][0]).toBe(404);
   });
 
-  test('returns a 404 and an error message if the response from GitHub is invalid', () => {
+  test('returns a 404 and an error message if the response from GitHub is invalid', async () => {
     const mockAcceptRepoInvite = jest.fn(() => Promise.resolve());
     const mockGetRepoInvites = jest.fn(() =>
       Promise.resolve({
@@ -98,13 +91,10 @@ describe('Connect controller', () => {
       },
     }));
 
-    const connect = require('../../../source/controllers/connect').default;
-
-    return connect(req, res).then((response) => {
-      expect(mockGetRepoInvites).toHaveBeenCalledTimes(1);
-      expect(mockAcceptRepoInvite).not.toHaveBeenCalled();
-      expect(res.send.mock.calls[0][0]).toBe('Invitation not found');
-      expect(res.status.mock.calls[0][0]).toBe(404);
-    });
+    await connect(req, res);
+    expect(mockGetRepoInvites).toHaveBeenCalledTimes(1);
+    expect(mockAcceptRepoInvite).not.toHaveBeenCalled();
+    expect(res.send.mock.calls[0][0]).toBe('Invitation not found');
+    expect(res.status.mock.calls[0][0]).toBe(404);
   });
 });
