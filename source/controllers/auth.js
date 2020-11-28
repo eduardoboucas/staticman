@@ -52,8 +52,6 @@ export default async (req, res) => {
       });
     })
     .catch((err) => {
-      console.log('ERR:', err);
-
       const statusCode = err.statusCode || 401;
 
       res.status(statusCode).send({
