@@ -163,24 +163,20 @@ export default class GitHub extends GitService {
       .then(normalizeResponse);
   }
 
-  getReview(reviewId) {
-    return this.api.pulls
-      .get({
-        owner: this.username,
-        repo: this.repository,
-        pull_number: reviewId,
-      })
-      .then(normalizeResponse)
-      .then(
-        ({ base, body, head, merged, state, title }) =>
-          new Review(
-            title,
-            body,
-            merged && state === 'closed' ? 'merged' : state,
-            head.ref,
-            base.ref
-          )
-      );
+  async getReview(reviewId) {
+    const { data } = await this.api.pulls.get({
+      owner: this.username,
+      repo: this.repository,
+      pull_number: reviewId,
+    });
+    const { base, body, head, merged, state, title } = data;
+    return new Review(
+      title,
+      body,
+      merged && state === 'closed' ? 'merged' : state,
+      head.ref,
+      base.ref
+    );
   }
 
   async readFile(filePath, getFullResponse) {

@@ -65,16 +65,16 @@ export default class GitLab extends GitService {
     });
   }
 
-  getReview(reviewId) {
-    return this.api.MergeRequests.show(this.repositoryId, reviewId).then(
-      ({
-        description: body,
-        source_branch: sourceBranch,
-        target_branch: targetBranch,
-        state,
-        title,
-      }) => new Review(title, body, state, sourceBranch, targetBranch)
-    );
+  async getReview(reviewId) {
+    const {
+      description: body,
+      source_branch: sourceBranch,
+      target_branch: targetBranch,
+      state,
+      title,
+    } = this.api.MergeRequests.show(this.repositoryId, reviewId);
+
+    return new Review(title, body, state, sourceBranch, targetBranch);
   }
 
   readFile(filePath, getFullResponse) {

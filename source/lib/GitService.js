@@ -40,7 +40,7 @@ export default class GitService {
   }
 
   // eslint-disable-next-line class-methods-use-this, no-unused-vars
-  getReview(_reviewId) {
+  async getReview(_reviewId) {
     throw new Error('Abstract method `getReview` should be implemented');
   }
 

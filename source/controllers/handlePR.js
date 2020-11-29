@@ -19,7 +19,7 @@ export default async (repo, data) => {
 
   try {
     const review = await github.getReview(data.number);
-    if (review.sourceBranch.indexOf('staticman_')) {
+  if (!review.sourceBranch.startsWith('staticman_')) {
       return;
     }
 
