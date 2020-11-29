@@ -14,8 +14,6 @@ beforeEach(() => {
   req = mockHelpers.getMockRequest();
 });
 
-// TODO: Find the unhandled promise rejection in here
-
 describe('Process controller', () => {
   describe('checkRecaptcha', () => {
     test('does nothing if reCaptcha is not enabled in config', async () => {
@@ -271,8 +269,11 @@ describe('Process controller', () => {
     test('displays an error if the reCaptcha verification fails', async () => {
       const reCaptchaError = new Error('someError');
       const mockInitFn = jest.fn();
-      const mockVerifyFn = jest.fn((verifyReq, reCaptchaCallback) => {
-        reCaptchaCallback(reCaptchaError);
+      // const mockVerifyFn = jest.fn((verifyReq, reCaptchaCallback) => {
+      //   reCaptchaCallback(reCaptchaError);
+      // });
+      const mockVerifyFn = jest.fn().mockImplementation(() => {
+        throw reCaptchaError;
       });
 
       jest.mock('express-recaptcha', () => {
@@ -309,9 +310,7 @@ describe('Process controller', () => {
       try {
         await checkRecaptcha(staticman, req);
       } catch (err) {
-        expect(err).toEqual({
-          _smErrorCode: reCaptchaError,
-        });
+        expect(err).toEqual(reCaptchaError);
       }
     });
   });
