@@ -7,33 +7,36 @@ jest.mock('@octokit/rest');
 
 let req;
 let res;
+const mockAcceptRepoInvite = jest.fn();
+const mockGetRepoInvites = jest.fn();
 
 beforeEach(() => {
   req = helpers.getMockRequest();
   res = helpers.getMockResponse();
+
+  Octokit.mockImplementation(() => ({
+    repos: {
+      listInvitationsForAuthenticatedUser: mockGetRepoInvites,
+      acceptInvitation: mockAcceptRepoInvite,
+    },
+  }));
 });
+
+afterEach(() => jest.clearAllMocks());
 
 describe('Connect controller', () => {
   test('accepts the invitation if one is found and replies with "Staticman connected!"', async () => {
-    const invitationId = 123;
-    const mockAcceptRepoInvite = jest.fn().mockResolvedValue();
-    const mockGetRepoInvites = jest.fn().mockResolvedValue({
+    mockAcceptRepoInvite.mockResolvedValue();
+    mockGetRepoInvites.mockResolvedValue({
       data: [
         {
-          id: invitationId,
+          id: 123,
           repository: {
             full_name: `${req.params.username}/${req.params.repository}`,
           },
         },
       ],
     });
-
-    Octokit.mockImplementation(() => ({
-      repos: {
-        listInvitationsForAuthenticatedUser: mockGetRepoInvites,
-        acceptInvitation: mockAcceptRepoInvite,
-      },
-    }));
 
     expect.assertions(3);
 
@@ -44,25 +47,17 @@ describe('Connect controller', () => {
   });
 
   test('returns a 404 and an error message if a matching invitation is not found', async () => {
-    const invitationId = 123;
-    const mockAcceptRepoInvite = jest.fn().mockResolvedValue();
-    const mockGetRepoInvites = jest.fn().mockResolvedValue({
+    mockAcceptRepoInvite.mockResolvedValue();
+    mockGetRepoInvites.mockResolvedValue({
       data: [
         {
-          id: invitationId,
+          id: 123,
           repository: {
             full_name: `${req.params.username}/anotherrepo`,
           },
         },
       ],
     });
-
-    Octokit.mockImplementation(() => ({
-      repos: {
-        listInvitationsForAuthenticatedUser: mockGetRepoInvites,
-        acceptInvitation: mockAcceptRepoInvite,
-      },
-    }));
 
     expect.assertions(4);
 
@@ -74,19 +69,12 @@ describe('Connect controller', () => {
   });
 
   test('returns a 404 and an error message if the response from GitHub is invalid', async () => {
-    const mockAcceptRepoInvite = jest.fn().mockResolvedValue();
-    const mockGetRepoInvites = jest.fn().mockResolvedValue({
+    mockAcceptRepoInvite.mockResolvedValue();
+    mockGetRepoInvites.mockResolvedValue({
       data: {
         invalidProperty: 'invalidValue',
       },
     });
-
-    Octokit.mockImplementation(() => ({
-      repos: {
-        listInvitationsForAuthenticatedUser: mockGetRepoInvites,
-        acceptInvitation: mockAcceptRepoInvite,
-      },
-    }));
 
     expect.assertions(4);
 
