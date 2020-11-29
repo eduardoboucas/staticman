@@ -14,61 +14,9 @@ afterEach(() => {
   nock.cleanAll();
 });
 
-const btoa = (contents) => Buffer.from(contents).toString('base64');
-
 const repoData = {
   ...helpers.getParameters(),
   path: 'staticman.yml',
-};
-
-const _constructEntryEndpoint = (version, service) => {
-  const gitService = service ?? 'github';
-  switch (version) {
-    case 'v1':
-      return `/${version}/entry/${repoData.username}/${repoData.repository}/${repoData.branch}`;
-
-    case 'v2':
-      return `/${version}/entry/${repoData.username}/${repoData.repository}/${repoData.branch}/${repoData.property}`;
-
-    case 'v3':
-    default:
-      return `/${version}/entry/${gitService}/${repoData.username}/${repoData.repository}/${repoData.branch}/${repoData.property}`;
-  }
-};
-
-const _mockFetchConfigFile = (configContents, version) => {
-  const configName = version === 'v1' ? '_config.yml' : 'staticman.yml';
-  const mockConfig =
-    version === 'v1' ? configContents.replace('comments:', 'staticman:') : configContents;
-
-  return nock('https://api.github.com', {
-    reqheaders: {
-      Authorization: `token ${githubToken}`,
-    },
-  })
-    .get(
-      `/repos/${repoData.username}/${repoData.repository}/contents/${configName}?ref=${repoData.branch}`
-    )
-    .reply(200, {
-      type: 'file',
-      encoding: 'base64',
-      size: 5362,
-      name: `${configName}`,
-      path: `${configName}`,
-      content: btoa(mockConfig),
-      sha: '3d21ec53a331a6f037a91c368710b99387d012c1',
-      url: `https://api.github.com/repos/octokit/octokit.rb/contents/${configName}`,
-      git_url:
-        'https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21ec53a331a6f037a91c368710b99387d012c1',
-      html_url: `https://github.com/octokit/octokit.rb/blob/master/${configName}`,
-      download_url: `https://raw.githubusercontent.com/octokit/octokit.rb/master/${configName}`,
-      _links: {
-        git:
-          'https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21ec53a331a6f037a91c368710b99387d012c1',
-        self: `https://api.github.com/repos/octokit/octokit.rb/contents/${configName}`,
-        html: `https://github.com/octokit/octokit.rb/blob/master/${configName}`,
-      },
-    });
 };
 
 describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
@@ -173,3 +121,57 @@ describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
     expect(configMock.isDone()).toBe(true);
   });
 });
+
+function _btoa(contents) {
+  return Buffer.from(contents).toString('base64');
+}
+
+function _constructEntryEndpoint(version, service) {
+  const gitService = service ?? 'github';
+  switch (version) {
+    case 'v1':
+      return `/${version}/entry/${repoData.username}/${repoData.repository}/${repoData.branch}`;
+
+    case 'v2':
+      return `/${version}/entry/${repoData.username}/${repoData.repository}/${repoData.branch}/${repoData.property}`;
+
+    case 'v3':
+    default:
+      return `/${version}/entry/${gitService}/${repoData.username}/${repoData.repository}/${repoData.branch}/${repoData.property}`;
+  }
+}
+
+function _mockFetchConfigFile(configContents, version) {
+  const configName = version === 'v1' ? '_config.yml' : 'staticman.yml';
+  const mockConfig =
+    version === 'v1' ? configContents.replace('comments:', 'staticman:') : configContents;
+
+  return nock('https://api.github.com', {
+    reqheaders: {
+      Authorization: `token ${githubToken}`,
+    },
+  })
+    .get(
+      `/repos/${repoData.username}/${repoData.repository}/contents/${configName}?ref=${repoData.branch}`
+    )
+    .reply(200, {
+      type: 'file',
+      encoding: 'base64',
+      size: 5362,
+      name: `${configName}`,
+      path: `${configName}`,
+      content: _btoa(mockConfig),
+      sha: '3d21ec53a331a6f037a91c368710b99387d012c1',
+      url: `https://api.github.com/repos/octokit/octokit.rb/contents/${configName}`,
+      git_url:
+        'https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21ec53a331a6f037a91c368710b99387d012c1',
+      html_url: `https://github.com/octokit/octokit.rb/blob/master/${configName}`,
+      download_url: `https://raw.githubusercontent.com/octokit/octokit.rb/master/${configName}`,
+      _links: {
+        git:
+          'https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21ec53a331a6f037a91c368710b99387d012c1',
+        self: `https://api.github.com/repos/octokit/octokit.rb/contents/${configName}`,
+        html: `https://github.com/octokit/octokit.rb/blob/master/${configName}`,
+      },
+    });
+}

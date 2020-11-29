@@ -12,31 +12,6 @@ afterEach(() => {
   nock.cleanAll();
 });
 
-const _mockFetchGitHubCollaboratorInvitations = () =>
-  nock('https://api.github.com', {
-    reqheaders: {
-      authorization: `token ${githubToken}`,
-    },
-  })
-    .get('/user/repository_invitations')
-    .reply(200, [
-      {
-        id: 123,
-        repository: {
-          full_name: `johndoe/foobar`,
-        },
-      },
-    ]);
-
-const _mockAcceptGitHubCollaboratorInvitation = () =>
-  nock('https://api.github.com', {
-    reqheaders: {
-      authorization: `token ${githubToken}`,
-    },
-  })
-    .patch('/user/repository_invitations/123')
-    .reply(204);
-
 describe.each(supportedApiVersions)('API %s - Connect endpoint', (version) => {
   it('accepts the collaboration invitation and replies with "Staticman connected!"', async () => {
     const reqListInvititations = _mockFetchGitHubCollaboratorInvitations();
@@ -66,3 +41,30 @@ describe.each(supportedApiVersions)('API %s - Connect endpoint', (version) => {
     expect(reqAcceptInvitation.isDone()).toBe(false);
   });
 });
+
+function _mockFetchGitHubCollaboratorInvitations() {
+  return nock('https://api.github.com', {
+    reqheaders: {
+      authorization: `token ${githubToken}`,
+    },
+  })
+    .get('/user/repository_invitations')
+    .reply(200, [
+      {
+        id: 123,
+        repository: {
+          full_name: `johndoe/foobar`,
+        },
+      },
+    ]);
+}
+
+function _mockAcceptGitHubCollaboratorInvitation() {
+  return nock('https://api.github.com', {
+    reqheaders: {
+      authorization: `token ${githubToken}`,
+    },
+  })
+    .patch('/user/repository_invitations/123')
+    .reply(204);
+}
