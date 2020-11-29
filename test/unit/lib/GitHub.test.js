@@ -33,6 +33,8 @@ describe('GitHub interface', () => {
       .get('/user/repository_invitations')
       .reply(200);
 
+    expect.assertions(1);
+
     const githubInstance = await new GitHub(req.params);
     await githubInstance.api.repos.listInvitationsForAuthenticatedUser();
     expect(scope.isDone()).toBe(true);
@@ -46,6 +48,8 @@ describe('GitHub interface', () => {
     })
       .get('/user/repository_invitations')
       .reply(200);
+
+    expect.assertions(1);
 
     const githubInstance = await new GitHub({
       ...req.params,
@@ -79,6 +83,8 @@ describe('GitHub interface', () => {
         .reply(200, {
           content: btoa(sampleData.config1),
         });
+
+      expect.assertions(2);
 
       const githubInstance = await new GitHub(req.params);
 
@@ -165,6 +171,8 @@ describe('GitHub interface', () => {
           content: btoa(sampleData.config1),
         });
 
+      expect.assertions(2);
+
       const githubInstance = await new GitHub(req.params);
 
       const contents = await githubInstance.readFile(filePath);
@@ -185,6 +193,8 @@ describe('GitHub interface', () => {
         .reply(200, {
           content: btoa(sampleData.config1),
         });
+
+      expect.assertions(2);
 
       const githubInstance = await new GitHub(req.params);
 
@@ -207,6 +217,8 @@ describe('GitHub interface', () => {
         .reply(200, {
           content: btoa(sampleData.config2),
         });
+
+      expect.assertions(2);
 
       const githubInstance = await new GitHub(req.params);
 
@@ -232,6 +244,8 @@ describe('GitHub interface', () => {
         .reply(200, {
           content: btoa(sampleData.config2),
         });
+
+      expect.assertions(3);
 
       const githubInstance = await new GitHub(req.params);
 
@@ -261,6 +275,8 @@ describe('GitHub interface', () => {
           number: 123,
         });
 
+      expect.assertions(1);
+
       const githubInstance = await new GitHub(req.params);
 
       await githubInstance.writeFile(
@@ -289,6 +305,8 @@ describe('GitHub interface', () => {
         .reply(200, {
           number: 123,
         });
+
+      expect.assertions(1);
 
       const githubInstance = await new GitHub(req.params);
 
@@ -460,6 +478,8 @@ describe('GitHub interface', () => {
           email: 'johndoe@test.com',
           name: 'John Doe',
         });
+
+      expect.assertions(2);
 
       const githubInstance = await new GitHub(req.params);
 

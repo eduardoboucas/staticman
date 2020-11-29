@@ -14,6 +14,8 @@ beforeEach(() => {
   req = mockHelpers.getMockRequest();
 });
 
+// TODO: Find the unhandled promise rejection in here
+
 describe('Process controller', () => {
   describe('checkRecaptcha', () => {
     test('does nothing if reCaptcha is not enabled in config', async () => {
@@ -31,9 +33,10 @@ describe('Process controller', () => {
       const staticman = new Staticman(req.params);
       await staticman.init();
 
-      return checkRecaptcha(staticman, req).then((response) => {
-        expect(response).toBe(false);
-      });
+      expect.assertions(1);
+
+      const response = await checkRecaptcha(staticman, req);
+      expect(response).toBe(false);
     });
 
     test('throws an error if reCaptcha block is not in the request body', async () => {
@@ -55,9 +58,13 @@ describe('Process controller', () => {
         options: {},
       };
 
-      return checkRecaptcha(staticman, req).catch((err) => {
+      expect.assertions(1);
+
+      try {
+        await checkRecaptcha(staticman, req);
+      } catch (err) {
         expect(err._smErrorCode).toBe('RECAPTCHA_MISSING_CREDENTIALS');
-      });
+      }
     });
 
     test('throws an error if reCaptcha site key is not in the request body', async () => {
@@ -81,9 +88,13 @@ describe('Process controller', () => {
         },
       };
 
-      return checkRecaptcha(staticman, req).catch((err) => {
+      expect.assertions(1);
+
+      try {
+        await checkRecaptcha(staticman, req);
+      } catch (err) {
         expect(err._smErrorCode).toBe('RECAPTCHA_MISSING_CREDENTIALS');
-      });
+      }
     });
 
     test('throws an error if reCaptcha secret is not in the request body', async () => {
@@ -107,9 +118,13 @@ describe('Process controller', () => {
         },
       };
 
-      return checkRecaptcha(staticman, req).catch((err) => {
+      expect.assertions(1);
+
+      try {
+        await checkRecaptcha(staticman, req);
+      } catch (err) {
         expect(err._smErrorCode).toBe('RECAPTCHA_MISSING_CREDENTIALS');
-      });
+      }
     });
 
     test('throws an error if the reCatpcha secret fails to decrypt', async () => {
@@ -137,9 +152,13 @@ describe('Process controller', () => {
         },
       };
 
-      return checkRecaptcha(staticman, req).catch((err) => {
+      expect.assertions(1);
+
+      try {
+        await checkRecaptcha(staticman, req);
+      } catch (err) {
         expect(err._smErrorCode).toBe('RECAPTCHA_CONFIG_MISMATCH');
-      });
+      }
     });
 
     test('throws an error if the reCatpcha siteKey provided does not match the one in config', async () => {
@@ -164,9 +183,13 @@ describe('Process controller', () => {
         },
       };
 
-      return checkRecaptcha(staticman, req).catch((err) => {
+      expect.assertions(1);
+
+      try {
+        await checkRecaptcha(staticman, req);
+      } catch (err) {
         expect(err._smErrorCode).toBe('RECAPTCHA_CONFIG_MISMATCH');
-      });
+      }
     });
 
     test('throws an error if the reCatpcha secret provided does not match the one in config', async () => {
@@ -191,8 +214,10 @@ describe('Process controller', () => {
         },
       };
 
+      expect.assertions(1);
+
       try {
-        checkRecaptcha(staticman, req);
+        await checkRecaptcha(staticman, req);
       } catch (err) {
         expect(err._smErrorCode).toBe('RECAPTCHA_CONFIG_MISMATCH');
       }
@@ -232,6 +257,8 @@ describe('Process controller', () => {
           },
         },
       };
+
+      expect.assertions(5);
 
       const response = await checkRecaptcha(staticman, req);
       expect(response).toBe(true);
@@ -277,8 +304,10 @@ describe('Process controller', () => {
         },
       };
 
+      expect.assertions(1);
+
       try {
-        checkRecaptcha(staticman, req);
+        await checkRecaptcha(staticman, req);
       } catch (err) {
         expect(err).toEqual({
           _smErrorCode: reCaptchaError,
@@ -365,10 +394,12 @@ describe('Process controller', () => {
       };
       req.query = {};
 
-      return processFn(staticman, req, res).then((response) => {
-        expect(res.redirect.mock.calls).toHaveLength(1);
-        expect(res.redirect.mock.calls[0][0]).toBe(redirectUrl);
-      });
+      expect.assertions(2);
+
+      await processFn(staticman, req, res);
+
+      expect(res.redirect.mock.calls).toHaveLength(1);
+      expect(res.redirect.mock.calls[0][0]).toBe(redirectUrl);
     });
 
     test('deliver an object with the processed fields if `processEntry` succeeds', async () => {
@@ -406,12 +437,14 @@ describe('Process controller', () => {
       };
       req.query = {};
 
-      return processFn(staticman, req, res).then(() => {
-        expect(res.send.mock.calls).toHaveLength(1);
-        expect(res.send.mock.calls[0][0]).toEqual({
-          fields,
-          success: true,
-        });
+      expect.assertions(2);
+
+      await processFn(staticman, req, res);
+
+      expect(res.send.mock.calls).toHaveLength(1);
+      expect(res.send.mock.calls[0][0]).toEqual({
+        fields,
+        success: true,
       });
     });
 
@@ -448,9 +481,13 @@ describe('Process controller', () => {
       };
       req.query = {};
 
-      return processFn(staticman, req, res).catch((err) => {
+      expect.assertions(1);
+
+      try {
+        await processFn(staticman, req, res);
+      } catch (err) {
         expect(err).toEqual(processEntryError);
-      });
+      }
     });
   });
 
