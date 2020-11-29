@@ -8,8 +8,6 @@ import GitService from './GitService';
 import Review from './models/Review';
 import User from './models/User';
 
-const normalizeResponse = ({ data }) => data;
-
 export default class GitHub extends GitService {
   constructor(options = {}) {
     super(options.username, options.repository, options.branch);
@@ -68,41 +66,46 @@ export default class GitHub extends GitService {
     return token;
   }
 
-  _pullFile(filePath, branch) {
-    return this.api.repos
-      .getContent({
+  async _pullFile(filePath, branch) {
+    try {
+      const { data } = await this.api.repos.getContent({
         owner: this.username,
         repo: this.repository,
         path: filePath,
         ref: branch,
-      })
-      .then(normalizeResponse)
-      .catch((err) => Promise.reject(errorHandler('GITHUB_READING_FILE', { err })));
+      });
+
+      return data;
+    } catch (err) {
+      throw new Error(errorHandler('GITHUB_READING_FILE', { err }));
+    }
   }
 
-  _commitFile(filePath, content, commitMessage, branch) {
-    return this.api.repos
-      .createOrUpdateFileContents({
-        owner: this.username,
-        repo: this.repository,
-        path: filePath,
-        message: commitMessage,
-        content,
-        committer: {
-          name: 'Staticman',
-          email: 'noreply@staticman.net',
-        },
-        author: {
-          name: 'Staticman',
-          email: 'noreply@staticman.net',
-        },
-        branch,
-      })
-      .then(normalizeResponse);
+  async _commitFile(filePath, content, commitMessage, branch) {
+    const { data } = await this.api.repos.createOrUpdateFileContents({
+      owner: this.username,
+      repo: this.repository,
+      path: filePath,
+      message: commitMessage,
+      content,
+      committer: {
+        name: 'Staticman',
+        email: 'noreply@staticman.net',
+      },
+      author: {
+        name: 'Staticman',
+        email: 'noreply@staticman.net',
+      },
+      branch,
+    });
+
+    return data;
   }
 
-  writeFile(filePath, data, targetBranch, commitTitle) {
-    return super.writeFile(filePath, data, targetBranch, commitTitle).catch((err) => {
+  async writeFile(filePath, data, targetBranch, commitTitle) {
+    try {
+      return await super.writeFile(filePath, data, targetBranch, commitTitle);
+    } catch (err) {
       try {
         const message = err?.message;
 
@@ -117,32 +120,32 @@ export default class GitHub extends GitService {
         console.log(errorParsingError);
       }
 
-      return Promise.reject(errorHandler('GITHUB_WRITING_FILE'));
+      throw errorHandler('GITHUB_WRITING_FILE');
+    }
+  }
+
+  async getBranchHeadCommit(branch) {
+    const result = await this.api.repos.getBranch({
+      owner: this.username,
+      repo: this.repository,
+      branch,
     });
+
+    return result.data.commit.sha;
   }
 
-  getBranchHeadCommit(branch) {
-    return this.api.repos
-      .getBranch({
-        owner: this.username,
-        repo: this.repository,
-        branch,
-      })
-      .then((res) => res.data.commit.sha);
+  async createBranch(branch, sha) {
+    const { data } = await this.api.git.createRef({
+      owner: this.username,
+      repo: this.repository,
+      ref: `refs/heads/${branch}`,
+      sha,
+    });
+
+    return data;
   }
 
-  createBranch(branch, sha) {
-    return this.api.git
-      .createRef({
-        owner: this.username,
-        repo: this.repository,
-        ref: `refs/heads/${branch}`,
-        sha,
-      })
-      .then(normalizeResponse);
-  }
-
-  deleteBranch(branch) {
+  async deleteBranch(branch) {
     return this.api.git.deleteRef({
       owner: this.username,
       repo: this.repository,
@@ -150,17 +153,17 @@ export default class GitHub extends GitService {
     });
   }
 
-  createReview(reviewTitle, branch, reviewBody) {
-    return this.api.pulls
-      .create({
-        owner: this.username,
-        repo: this.repository,
-        title: reviewTitle,
-        head: branch,
-        base: this.branch,
-        body: reviewBody,
-      })
-      .then(normalizeResponse);
+  async createReview(reviewTitle, branch, reviewBody) {
+    const { data } = await this.api.pulls.create({
+      owner: this.username,
+      repo: this.repository,
+      title: reviewTitle,
+      head: branch,
+      base: this.branch,
+      body: reviewBody,
+    });
+
+    return data;
   }
 
   async getReview(reviewId) {
@@ -187,20 +190,21 @@ export default class GitHub extends GitService {
     }
   }
 
-  writeFileAndSendReview(filePath, data, branch, commitTitle, reviewBody) {
-    return super
-      .writeFileAndSendReview(filePath, data, branch, commitTitle, reviewBody)
-      .catch((err) => Promise.reject(errorHandler('GITHUB_CREATING_PR', { err })));
+  async writeFileAndSendReview(filePath, data, branch, commitTitle, reviewBody) {
+    try {
+      return await super.writeFileAndSendReview(filePath, data, branch, commitTitle, reviewBody);
+    } catch (err) {
+      return Promise.reject(errorHandler('GITHUB_CREATING_PR', { err }));
+    }
   }
 
-  getCurrentUser() {
-    return this.api.users
-      .getAuthenticated({})
-      .then(normalizeResponse)
-      .then(
-        ({ login, email, avatar_url: avatarUrl, name, bio, company, blog }) =>
-          new User('github', login, email, name, avatarUrl, bio, blog, company)
-      )
-      .catch((err) => Promise.reject(errorHandler('GITHUB_GET_USER', { err })));
+  async getCurrentUser() {
+    try {
+      const { data } = await this.api.users.getAuthenticated({});
+      const { login, email, avatar_url: avatarUrl, name, bio, company, blog } = data;
+      return new User('github', login, email, name, avatarUrl, bio, blog, company);
+    } catch (err) {
+      return Promise.reject(errorHandler('GITHUB_GET_USER', { err }));
+    }
   }
 }

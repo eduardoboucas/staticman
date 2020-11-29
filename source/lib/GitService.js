@@ -10,32 +10,32 @@ export default class GitService {
   }
 
   // eslint-disable-next-line class-methods-use-this, no-unused-vars
-  _pullFile(_filePath, _branch) {
+  async _pullFile(_filePath, _branch) {
     throw new Error('Abstract method `_pullFile` should be implemented');
   }
 
   // eslint-disable-next-line class-methods-use-this, no-unused-vars
-  _commitFile(_filePath, _contents, _commitTitle, _branch) {
+  async _commitFile(_filePath, _contents, _commitTitle, _branch) {
     throw new Error('Abstract method `_commitFile` should be implemented');
   }
 
   // eslint-disable-next-line class-methods-use-this, no-unused-vars
-  getBranchHeadCommit(_branch) {
+  async getBranchHeadCommit(_branch) {
     throw new Error('Abstract method `getBranchHeadCommit` should be implemented');
   }
 
   // eslint-disable-next-line class-methods-use-this, no-unused-vars
-  createBranch(_branch, _sha) {
+  async createBranch(_branch, _sha) {
     throw new Error('Abstract method `createBranch` should be implemented');
   }
 
   // eslint-disable-next-line class-methods-use-this, no-unused-vars
-  deleteBranch(_branch) {
+  async deleteBranch(_branch) {
     throw new Error('Abstract method `deleteBranch` should be implemented');
   }
 
   // eslint-disable-next-line class-methods-use-this, no-unused-vars
-  createReview(_commitTitle, _branch, _reviewBody) {
+  async createReview(_commitTitle, _branch, _reviewBody) {
     throw new Error('Abstract method `createReview` should be implemented');
   }
 
@@ -45,7 +45,7 @@ export default class GitService {
   }
 
   // eslint-disable-next-line class-methods-use-this, no-unused-vars
-  getCurrentUser() {
+  async getCurrentUser() {
     throw new Error('Abstract method `getCurrentUser` should be implemented');
   }
 
@@ -97,20 +97,20 @@ export default class GitService {
     }
   }
 
-  writeFile(filePath, data, branch = this.branch, commitTitle = 'Add Staticman file') {
+  async writeFile(filePath, data, branch = this.branch, commitTitle = 'Add Staticman file') {
     return this._commitFile(filePath, Buffer.from(data).toString('base64'), commitTitle, branch);
   }
 
-  writeFileAndSendReview(
+  async writeFileAndSendReview(
     filePath,
     data,
     branch,
     commitTitle = 'Add Staticman file',
     reviewBody = ''
   ) {
-    return this.getBranchHeadCommit(this.branch)
-      .then((sha) => this.createBranch(branch, sha))
-      .then(() => this.writeFile(filePath, data, branch, commitTitle))
-      .then(() => this.createReview(commitTitle, branch, reviewBody));
+    const sha = await this.getBranchHeadCommit(this.branch);
+    await this.createBranch(branch, sha);
+    await this.writeFile(filePath, data, branch, commitTitle);
+    return this.createReview(commitTitle, branch, reviewBody);
   }
 }
