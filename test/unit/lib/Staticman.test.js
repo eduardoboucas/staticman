@@ -1263,11 +1263,15 @@ describe('Staticman interface', () => {
       const Staticman = require('../../../source/lib/Staticman').default;
       const staticman = await new Staticman(mockParameters);
 
-      return staticman.getSiteConfig().catch((err) => {
+      expect.assertions(1);
+
+      try {
+        await staticman.getSiteConfig();
+      } catch (err) {
         expect(err).toEqual({
           _smErrorCode: 'NO_CONFIG_PATH',
         });
-      });
+      }
     });
 
     test('fetches the site config from the repository, even if there is one already defined, if `force` is truthy', async () => {
@@ -1375,7 +1379,7 @@ describe('Staticman interface', () => {
       });
 
       staticman._checkForSpam = jest.fn((fields) => {
-        return Promise.reject(errorHandler('IS_SPAM'));
+        throw errorHandler('IS_SPAM');
       });
 
       return staticman.processEntry(mockHelpers.getFields(), {}).catch((err) => {
@@ -1420,7 +1424,7 @@ describe('Staticman interface', () => {
       const spyApplyInternalFields = jest.spyOn(staticman, '_applyInternalFields');
 
       staticman._createFile = jest.fn(() => {
-        return Promise.reject(errorHandler('INVALID_FORMAT'));
+        throw errorHandler('INVALID_FORMAT');
       });
 
       return staticman.processEntry(mockHelpers.getFields(), {}).catch((err) => {

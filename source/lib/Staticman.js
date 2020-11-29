@@ -172,13 +172,13 @@ export default class Staticman {
     }
 
     if (!this.options['auth-token']) {
-      return Promise.reject(errorHandler('AUTH_TOKEN_MISSING'));
+      throw errorHandler('AUTH_TOKEN_MISSING');
     }
 
     const oauthToken = RSA.decrypt(this.options['auth-token']);
 
     if (!oauthToken) {
-      return Promise.reject(errorHandler('AUTH_TOKEN_INVALID'));
+      throw errorHandler('AUTH_TOKEN_INVALID');
     }
 
     const git = await gitFactory(this.options['auth-type'], {
@@ -199,13 +199,13 @@ export default class Staticman {
     }
 
     if (!this.options['github-token']) {
-      return Promise.reject(errorHandler('GITHUB_AUTH_TOKEN_MISSING'));
+      throw errorHandler('GITHUB_AUTH_TOKEN_MISSING');
     }
 
     const oauthToken = RSA.decrypt(this.options['github-token']);
 
     if (!oauthToken) {
-      return Promise.reject(errorHandler('GITHUB_AUTH_TOKEN_INVALID'));
+      throw errorHandler('GITHUB_AUTH_TOKEN_INVALID');
     }
 
     const git = await gitFactory('github', {
@@ -488,18 +488,20 @@ export default class Staticman {
   getSiteConfig(force) {
     if (this.siteConfig && !force) return Promise.resolve(this.siteConfig);
 
-    if (!this.configPath) return Promise.reject(errorHandler('NO_CONFIG_PATH'));
+    if (!this.configPath) {
+      throw errorHandler('NO_CONFIG_PATH');
+    }
 
     return this.git.readFile(this.configPath.file).then((data) => {
       const siteConfig = objectPath.get(data, this.configPath.path);
       const validationErrors = this._validateConfig(siteConfig);
 
       if (validationErrors) {
-        return Promise.reject(validationErrors);
+        throw validationErrors;
       }
 
       if (siteConfig.branch !== this.parameters.branch) {
-        return Promise.reject(errorHandler('BRANCH_MISMATCH'));
+        throw errorHandler('BRANCH_MISMATCH');
       }
 
       return this.siteConfig;
@@ -522,7 +524,7 @@ export default class Staticman {
         // Validate fields
         const fieldErrors = this._validateFields(transformedFields);
 
-        if (fieldErrors) return Promise.reject(fieldErrors);
+        if (fieldErrors) throw fieldErrors;
 
         // Add generated fields
         transformedFields = this._applyGeneratedFields(transformedFields);
@@ -581,12 +583,10 @@ export default class Staticman {
         };
       })
       .catch((err) => {
-        return Promise.reject(
-          errorHandler('ERROR_PROCESSING_ENTRY', {
-            err,
-            instance: this,
-          })
-        );
+        throw errorHandler('ERROR_PROCESSING_ENTRY', {
+          err,
+          instance: this,
+        });
       });
   }
 
@@ -601,12 +601,10 @@ export default class Staticman {
         return subscriptions.send(options.parent, fields, options, this.siteConfig);
       })
       .catch((err) => {
-        return Promise.reject(
-          errorHandler('ERROR_PROCESSING_MERGE', {
-            err,
-            instance: this,
-          })
-        );
+        throw errorHandler('ERROR_PROCESSING_MERGE', {
+          err,
+          instance: this,
+        });
       });
   }
 

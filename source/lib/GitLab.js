@@ -32,10 +32,12 @@ export default class GitLab extends GitService {
     return this.username && this.repository ? `${this.username}/${this.repository}` : '';
   }
 
-  _pullFile(path, branch) {
-    return this.api.RepositoryFiles.show(this.repositoryId, path, branch).catch((err) =>
-      Promise.reject(errorHandler('GITLAB_READING_FILE', { err }))
-    );
+  async _pullFile(path, branch) {
+    try {
+      return this.api.RepositoryFiles.show(this.repositoryId, path, branch);
+    } catch (err) {
+      throw errorHandler('GITLAB_READING_FILE', { err });
+    }
   }
 
   _commitFile(filePath, content, commitMessage, branch) {
@@ -86,17 +88,19 @@ export default class GitLab extends GitService {
   writeFile(filePath, data, targetBranch, commitTitle) {
     return super.writeFile(filePath, data, targetBranch, commitTitle).catch((err) => {
       if (err?.error?.message === 'A file with this name already exists') {
-        return Promise.reject(errorHandler('GITLAB_FILE_ALREADY_EXISTS', { err }));
+        throw errorHandler('GITLAB_FILE_ALREADY_EXISTS', { err });
       }
 
-      return Promise.reject(errorHandler('GITLAB_WRITING_FILE', { err }));
+      throw errorHandler('GITLAB_WRITING_FILE', { err });
     });
   }
 
   writeFileAndSendReview(filePath, data, branch, commitTitle, reviewBody) {
     return super
       .writeFileAndSendReview(filePath, data, branch, commitTitle, reviewBody)
-      .catch((err) => Promise.reject(errorHandler('GITLAB_CREATING_PR', { err })));
+      .catch((err) => {
+        throw errorHandler('GITLAB_CREATING_PR', { err });
+      });
   }
 
   getCurrentUser() {

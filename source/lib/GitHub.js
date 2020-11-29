@@ -113,7 +113,7 @@ export default class GitHub extends GitService {
           const parsedError = JSON.parse(message);
 
           if (parsedError?.message.includes('"sha" wasn\'t supplied')) {
-            return Promise.reject(errorHandler('GITHUB_FILE_ALREADY_EXISTS', { err }));
+            throw errorHandler('GITHUB_FILE_ALREADY_EXISTS', { err });
           }
         }
       } catch (errorParsingError) {
@@ -194,7 +194,7 @@ export default class GitHub extends GitService {
     try {
       return await super.writeFileAndSendReview(filePath, data, branch, commitTitle, reviewBody);
     } catch (err) {
-      return Promise.reject(errorHandler('GITHUB_CREATING_PR', { err }));
+      throw errorHandler('GITHUB_CREATING_PR', { err });
     }
   }
 
@@ -204,7 +204,7 @@ export default class GitHub extends GitService {
       const { login, email, avatar_url: avatarUrl, name, bio, company, blog } = data;
       return new User('github', login, email, name, avatarUrl, bio, blog, company);
     } catch (err) {
-      return Promise.reject(errorHandler('GITHUB_GET_USER', { err }));
+      throw errorHandler('GITHUB_GET_USER', { err });
     }
   }
 }
