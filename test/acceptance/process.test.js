@@ -1,13 +1,12 @@
 import nock from 'nock';
 import request from 'supertest';
 
-import config from '../../source/config';
 import * as helpers from '../helpers';
+import * as GitHubMocks from '../helpers/githubApiMocks';
 import * as sampleData from '../helpers/sampleData';
 import StaticmanAPI from '../../source/server';
 
 const staticman = new StaticmanAPI().server;
-const githubToken = config.get('githubToken');
 const supportedApiVersions = [['v1'], ['v2'], ['v3']];
 
 afterEach(() => {
@@ -24,7 +23,15 @@ describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
     const reCaptchaSecret = helpers.encrypt('Some little secret');
     const mockConfig = sampleData.config1.replace('@reCaptchaSecret@', reCaptchaSecret);
 
-    const configMock = _mockFetchConfigFile(mockConfig, version);
+    const mockConfigInfo = {
+      contents: mockConfig,
+      version,
+      username: repoData.username,
+      repository: repoData.repository,
+      branch: repoData.branch,
+    };
+
+    const configMock = GitHubMocks.fetchConfigFile(mockConfigInfo);
 
     expect.assertions(2);
 
@@ -62,7 +69,15 @@ describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
       helpers.encrypt(reCaptchaSecret)
     );
 
-    const configMock = _mockFetchConfigFile(mockConfig, version);
+    const mockConfigInfo = {
+      contents: mockConfig,
+      version,
+      username: repoData.username,
+      repository: repoData.repository,
+      branch: repoData.branch,
+    };
+
+    const configMock = GitHubMocks.fetchConfigFile(mockConfigInfo);
 
     expect.assertions(2);
 
@@ -94,7 +109,15 @@ describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
   });
 
   it('outputs a PARSING_ERROR error if the site config is malformed', async () => {
-    const configMock = _mockFetchConfigFile(sampleData.config3, version);
+    const mockConfigInfo = {
+      contents: sampleData.config3,
+      version,
+      username: repoData.username,
+      repository: repoData.repository,
+      branch: repoData.branch,
+    };
+
+    const configMock = GitHubMocks.fetchConfigFile(mockConfigInfo);
 
     expect.assertions(3);
 
@@ -122,10 +145,6 @@ describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
   });
 });
 
-function _btoa(contents) {
-  return Buffer.from(contents).toString('base64');
-}
-
 function _constructEntryEndpoint(version, service) {
   const gitService = service ?? 'github';
   switch (version) {
@@ -139,39 +158,4 @@ function _constructEntryEndpoint(version, service) {
     default:
       return `/${version}/entry/${gitService}/${repoData.username}/${repoData.repository}/${repoData.branch}/${repoData.property}`;
   }
-}
-
-function _mockFetchConfigFile(configContents, version) {
-  const configName = version === 'v1' ? '_config.yml' : 'staticman.yml';
-  const mockConfig =
-    version === 'v1' ? configContents.replace('comments:', 'staticman:') : configContents;
-
-  return nock('https://api.github.com', {
-    reqheaders: {
-      Authorization: `token ${githubToken}`,
-    },
-  })
-    .get(
-      `/repos/${repoData.username}/${repoData.repository}/contents/${configName}?ref=${repoData.branch}`
-    )
-    .reply(200, {
-      type: 'file',
-      encoding: 'base64',
-      size: 5362,
-      name: `${configName}`,
-      path: `${configName}`,
-      content: _btoa(mockConfig),
-      sha: '3d21ec53a331a6f037a91c368710b99387d012c1',
-      url: `https://api.github.com/repos/octokit/octokit.rb/contents/${configName}`,
-      git_url:
-        'https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21ec53a331a6f037a91c368710b99387d012c1',
-      html_url: `https://github.com/octokit/octokit.rb/blob/master/${configName}`,
-      download_url: `https://raw.githubusercontent.com/octokit/octokit.rb/master/${configName}`,
-      _links: {
-        git:
-          'https://api.github.com/repos/octokit/octokit.rb/git/blobs/3d21ec53a331a6f037a91c368710b99387d012c1',
-        self: `https://api.github.com/repos/octokit/octokit.rb/contents/${configName}`,
-        html: `https://github.com/octokit/octokit.rb/blob/master/${configName}`,
-      },
-    });
 }

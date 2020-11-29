@@ -1,11 +1,10 @@
 import nock from 'nock';
 import request from 'supertest';
 
-import config from '../../source/config';
+import * as GitHubMocks from '../helpers/githubApiMocks';
 import StaticmanAPI from '../../source/server';
 
 const staticman = new StaticmanAPI().server;
-const githubToken = config.get('githubToken');
 const supportedApiVersions = [['v1'], ['v2'], ['v3']];
 
 afterEach(() => {
@@ -14,13 +13,18 @@ afterEach(() => {
 
 describe.each(supportedApiVersions)('API %s - Connect endpoint', (version) => {
   it('accepts the collaboration invitation and replies with "Staticman connected!"', async () => {
-    const reqListInvititations = _mockFetchGitHubCollaboratorInvitations();
-    const reqAcceptInvitation = _mockAcceptGitHubCollaboratorInvitation();
+    const mockInviteInfo = {
+      username: 'johndoe',
+      repository: 'foobar',
+      id: 1,
+    };
+    const reqListInvititations = GitHubMocks.fetchGitHubCollaboratorInvitations(mockInviteInfo);
+    const reqAcceptInvitation = GitHubMocks.acceptGitHubCollaboratorInvitation(mockInviteInfo.id);
 
     expect.assertions(2);
 
     await request(staticman)
-      .get(`/${version}/connect/johndoe/foobar`)
+      .get(`/${version}/connect/${mockInviteInfo.username}/${mockInviteInfo.repository}`)
       .expect(200)
       .expect('Staticman connected!');
     expect(reqListInvititations.isDone()).toBe(true);
@@ -28,43 +32,21 @@ describe.each(supportedApiVersions)('API %s - Connect endpoint', (version) => {
   });
 
   it('returns a 404 and an error message when collaboration invitation is not found', async () => {
-    const reqListInvititations = _mockFetchGitHubCollaboratorInvitations();
-    const reqAcceptInvitation = _mockAcceptGitHubCollaboratorInvitation();
+    const mockInviteInfo = {
+      username: 'johndoe',
+      repository: 'foobar',
+      id: 1,
+    };
+    const reqListInvititations = GitHubMocks.fetchGitHubCollaboratorInvitations(mockInviteInfo);
+    const reqAcceptInvitation = GitHubMocks.acceptGitHubCollaboratorInvitation(mockInviteInfo.id);
 
     expect.assertions(2);
 
     await request(staticman)
-      .get(`/${version}/connect/johndoe/anotherrepo`)
+      .get(`/${version}/connect/${mockInviteInfo.username}/anotherrepo`)
       .expect(404)
       .expect('Invitation not found');
     expect(reqListInvititations.isDone()).toBe(true);
     expect(reqAcceptInvitation.isDone()).toBe(false);
   });
 });
-
-function _mockFetchGitHubCollaboratorInvitations() {
-  return nock('https://api.github.com', {
-    reqheaders: {
-      authorization: `token ${githubToken}`,
-    },
-  })
-    .get('/user/repository_invitations')
-    .reply(200, [
-      {
-        id: 123,
-        repository: {
-          full_name: `johndoe/foobar`,
-        },
-      },
-    ]);
-}
-
-function _mockAcceptGitHubCollaboratorInvitation() {
-  return nock('https://api.github.com', {
-    reqheaders: {
-      authorization: `token ${githubToken}`,
-    },
-  })
-    .patch('/user/repository_invitations/123')
-    .reply(204);
-}
