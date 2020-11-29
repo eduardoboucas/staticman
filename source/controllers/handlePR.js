@@ -19,7 +19,7 @@ export default async (repo, data) => {
 
   try {
     const review = await github.getReview(data.number);
-  if (!review.sourceBranch.startsWith('staticman_')) {
+    if (!review.sourceBranch.startsWith('staticman_')) {
       return;
     }
 
@@ -33,10 +33,11 @@ export default async (repo, data) => {
       if (bodyMatch?.length === 2) {
         try {
           const parsedBody = JSON.parse(bodyMatch[1]);
-          const staticman = await new Staticman(parsedBody.parameters);
+          const staticman = new Staticman(parsedBody.parameters);
+          await staticman.init();
 
           staticman.setConfigPath(parsedBody.configPath);
-          staticman.processMerge(parsedBody.fields, parsedBody.options);
+          await staticman.processMerge(parsedBody.fields, parsedBody.options);
         } catch (err) {
           console.log(err);
 
@@ -50,7 +51,7 @@ export default async (repo, data) => {
     if (ua) {
       ua.event('Hooks', 'Delete branch').send();
     }
-    github.deleteBranch(review.sourceBranch);
+    await github.deleteBranch(review.sourceBranch);
   } catch (err) {
     console.log(err);
 

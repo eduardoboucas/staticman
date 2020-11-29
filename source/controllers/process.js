@@ -121,7 +121,8 @@ export function sendResponse(res, data) {
 }
 
 export default async (req, res) => {
-  const staticman = await new Staticman(req.params);
+  const staticman = new Staticman(req.params);
+  await staticman.init();
 
   staticman.setConfigPath();
   staticman.setIp(req.headers['x-forwarded-for'] || req.connection.remoteAddress);

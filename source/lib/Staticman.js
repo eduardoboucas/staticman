@@ -18,27 +18,25 @@ import * as Transforms from './Transforms';
 
 export default class Staticman {
   constructor(parameters) {
-    return (async () => {
-      this.parameters = parameters;
+    this.parameters = parameters;
 
-      const { branch, repository, service, username, version } = parameters;
+    // Generate unique id
+    this.uid = uuidv1();
 
-      // Initialise the Git service API
-      this.git = await gitFactory(service, {
-        branch,
-        repository,
-        username,
-        version,
-      });
+    this.rsa = new NodeRSA();
+    this.rsa.importKey(config.get('rsaPrivateKey'), 'private');
+  }
 
-      // Generate unique id
-      this.uid = uuidv1();
+  async init() {
+    const { branch, repository, service, username, version } = this.parameters;
 
-      this.rsa = new NodeRSA();
-      this.rsa.importKey(config.get('rsaPrivateKey'), 'private');
-
-      return this;
-    })();
+    // Initialise the Git service API
+    this.git = await gitFactory(service, {
+      branch,
+      repository,
+      username,
+      version,
+    });
   }
 
   _applyInternalFields(data) {
@@ -590,22 +588,20 @@ export default class Staticman {
       });
   }
 
-  processMerge(fields, options) {
+  async processMerge(fields, options) {
     this.fields = { ...fields };
     this.options = { ...options };
 
-    return this.getSiteConfig()
-      .then(() => {
-        const subscriptions = this._initialiseSubscriptions();
-
-        return subscriptions.send(options.parent, fields, options, this.siteConfig);
-      })
-      .catch((err) => {
-        throw errorHandler('ERROR_PROCESSING_MERGE', {
-          err,
-          instance: this,
-        });
+    try {
+      await this.getSiteConfig();
+      const subscriptions = this._initialiseSubscriptions();
+      return subscriptions.send(options.parent, fields, options, this.siteConfig);
+    } catch (err) {
+      throw errorHandler('ERROR_PROCESSING_MERGE', {
+        err,
+        instance: this,
       });
+    }
   }
 
   setConfigPath(configPath) {

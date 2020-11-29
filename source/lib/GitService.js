@@ -5,7 +5,7 @@ import errorHandler from './ErrorHandler';
 export default class GitService {
   constructor(username, repository, branch) {
     this.username = username;
-    this.repository = repository;
+  this.repository = repository;
     this.branch = branch;
   }
 

@@ -10,6 +10,7 @@ let req;
 jest.mock('../../../source/lib/Staticman', () => {
   return jest.fn().mockImplementation(() => {
     return {
+      init: jest.fn().mockResolvedValue(),
       setConfigPath: mockSetConfigPathFn,
       processMerge: mockProcessMergeFn,
     };

@@ -4,7 +4,8 @@ import * as RSA from '../lib/RSA';
 import Staticman from '../lib/Staticman';
 
 export default async (req, res) => {
-  const staticman = await new Staticman(req.params);
+  const staticman = new Staticman(req.params);
+  await staticman.init();
   staticman.setConfigPath();
 
   let requestAccessToken;
