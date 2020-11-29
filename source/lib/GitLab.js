@@ -40,7 +40,7 @@ export default class GitLab extends GitService {
     }
   }
 
-  _commitFile(filePath, content, commitMessage, branch) {
+  async _commitFile(filePath, content, commitMessage, branch) {
     return this.api.RepositoryFiles.create(this.repositoryId, filePath, branch, {
       content,
       commit_message: commitMessage,
@@ -48,19 +48,20 @@ export default class GitLab extends GitService {
     });
   }
 
-  getBranchHeadCommit(branch) {
-    return this.api.Branches.show(this.repositoryId, branch).then((res) => res.commit.id);
+  async getBranchHeadCommit(branch) {
+    const result = await this.api.Branches.show(this.repositoryId, branch);
+    return result.commit.id;
   }
 
-  createBranch(branch, sha) {
+  async createBranch(branch, sha) {
     return this.api.Branches.create(this.repositoryId, branch, sha);
   }
 
-  deleteBranch(branch) {
+  async deleteBranch(branch) {
     return this.api.Branches.remove(this.repositoryId, branch);
   }
 
-  createReview(reviewTitle, branch, reviewBody) {
+  async createReview(reviewTitle, branch, reviewBody) {
     return this.api.MergeRequests.create(this.repositoryId, branch, this.branch, reviewTitle, {
       description: reviewBody,
       remove_source_branch: true,
@@ -79,43 +80,49 @@ export default class GitLab extends GitService {
     return new Review(title, body, state, sourceBranch, targetBranch);
   }
 
-  readFile(filePath, getFullResponse) {
-    return super
-      .readFile(filePath, getFullResponse)
-      .catch((err) => Promise.reject(errorHandler('GITLAB_READING_FILE', { err })));
+  async readFile(filePath, getFullResponse) {
+    try {
+      return await super.readFile(filePath, getFullResponse);
+    } catch (err) {
+      throw errorHandler('GITLAB_READING_FILE', { err });
+    }
   }
 
-  writeFile(filePath, data, targetBranch, commitTitle) {
-    return super.writeFile(filePath, data, targetBranch, commitTitle).catch((err) => {
+  async writeFile(filePath, data, targetBranch, commitTitle) {
+    try {
+      return await super.writeFile(filePath, data, targetBranch, commitTitle);
+    } catch (err) {
       if (err?.error?.message === 'A file with this name already exists') {
         throw errorHandler('GITLAB_FILE_ALREADY_EXISTS', { err });
       }
 
       throw errorHandler('GITLAB_WRITING_FILE', { err });
-    });
+    }
   }
 
-  writeFileAndSendReview(filePath, data, branch, commitTitle, reviewBody) {
-    return super
-      .writeFileAndSendReview(filePath, data, branch, commitTitle, reviewBody)
-      .catch((err) => {
-        throw errorHandler('GITLAB_CREATING_PR', { err });
-      });
+  async writeFileAndSendReview(filePath, data, branch, commitTitle, reviewBody) {
+    try {
+      return await super.writeFileAndSendReview(filePath, data, branch, commitTitle, reviewBody);
+    } catch (err) {
+      throw errorHandler('GITLAB_CREATING_PR', { err });
+    }
   }
 
-  getCurrentUser() {
-    return this.api.Users.current()
-      .then(
-        ({
-          username,
-          email,
-          name,
-          avatar_url: avatarUrl,
-          bio,
-          website_url: websiteUrl,
-          organisation,
-        }) => new User('gitlab', username, email, name, avatarUrl, bio, websiteUrl, organisation)
-      )
-      .catch((err) => Promise.reject(errorHandler('GITLAB_GET_USER', { err })));
+  async getCurrentUser() {
+    try {
+      const {
+        username,
+        email,
+        name,
+        avatar_url: avatarUrl,
+        bio,
+        website_url: websiteUrl,
+        organisation,
+      } = await this.api.Users.current();
+
+      return new User('gitlab', username, email, name, avatarUrl, bio, websiteUrl, organisation);
+    } catch (err) {
+      throw errorHandler('GITLAB_GET_USER', { err });
+    }
   }
 }
