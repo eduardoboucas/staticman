@@ -4,7 +4,6 @@ import markdownTable from 'markdown-table';
 import NodeRSA from 'node-rsa';
 import yaml from 'js-yaml';
 
-import CatchAllApiMock from './CatchAllApiMock';
 import config from '../../source/config';
 import * as sampleData from './sampleData';
 import SiteConfig from '../../source/siteConfig';
@@ -39,10 +38,6 @@ export function decrypt(text) {
 
 export function encrypt(text) {
   return rsa.encrypt(text, 'base64');
-}
-
-export function getCatchAllApiMock(callback) {
-  return new CatchAllApiMock(callback);
 }
 
 export function getConfig() {

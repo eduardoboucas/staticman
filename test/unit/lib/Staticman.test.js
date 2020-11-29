@@ -346,11 +346,8 @@ describe('Staticman interface', () => {
       mockConfig.set('akismet.enabled', false);
       staticman.siteConfig = mockConfig;
 
-      const catchAllMockRequest = mockHelpers.getCatchAllApiMock();
-
       return staticman._checkForSpam(fields).then((response) => {
         expect(response).toEqual(fields);
-        expect(catchAllMockRequest.hasIntercepted()).toBe(false);
       });
     });
 
