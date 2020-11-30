@@ -30,34 +30,30 @@ export default async (req, res) => {
         );
   }
 
-  return staticman
-    .getSiteConfig()
-    .then(requestAccessToken)
-    .then(async (accessToken) => {
-      const git = await gitFactory(req.params.service, {
-        oauthToken: accessToken,
-        version: req.params.version,
-      });
-
-      // TODO: Simplify this when v2 support is dropped.
-      const getUser =
-        req.params.version === '2' && req.params.service === 'github'
-          ? git.api.users.getAuthenticated({}).then(({ data }) => data)
-          : git.getCurrentUser();
-
-      return getUser.then((user) => {
-        res.send({
-          accessToken: RSA.encrypt(accessToken),
-          user,
-        });
-      });
-    })
-    .catch((err) => {
-      const statusCode = err.statusCode || 401;
-
-      res.status(statusCode).send({
-        statusCode,
-        message: err.message,
-      });
+  try {
+    const siteConfig = await staticman.getSiteConfig();
+    const accessToken = await requestAccessToken(siteConfig);
+    const git = await gitFactory(req.params.service, {
+      oauthToken: accessToken,
+      version: req.params.version,
     });
+
+    // TODO: Simplify this when v2 support is dropped.
+    const user =
+      req.params.version === '2' && req.params.service === 'github'
+        ? await git.api.users.getAuthenticated({}).then(({ data }) => data)
+        : await git.getCurrentUser();
+
+    res.send({
+      accessToken: RSA.encrypt(accessToken),
+      user,
+    });
+  } catch (err) {
+    const statusCode = err.statusCode || 401;
+
+    res.status(statusCode).send({
+      statusCode,
+      message: err.message,
+    });
+  }
 };
