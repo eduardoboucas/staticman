@@ -76,7 +76,6 @@ describe('Staticman interface', () => {
       const staticman = new Staticman(mockParameters);
       await staticman.init();
 
-      expect(staticman.rsa).toBeDefined();
       expect(mockImportKeyFn).toHaveBeenCalled();
       expect(mockImportKeyFn.mock.calls[0][0]).toBe(config.get('rsaPrivateKey'));
     });

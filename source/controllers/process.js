@@ -23,7 +23,7 @@ export function checkRecaptcha(staticman, req) {
         let decryptedSecret;
 
         try {
-          decryptedSecret = staticman.decrypt(reCaptchaOptions.secret);
+          decryptedSecret = Staticman.decrypt(reCaptchaOptions.secret);
         } catch (err) {
           return reject(errorHandler('RECAPTCHA_CONFIG_MISMATCH'));
         }

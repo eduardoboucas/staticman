@@ -25,7 +25,7 @@ describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
 
     const mockConfigInfo = {
       contents: mockConfig,
-      version,
+      version: version.charAt(1),
       username: repoData.username,
       repository: repoData.repository,
       branch: repoData.branch,
@@ -71,7 +71,7 @@ describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
 
     const mockConfigInfo = {
       contents: mockConfig,
-      version,
+      version: version.charAt(1),
       username: repoData.username,
       repository: repoData.repository,
       branch: repoData.branch,
@@ -111,7 +111,7 @@ describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
   it('outputs a PARSING_ERROR error if the site config is malformed', async () => {
     const mockConfigInfo = {
       contents: sampleData.config3,
-      version,
+      version: version.charAt(1),
       username: repoData.username,
       repository: repoData.repository,
       branch: repoData.branch,

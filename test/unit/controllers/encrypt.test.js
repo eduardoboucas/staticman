@@ -1,35 +1,24 @@
+import encryptController from '../../../source/controllers/encrypt';
+import { encrypt } from '../../../source/lib/RSA';
 import * as helpers from '../../helpers';
 
-let encrypt;
-let mockEncryptFn;
-let mockImportKeyFn;
+jest.mock('../../../source/lib/RSA');
+
 let req;
 let res;
 
 beforeEach(() => {
   req = helpers.getMockRequest();
   res = helpers.getMockResponse();
-
-  mockEncryptFn = jest.fn(() => 'Encrypted text');
-  mockImportKeyFn = jest.fn();
-
-  jest.mock('node-rsa', () => {
-    return jest.fn(() => ({
-      encrypt: mockEncryptFn,
-      importKey: mockImportKeyFn,
-    }));
-  });
-
-  encrypt = require('../../../source/controllers/encrypt').default;
 });
 
 describe('Encrypt controller', () => {
   test('returns an encrypted version of the given text', () => {
     req.params.text = 'This is the text to encrypt';
+    encrypt.mockReturnValue('Encrypted text');
 
-    encrypt(req, res);
+    encryptController(req, res);
 
-    expect(mockEncryptFn.mock.calls[0][0]).toBe(req.params.text);
     expect(res.send.mock.calls[0][0]).toBe('Encrypted text');
   });
 });

@@ -1,16 +1,11 @@
 import cloneDeep from 'lodash/cloneDeep';
 import objectPath from 'object-path';
 import markdownTable from 'markdown-table';
-import NodeRSA from 'node-rsa';
 import yaml from 'js-yaml';
 
-import config from '../../source/config';
+import * as RSA from '../../source/lib/RSA';
 import * as sampleData from './sampleData';
 import SiteConfig from '../../source/siteConfig';
-
-const rsa = new NodeRSA();
-const rsaKey = config.get('rsaPrivateKey');
-rsa.importKey(rsaKey, 'private');
 
 const fields = {
   name: 'Eduardo Bouças',
@@ -28,16 +23,16 @@ const parameters = {
 };
 
 const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8');
-const siteConfig = SiteConfig(parsedConfig.comments, rsa);
+const siteConfig = SiteConfig(parsedConfig.comments);
 
 export const baseUrl = '';
 
 export function decrypt(text) {
-  return rsa.decrypt(text, 'utf8');
+  return RSA.decrypt(text);
 }
 
 export function encrypt(text) {
-  return rsa.encrypt(text, 'base64');
+  return RSA.encrypt(text);
 }
 
 export function getConfig() {

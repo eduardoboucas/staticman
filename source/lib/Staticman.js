@@ -2,7 +2,6 @@ import akismetApi from 'akismet';
 import Mailgun from 'mailgun-js';
 import markdownTable from 'markdown-table';
 import moment from 'moment';
-import NodeRSA from 'node-rsa';
 import objectPath from 'object-path';
 import slugify from 'slug';
 import uuidv1 from 'uuid/v1';
@@ -22,9 +21,6 @@ export default class Staticman {
 
     // Generate unique id
     this.uid = uuidv1();
-
-    this.rsa = new NodeRSA();
-    this.rsa.importKey(config.get('rsaPrivateKey'), 'private');
   }
 
   async init() {
@@ -200,9 +196,11 @@ export default class Staticman {
       throw errorHandler('GITHUB_AUTH_TOKEN_MISSING');
     }
 
-    const oauthToken = RSA.decrypt(this.options['github-token']);
+    let oauthToken;
 
-    if (!oauthToken) {
+    try {
+      oauthToken = RSA.decrypt(this.options['github-token']);
+    } catch (err) {
       throw errorHandler('GITHUB_AUTH_TOKEN_INVALID');
     }
 
@@ -428,7 +426,7 @@ export default class Staticman {
       });
     }
 
-    this.siteConfig = SiteConfig(siteConfig, this.rsa);
+    this.siteConfig = SiteConfig(siteConfig);
 
     return null;
   }
@@ -475,35 +473,34 @@ export default class Staticman {
     return null;
   }
 
-  decrypt(encrypted) {
-    return this.rsa.decrypt(encrypted, 'utf8');
+  static decrypt(encrypted) {
+    return RSA.decrypt(encrypted);
   }
 
   getParameters() {
     return this.parameters;
   }
 
-  getSiteConfig(force) {
-    if (this.siteConfig && !force) return Promise.resolve(this.siteConfig);
+  async getSiteConfig(force) {
+    if (this.siteConfig && !force) return this.siteConfig;
 
     if (!this.configPath) {
       throw errorHandler('NO_CONFIG_PATH');
     }
 
-    return this.git.readFile(this.configPath.file).then((data) => {
-      const siteConfig = objectPath.get(data, this.configPath.path);
-      const validationErrors = this._validateConfig(siteConfig);
+    const data = await this.git.readFile(this.configPath.file);
+    const siteConfig = objectPath.get(data, this.configPath.path);
+    const validationErrors = this._validateConfig(siteConfig);
 
-      if (validationErrors) {
-        throw validationErrors;
-      }
+    if (validationErrors) {
+      throw validationErrors;
+    }
 
-      if (siteConfig.branch !== this.parameters.branch) {
-        throw errorHandler('BRANCH_MISMATCH');
-      }
+    if (siteConfig.branch !== this.parameters.branch) {
+      throw errorHandler('BRANCH_MISMATCH');
+    }
 
-      return this.siteConfig;
-    });
+    return this.siteConfig;
   }
 
   processEntry(fields, options) {

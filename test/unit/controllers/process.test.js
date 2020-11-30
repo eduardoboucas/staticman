@@ -235,15 +235,15 @@ describe('Process controller', () => {
       });
 
       jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn((parameters) => ({
-          init: () => Promise.resolve(),
-          decrypt: mockHelpers.decrypt,
-          getSiteConfig: () => Promise.resolve(mockSiteConfig),
+        return jest.fn(() => ({
+          init: jest.fn().mockResolvedValue(),
+          getSiteConfig: jest.fn().mockResolvedValue(mockSiteConfig),
         }));
       });
 
       const { checkRecaptcha } = require('../../../source/controllers/process');
       const Staticman = require('../../../source/lib/Staticman');
+      Staticman.decrypt = jest.fn((text) => mockHelpers.decrypt(text));
       const staticman = new Staticman(req.params);
       await staticman.init();
 
@@ -269,9 +269,6 @@ describe('Process controller', () => {
     test('displays an error if the reCaptcha verification fails', async () => {
       const reCaptchaError = new Error('someError');
       const mockInitFn = jest.fn();
-      // const mockVerifyFn = jest.fn((verifyReq, reCaptchaCallback) => {
-      //   reCaptchaCallback(reCaptchaError);
-      // });
       const mockVerifyFn = jest.fn().mockImplementation(() => {
         throw reCaptchaError;
       });
@@ -284,15 +281,15 @@ describe('Process controller', () => {
       });
 
       jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn((parameters) => ({
-          init: () => Promise.resolve(),
-          decrypt: mockHelpers.decrypt,
-          getSiteConfig: () => Promise.resolve(mockSiteConfig),
+        return jest.fn(() => ({
+          init: jest.fn().mockResolvedValue(),
+          getSiteConfig: jest.fn().mockResolvedValue(mockSiteConfig),
         }));
       });
 
       const { checkRecaptcha } = require('../../../source/controllers/process');
       const Staticman = require('../../../source/lib/Staticman');
+      Staticman.decrypt = jest.fn((text) => mockHelpers.decrypt(text));
       const staticman = new Staticman(req.params);
       await staticman.init();
 

@@ -1,5 +1,7 @@
 import convict from 'convict';
 
+import { decrypt } from './lib/RSA';
+
 export const schema = {
   allowedFields: {
     doc:
@@ -205,12 +207,12 @@ export const schema = {
   },
 };
 
-export default (data, rsa) => {
+export default (data) => {
   convict.addFormat({
     name: 'EncryptedString',
     validate: () => true,
     coerce: (val) => {
-      return rsa.decrypt(val, 'utf8');
+      return decrypt(val);
     },
   });
 

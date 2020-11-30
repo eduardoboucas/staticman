@@ -5,7 +5,7 @@ import config from '../../source/config';
 const githubToken = config.get('githubToken');
 
 export function fetchGitHubCollaboratorInvitations(inviteInfo) {
-  return nock('https://api.github.com', {
+  return nock(/api\.github\.com/, {
     reqheaders: {
       authorization: `token ${githubToken}`,
     },
@@ -22,7 +22,7 @@ export function fetchGitHubCollaboratorInvitations(inviteInfo) {
 }
 
 export function acceptGitHubCollaboratorInvitation(inviteId) {
-  return nock('https://api.github.com', {
+  return nock(/api\.github\.com/, {
     reqheaders: {
       authorization: `token ${githubToken}`,
     },
@@ -32,20 +32,20 @@ export function acceptGitHubCollaboratorInvitation(inviteId) {
 }
 
 export function fetchConfigFile(configInfo) {
-  const configName = configInfo.version === 'v1' ? '_config.yml' : 'staticman.yml';
+  const configName = configInfo.version === '1' ? '_config.yml' : 'staticman.yml';
   const mockConfig =
-    configInfo.version === 'v1'
+    configInfo.version === '1'
       ? configInfo.contents.replace('comments:', 'staticman:')
       : configInfo.contents;
 
-  return nock('https://api.github.com', {
+  const endpoint = `/repos/${configInfo.username}/${configInfo.repository}/contents/${configName}?ref=${configInfo.branch}`;
+
+  return nock(/api\.github\.com/, {
     reqheaders: {
       Authorization: `token ${githubToken}`,
     },
   })
-    .get(
-      `/repos/${configInfo.username}/${configInfo.repository}/contents/${configName}?ref=${configInfo.branch}`
-    )
+    .get(endpoint)
     .reply(200, {
       type: 'file',
       encoding: 'base64',
@@ -70,4 +70,30 @@ export function fetchConfigFile(configInfo) {
 
 function _btoa(contents) {
   return Buffer.from(contents).toString('base64');
+}
+
+export function fetchPullRequest(responsePrBody) {
+  return nock(/api\.github\.com/, {
+    reqheaders: {
+      authorization: 'token '.concat('1q2w3e4r'),
+    },
+  })
+    .get(
+      `/repos/${responsePrBody.repository.owner.login}/${responsePrBody.repository.name}/pulls/${responsePrBody.number}`
+    )
+    .reply(200, responsePrBody);
+}
+
+export function deleteBranch(deleteInfo) {
+  const endpoint = `/repos/${deleteInfo.username}/${
+    deleteInfo.repository
+  }/git/refs/heads%2F${encodeURI(deleteInfo.branch)}`;
+
+  return nock(/api\.github\.com/, {
+    reqheaders: {
+      authorization: 'token '.concat('1q2w3e4r'),
+    },
+  })
+    .delete(endpoint)
+    .reply(204);
 }
