@@ -482,7 +482,9 @@ export default class Staticman {
   }
 
   async getSiteConfig(force) {
-    if (this.siteConfig && !force) return this.siteConfig;
+    if (this.siteConfig && !force) {
+      return this.siteConfig;
+    }
 
     if (!this.configPath) {
       throw errorHandler('NO_CONFIG_PATH');
@@ -503,86 +505,73 @@ export default class Staticman {
     return this.siteConfig;
   }
 
-  processEntry(fields, options) {
+  async processEntry(fields, options) {
     this.fields = { ...fields };
     this.options = { ...options };
 
-    return this.getSiteConfig()
-      .then(() => {
-        return this._checkAuth();
-      })
-      .then(() => {
-        return this._checkForSpam(fields);
-      })
-      .then((siteConfigFields) => {
-        let transformedFields = siteConfigFields;
-        // Validate fields
-        const fieldErrors = this._validateFields(transformedFields);
+    try {
+      await this.getSiteConfig();
+      await this._checkAuth();
+      let siteConfigFields = await this._checkForSpam(fields);
+      // Validate fields
+      const fieldErrors = this._validateFields(siteConfigFields);
 
-        if (fieldErrors) throw fieldErrors;
+      if (fieldErrors) {
+        throw fieldErrors;
+      }
 
-        // Add generated fields
-        transformedFields = this._applyGeneratedFields(transformedFields);
+      // Add generated fields
+      siteConfigFields = this._applyGeneratedFields(siteConfigFields);
 
-        // Apply transforms
-        return this._applyTransforms(transformedFields);
-      })
-      .then((transformedFields) => {
-        return this._applyInternalFields(transformedFields);
-      })
-      .then((extendedFields) => {
-        // Create file
-        return this._createFile(extendedFields);
-      })
-      .then((data) => {
-        const filePath = this._getNewFilePath(fields);
-        const subscriptions = this._initialiseSubscriptions();
-        const commitMessage = this._resolvePlaceholders(this.siteConfig.get('commitMessage'), {
-          fields,
-          options,
-        });
+      // Apply transforms
+      const transformedFields = await this._applyTransforms(siteConfigFields);
+      const extendedFields = this._applyInternalFields(transformedFields);
+      // Create file
+      const data = await this._createFile(extendedFields);
 
-        // Subscribe user, if applicable
-        if (
-          subscriptions &&
-          options.parent &&
-          options.subscribe &&
-          this.fields[options.subscribe]
-        ) {
-          subscriptions.set(options.parent, this.fields[options.subscribe]).catch((err) => {
-            console.log(err.stack || err);
-          });
-        }
-
-        if (this.siteConfig.get('moderation')) {
-          const newBranch = `staticman_${this.uid}`;
-
-          return this.git.writeFileAndSendReview(
-            filePath,
-            data,
-            newBranch,
-            commitMessage,
-            this._generateReviewBody(fields)
-          );
-        }
-        if (subscriptions && options.parent) {
-          subscriptions.send(options.parent, fields, options, this.siteConfig);
-        }
-
-        return this.git.writeFile(filePath, data, this.parameters.branch, commitMessage);
-      })
-      .then(() => {
-        return {
-          fields,
-          redirect: options.redirect ? options.redirect : false,
-        };
-      })
-      .catch((err) => {
-        throw errorHandler('ERROR_PROCESSING_ENTRY', {
-          err,
-          instance: this,
-        });
+      const filePath = this._getNewFilePath(fields);
+      const subscriptions = this._initialiseSubscriptions();
+      const commitMessage = this._resolvePlaceholders(this.siteConfig.get('commitMessage'), {
+        fields,
+        options,
       });
+
+      // Subscribe user, if applicable
+      if (subscriptions && options.parent && options.subscribe && this.fields[options.subscribe]) {
+        try {
+          await subscriptions.set(options.parent, this.fields[options.subscribe]);
+        } catch (err) {
+          console.log(err.stack || err);
+        }
+      }
+
+      if (this.siteConfig.get('moderation')) {
+        const newBranch = `staticman_${this.uid}`;
+
+        return this.git.writeFileAndSendReview(
+          filePath,
+          data,
+          newBranch,
+          commitMessage,
+          this._generateReviewBody(fields)
+        );
+      }
+      if (subscriptions && options.parent) {
+        subscriptions.send(options.parent, fields, options, this.siteConfig);
+      }
+
+      await this.git.writeFile(filePath, data, this.parameters.branch, commitMessage);
+
+      return {
+        fields,
+        redirect: options.redirect ? options.redirect : false,
+      };
+    } catch (err) {
+      throw errorHandler('ERROR_PROCESSING_ENTRY', {
+        err,
+        instance: this,
+      });
+    }
   }
 
   async processMerge(fields, options) {
