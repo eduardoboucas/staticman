@@ -464,7 +464,7 @@ describe('Staticman interface', () => {
     });
   });
 
-  describe('authentication ', () => {
+  describe('authentication', () => {
     beforeEach(() => {
       mockConfig.set('auth.required', true);
     });
@@ -503,15 +503,9 @@ describe('Staticman interface', () => {
       staticman.options = options;
       staticman.siteConfig = mockConfig;
 
-      expect.assertions(1);
-
-      try {
-        await staticman._checkAuth();
-      } catch (err) {
-        expect(err).toEqual({
-          _smErrorCode: 'AUTH_TOKEN_MISSING',
-        });
-      }
+      await expect(staticman._checkAuth()).rejects.toMatchObject({
+        _smErrorCode: 'AUTH_TOKEN_MISSING',
+      });
     });
 
     test('throws an error if unable to decrypt the `auth-token` option', async () => {
@@ -687,15 +681,9 @@ describe('Staticman interface', () => {
       staticman.options = options;
       staticman.siteConfig = mockConfig;
 
-      expect.assertions(1);
-
-      try {
-        await staticman._checkAuth();
-      } catch (err) {
-        expect(err).toEqual({
-          _smErrorCode: 'GITHUB_AUTH_TOKEN_MISSING',
-        });
-      }
+      await expect(staticman._checkAuth()).rejects.toMatchObject({
+        _smErrorCode: 'GITHUB_AUTH_TOKEN_MISSING',
+      });
     });
 
     test('throws an error if unable to decrypt the `github-token` option in the v2 API', async () => {
@@ -873,15 +861,9 @@ describe('Staticman interface', () => {
       mockConfig.set('transforms', undefined);
       staticman.siteConfig = mockConfig;
 
-      expect.assertions(1);
-
-      try {
-        await staticman._createFile(fields);
-      } catch (err) {
-        expect(err).toEqual({
-          _smErrorCode: 'NO_FRONTMATTER_CONTENT_TRANSFORM',
-        });
-      }
+      await expect(staticman._createFile(fields)).rejects.toMatchObject({
+        _smErrorCode: 'NO_FRONTMATTER_CONTENT_TRANSFORM',
+      });
     });
 
     test('throws an error if `format` contains an invalid format', async () => {
@@ -1251,15 +1233,9 @@ describe('Staticman interface', () => {
       const staticman = new Staticman(mockParameters);
       await staticman.init();
 
-      expect.assertions(1);
-
-      try {
-        await staticman.getSiteConfig();
-      } catch (err) {
-        expect(err).toEqual({
-          _smErrorCode: 'NO_CONFIG_PATH',
-        });
-      }
+      await expect(staticman.getSiteConfig()).rejects.toMatchObject({
+        _smErrorCode: 'NO_CONFIG_PATH',
+      });
     });
 
     test('fetches the site config from the repository, even if there is one already defined, if `force` is truthy', async () => {

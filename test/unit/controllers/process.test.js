@@ -61,11 +61,9 @@ describe('Process controller', () => {
 
       expect.assertions(1);
 
-      try {
-        await checkRecaptcha(staticman, req);
-      } catch (err) {
-        expect(err._smErrorCode).toBe('RECAPTCHA_MISSING_CREDENTIALS');
-      }
+      await expect(checkRecaptcha(staticman, req)).rejects.toMatchObject({
+        _smErrorCode: 'RECAPTCHA_MISSING_CREDENTIALS',
+      });
     });
 
     test('throws an error if reCaptcha site key is not in the request body', async () => {
@@ -87,11 +85,9 @@ describe('Process controller', () => {
 
       expect.assertions(1);
 
-      try {
-        await checkRecaptcha(staticman, req);
-      } catch (err) {
-        expect(err._smErrorCode).toBe('RECAPTCHA_MISSING_CREDENTIALS');
-      }
+      await expect(checkRecaptcha(staticman, req)).rejects.toMatchObject({
+        _smErrorCode: 'RECAPTCHA_MISSING_CREDENTIALS',
+      });
     });
 
     test('throws an error if reCaptcha secret is not in the request body', async () => {
@@ -113,11 +109,9 @@ describe('Process controller', () => {
 
       expect.assertions(1);
 
-      try {
-        await checkRecaptcha(staticman, req);
-      } catch (err) {
-        expect(err._smErrorCode).toBe('RECAPTCHA_MISSING_CREDENTIALS');
-      }
+      await expect(checkRecaptcha(staticman, req)).rejects.toMatchObject({
+        _smErrorCode: 'RECAPTCHA_MISSING_CREDENTIALS',
+      });
     });
 
     test('throws an error if the reCatpcha secret fails to decrypt', async () => {
@@ -141,11 +135,9 @@ describe('Process controller', () => {
 
       expect.assertions(1);
 
-      try {
-        await checkRecaptcha(staticman, req);
-      } catch (err) {
-        expect(err._smErrorCode).toBe('RECAPTCHA_CONFIG_MISMATCH');
-      }
+      await expect(checkRecaptcha(staticman, req)).rejects.toMatchObject({
+        _smErrorCode: 'RECAPTCHA_CONFIG_MISMATCH',
+      });
     });
 
     test('throws an error if the reCatpcha siteKey provided does not match the one in config', async () => {
@@ -168,11 +160,9 @@ describe('Process controller', () => {
 
       expect.assertions(1);
 
-      try {
-        await checkRecaptcha(staticman, req);
-      } catch (err) {
-        expect(err._smErrorCode).toBe('RECAPTCHA_CONFIG_MISMATCH');
-      }
+      await expect(checkRecaptcha(staticman, req)).rejects.toMatchObject({
+        _smErrorCode: 'RECAPTCHA_CONFIG_MISMATCH',
+      });
     });
 
     test('throws an error if the reCatpcha secret provided does not match the one in config', async () => {
@@ -195,11 +185,9 @@ describe('Process controller', () => {
 
       expect.assertions(1);
 
-      try {
-        await checkRecaptcha(staticman, req);
-      } catch (err) {
-        expect(err._smErrorCode).toBe('RECAPTCHA_CONFIG_MISMATCH');
-      }
+      await expect(checkRecaptcha(staticman, req)).rejects.toMatchObject({
+        _smErrorCode: 'RECAPTCHA_CONFIG_MISMATCH',
+      });
     });
 
     test('initialises and triggers a verification from the reCaptcha module', async () => {
@@ -271,11 +259,7 @@ describe('Process controller', () => {
 
       expect.assertions(1);
 
-      try {
-        await checkRecaptcha(staticman, req);
-      } catch (err) {
-        expect(err).toEqual(reCaptchaError);
-      }
+      await expect(checkRecaptcha(staticman, req)).rejects.toMatchObject(reCaptchaError);
     });
   });
 
@@ -425,11 +409,7 @@ describe('Process controller', () => {
 
       expect.assertions(1);
 
-      try {
-        await processFn(staticman, req, res);
-      } catch (err) {
-        expect(err).toEqual(processEntryError);
-      }
+      await expect(processFn(staticman, req, res)).rejects.toThrow(processEntryError);
     });
   });
 

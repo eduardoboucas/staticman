@@ -115,6 +115,7 @@
     },
     "extends": [
       "airbnb/base",
+      "plugin:jest/recommended",
       "plugin:jest/style",
       "prettier"
     ],

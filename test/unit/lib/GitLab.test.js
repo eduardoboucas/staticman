@@ -100,19 +100,15 @@ describe('GitLab interface', () => {
 
       expect.assertions(2);
 
-      try {
-        await gitlab.readFile(filePath);
-      } catch (err) {
-        expect(mockShowRepoFile).toHaveBeenCalledWith(
-          `${req.params.username}/${req.params.repository}`,
-          filePath,
-          req.params.branch
-        );
+      await expect(gitlab.readFile(filePath)).rejects.toMatchObject({
+        _smErrorCode: 'GITLAB_READING_FILE',
+      });
 
-        expect(err).toEqual({
-          _smErrorCode: 'GITLAB_READING_FILE',
-        });
-      }
+      expect(mockShowRepoFile).toHaveBeenCalledWith(
+        `${req.params.username}/${req.params.repository}`,
+        filePath,
+        req.params.branch
+      );
     });
 
     test('returns an error if parsing fails for the given file', async () => {
@@ -133,19 +129,19 @@ describe('GitLab interface', () => {
 
       const gitlab = new GitLab(req.params);
 
-      expect.assertions(3);
+      expect.assertions(2);
 
-      try {
-        await gitlab.readFile(filePath);
-      } catch (err) {
-        expect(mockShowRepoFile).toHaveBeenCalledWith(
-          `${req.params.username}/${req.params.repository}`,
-          filePath,
-          req.params.branch
-        );
-        expect(err._smErrorCode).toBe('PARSING_ERROR');
-        expect(err.message).toBeDefined();
-      }
+      await expect(gitlab.readFile(filePath)).rejects.toMatchObject(
+        expect.objectContaining({
+          _smErrorCode: 'PARSING_ERROR',
+          message: expect.anything(),
+        })
+      );
+      expect(mockShowRepoFile).toHaveBeenCalledWith(
+        `${req.params.username}/${req.params.repository}`,
+        filePath,
+        req.params.branch
+      );
     });
 
     test('reads a YAML file and returns its parsed contents', async () => {
@@ -328,11 +324,11 @@ describe('GitLab interface', () => {
 
       expect.assertions(1);
 
-      try {
-        await gitlab.writeFile(options.path, options.content, options.branch, options.commitTitle);
-      } catch (err) {
-        expect(err._smErrorCode).toBe('GITLAB_WRITING_FILE');
-      }
+      await expect(
+        gitlab.writeFile(options.path, options.content, options.branch, options.commitTitle)
+      ).rejects.toMatchObject({
+        _smErrorCode: 'GITLAB_WRITING_FILE',
+      });
     });
   });
 
@@ -429,17 +425,15 @@ describe('GitLab interface', () => {
 
       expect.assertions(1);
 
-      try {
-        await gitlab.writeFileAndSendReview(
+      await expect(
+        gitlab.writeFileAndSendReview(
           options.path,
           options.content,
           options.newBranch,
           options.commitTitle,
           options.commitBody
-        );
-      } catch (err) {
-        expect(err._smErrorCode).toBe('GITLAB_CREATING_PR');
-      }
+        )
+      ).rejects.toMatchObject({ _smErrorCode: 'GITLAB_CREATING_PR' });
     });
   });
 
@@ -476,11 +470,9 @@ describe('GitLab interface', () => {
 
       expect.assertions(1);
 
-      try {
-        await gitlab.getCurrentUser();
-      } catch (err) {
-        expect(err._smErrorCode).toBe('GITLAB_GET_USER');
-      }
+      await expect(gitlab.getCurrentUser()).rejects.toMatchObject({
+        _smErrorCode: 'GITLAB_GET_USER',
+      });
     });
   });
 });

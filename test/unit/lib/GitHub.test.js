@@ -64,13 +64,11 @@ describe('GitHub interface', () => {
 
   test('throws error if no personal access token or OAuth token is provided', async () => {
     jest.spyOn(config, 'get').mockImplementation(() => null);
+
     expect.assertions(1);
-    try {
-      const github = new GitHub({});
-      await github.init();
-    } catch (e) {
-      expect(e.message).toBe('Require an `oauthToken` or `token` option');
-    }
+
+    const github = new GitHub({});
+    await expect(github.init()).rejects.toThrow('Require an `oauthToken` or `token` option');
   });
 
   describe('readFile', () => {
@@ -114,11 +112,9 @@ describe('GitHub interface', () => {
 
       expect.assertions(2);
 
-      try {
-        await githubInstance.readFile(filePath);
-      } catch (err) {
-        expect(err._smErrorCode).toEqual('GITHUB_READING_FILE');
-      }
+      await expect(githubInstance.readFile(filePath)).rejects.toMatchObject({
+        _smErrorCode: 'GITHUB_READING_FILE',
+      });
 
       expect(scope.isDone()).toBe(true);
     });
@@ -128,14 +124,12 @@ describe('GitHub interface', () => {
       const githubInstance = new GitHub(req.params);
       await githubInstance.init();
 
-      expect.assertions(2);
+      expect.assertions(1);
 
-      try {
-        await githubInstance.readFile(filePath);
-      } catch (err) {
-        expect(err._smErrorCode).toEqual('GITHUB_READING_FILE');
-        expect(err.message).toBeDefined();
-      }
+      await expect(githubInstance.readFile(filePath)).rejects.toMatchObject({
+        _smErrorCode: 'GITHUB_READING_FILE',
+        message: expect.anything(),
+      });
     });
 
     test('returns an error if the config file cannot be parsed', async () => {
@@ -153,14 +147,12 @@ describe('GitHub interface', () => {
       const githubInstance = new GitHub(req.params);
       await githubInstance.init();
 
-      expect.assertions(3);
+      expect.assertions(2);
 
-      try {
-        await githubInstance.readFile(filePath);
-      } catch (err) {
-        expect(err._smErrorCode).toEqual('PARSING_ERROR');
-        expect(err.message).toBeDefined();
-      }
+      await expect(githubInstance.readFile(filePath)).rejects.toMatchObject({
+        _smErrorCode: 'PARSING_ERROR',
+        message: expect.anything(),
+      });
 
       expect(scope.isDone()).toBe(true);
     });
@@ -350,18 +342,11 @@ describe('GitHub interface', () => {
 
       expect.assertions(2);
 
-      try {
-        await githubInstance.writeFile(
-          options.path,
-          options.content,
-          options.branch,
-          options.commitTitle
-        );
-      } catch (err) {
-        expect(err).toEqual({
-          _smErrorCode: 'GITHUB_WRITING_FILE',
-        });
-      }
+      await expect(
+        githubInstance.writeFile(options.path, options.content, options.branch, options.commitTitle)
+      ).rejects.toMatchObject({
+        _smErrorCode: 'GITHUB_WRITING_FILE',
+      });
 
       expect(scope.isDone()).toBe(true);
     });
@@ -467,17 +452,17 @@ describe('GitHub interface', () => {
 
       expect.assertions(2);
 
-      try {
-        await githubInstance.writeFileAndSendReview(
+      await expect(
+        githubInstance.writeFileAndSendReview(
           options.path,
           options.content,
           options.newBranch,
           options.commitTitle,
           options.commitBody
-        );
-      } catch (err) {
-        expect(err._smErrorCode).toEqual('GITHUB_CREATING_PR');
-      }
+        )
+      ).rejects.toMatchObject({
+        _smErrorCode: 'GITHUB_CREATING_PR',
+      });
       expect(scope.isDone()).toBe(true);
     });
   });
@@ -520,11 +505,10 @@ describe('GitHub interface', () => {
 
       expect.assertions(2);
 
-      try {
-        await githubInstance.getCurrentUser();
-      } catch (err) {
-        expect(err._smErrorCode).toEqual('GITHUB_GET_USER');
-      }
+      await expect(githubInstance.getCurrentUser()).rejects.toMatchObject({
+        _smErrorCode: 'GITHUB_GET_USER',
+      });
+
       expect(scope.isDone()).toBe(true);
     });
   });
