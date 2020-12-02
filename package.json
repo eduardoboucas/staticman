@@ -123,7 +123,6 @@
     ],
     "parser": "@babel/eslint-parser",
     "rules": {
-      "global-require": "off",
       "no-console": "off",
       "no-underscore-dangle": "off",
       "no-use-before-define": [

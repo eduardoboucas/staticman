@@ -236,7 +236,7 @@ describe('Auth controller', () => {
           authorization: `Bearer ${mockAccessToken}`,
         },
       })
-        .get('/api/v4/user')
+        .get('/api/v4/https://gitlab.com/user')
         .reply(200, mockUser);
 
       const reqWithQuery = {
@@ -319,7 +319,7 @@ describe('Auth controller', () => {
           authorization: `Bearer ${mockAccessToken}`,
         },
       })
-        .get('/api/v4/user')
+        .get('/api/v4/https://gitlab.com/user')
         .reply(401, {
           message: '401 Unauthorized',
         });
@@ -338,7 +338,7 @@ describe('Auth controller', () => {
       expect(res.status).toHaveBeenCalledWith(401);
       expect(res.send).toHaveBeenCalledWith({
         statusCode: 401,
-        message: expect.stringContaining('401 Unauthorized'),
+        message: expect.stringContaining('Unauthorized'),
       });
     });
   });

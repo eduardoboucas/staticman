@@ -1,5 +1,17 @@
+import Recaptcha from 'express-recaptcha';
+
+import {
+  checkRecaptcha,
+  createConfigObject,
+  processEntry as processFn,
+  sendResponse,
+} from '../../../source/controllers/process';
 import { getInstance } from '../../../source/lib/ErrorHandler';
 import * as mockHelpers from '../../helpers';
+import Staticman from '../../../source/lib/Staticman';
+
+jest.mock('express-recaptcha');
+jest.mock('../../../source/lib/Staticman');
 
 const errorHandler = getInstance();
 
@@ -7,27 +19,22 @@ let mockSiteConfig;
 let req;
 
 beforeEach(() => {
-  jest.resetModules();
-
   mockSiteConfig = mockHelpers.getConfig();
-
   req = mockHelpers.getMockRequest();
 });
+
+afterEach(() => jest.clearAllMocks());
 
 describe('Process controller', () => {
   describe('checkRecaptcha', () => {
     test('does nothing if reCaptcha is not enabled in config', async () => {
       mockSiteConfig.set('reCaptcha.enabled', false);
 
-      jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn((parameters) => ({
-          init: () => Promise.resolve(),
-          getSiteConfig: () => Promise.resolve(mockSiteConfig),
-        }));
-      });
+      Staticman.mockImplementation(() => ({
+        init: jest.fn(),
+        getSiteConfig: jest.fn().mockResolvedValue(mockSiteConfig),
+      }));
 
-      const { checkRecaptcha } = require('../../../source/controllers/process');
-      const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
       await staticman.init();
 
@@ -38,15 +45,11 @@ describe('Process controller', () => {
     });
 
     test('throws an error if reCaptcha block is not in the request body', async () => {
-      jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn((parameters) => ({
-          init: () => Promise.resolve(),
-          getSiteConfig: () => Promise.resolve(mockSiteConfig),
-        }));
-      });
+      Staticman.mockImplementation(() => ({
+        init: jest.fn(),
+        getSiteConfig: jest.fn().mockResolvedValue(mockSiteConfig),
+      }));
 
-      const { checkRecaptcha } = require('../../../source/controllers/process');
-      const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
       await staticman.init();
 
@@ -66,15 +69,11 @@ describe('Process controller', () => {
     });
 
     test('throws an error if reCaptcha site key is not in the request body', async () => {
-      jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn((parameters) => ({
-          init: () => Promise.resolve(),
-          getSiteConfig: () => Promise.resolve(mockSiteConfig),
-        }));
-      });
+      Staticman.mockImplementation(() => ({
+        init: jest.fn(),
+        getSiteConfig: jest.fn().mockResolvedValue(mockSiteConfig),
+      }));
 
-      const { checkRecaptcha } = require('../../../source/controllers/process');
-      const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
       await staticman.init();
 
@@ -96,15 +95,11 @@ describe('Process controller', () => {
     });
 
     test('throws an error if reCaptcha secret is not in the request body', async () => {
-      jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn((parameters) => ({
-          init: () => Promise.resolve(),
-          getSiteConfig: () => Promise.resolve(mockSiteConfig),
-        }));
-      });
+      Staticman.mockImplementation(() => ({
+        init: jest.fn(),
+        getSiteConfig: jest.fn().mockResolvedValue(mockSiteConfig),
+      }));
 
-      const { checkRecaptcha } = require('../../../source/controllers/process');
-      const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
       await staticman.init();
 
@@ -126,18 +121,12 @@ describe('Process controller', () => {
     });
 
     test('throws an error if the reCatpcha secret fails to decrypt', async () => {
-      jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn((parameters) => ({
-          init: () => Promise.resolve(),
-          decrypt: () => {
-            throw Error('someError');
-          },
-          getSiteConfig: () => Promise.resolve(mockSiteConfig),
-        }));
-      });
+      Staticman.mockImplementation(() => ({
+        init: jest.fn(),
+        decrypt: jest.fn().mockRejectedValue(new Error('someError')),
+        getSiteConfig: jest.fn().mockResolvedValue(mockSiteConfig),
+      }));
 
-      const { checkRecaptcha } = require('../../../source/controllers/process');
-      const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
       await staticman.init();
 
@@ -160,15 +149,11 @@ describe('Process controller', () => {
     });
 
     test('throws an error if the reCatpcha siteKey provided does not match the one in config', async () => {
-      jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn((parameters) => ({
-          init: () => Promise.resolve(),
-          getSiteConfig: () => Promise.resolve(mockSiteConfig),
-        }));
-      });
+      Staticman.mockImplementation(() => ({
+        init: jest.fn(),
+        getSiteConfig: jest.fn().mockResolvedValue(mockSiteConfig),
+      }));
 
-      const { checkRecaptcha } = require('../../../source/controllers/process');
-      const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
       await staticman.init();
 
@@ -191,15 +176,11 @@ describe('Process controller', () => {
     });
 
     test('throws an error if the reCatpcha secret provided does not match the one in config', async () => {
-      jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn((parameters) => ({
-          init: () => Promise.resolve(),
-          getSiteConfig: () => Promise.resolve(mockSiteConfig),
-        }));
-      });
+      Staticman.mockImplementation(() => ({
+        init: jest.fn(),
+        getSiteConfig: jest.fn().mockResolvedValue(mockSiteConfig),
+      }));
 
-      const { checkRecaptcha } = require('../../../source/controllers/process');
-      const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
       await staticman.init();
 
@@ -227,22 +208,14 @@ describe('Process controller', () => {
         reCaptchaCallback(false);
       });
 
-      jest.mock('express-recaptcha', () => {
-        return {
-          init: mockInitFn,
-          verify: mockVerifyFn,
-        };
-      });
+      Recaptcha.init.mockImplementation(mockInitFn);
+      Recaptcha.verify.mockImplementation(mockVerifyFn);
 
-      jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn(() => ({
-          init: jest.fn(),
-          getSiteConfig: jest.fn().mockResolvedValue(mockSiteConfig),
-        }));
-      });
+      Staticman.mockImplementation(() => ({
+        init: jest.fn(),
+        getSiteConfig: jest.fn().mockResolvedValue(mockSiteConfig),
+      }));
 
-      const { checkRecaptcha } = require('../../../source/controllers/process');
-      const Staticman = require('../../../source/lib/Staticman');
       Staticman.decrypt = jest.fn((text) => mockHelpers.decrypt(text));
       const staticman = new Staticman(req.params);
       await staticman.init();
@@ -275,22 +248,14 @@ describe('Process controller', () => {
         throw reCaptchaError;
       });
 
-      jest.mock('express-recaptcha', () => {
-        return {
-          init: mockInitFn,
-          verify: mockVerifyFn,
-        };
-      });
+      Recaptcha.init.mockImplementation(mockInitFn);
+      Recaptcha.verify.mockImplementation(mockVerifyFn);
 
-      jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn(() => ({
-          init: jest.fn(),
-          getSiteConfig: jest.fn().mockResolvedValue(mockSiteConfig),
-        }));
-      });
+      Staticman.mockImplementation(() => ({
+        init: jest.fn(),
+        getSiteConfig: jest.fn().mockResolvedValue(mockSiteConfig),
+      }));
 
-      const { checkRecaptcha } = require('../../../source/controllers/process');
-      const Staticman = require('../../../source/lib/Staticman');
       Staticman.decrypt = jest.fn((text) => mockHelpers.decrypt(text));
       const staticman = new Staticman(req.params);
       await staticman.init();
@@ -315,8 +280,6 @@ describe('Process controller', () => {
   });
 
   describe('createConfigObject', () => {
-    const { createConfigObject } = require('../../../source/controllers/process');
-
     test('creates a config object for version 1 of API', () => {
       const configv1 = {
         file: '_config.yml',
@@ -353,8 +316,6 @@ describe('Process controller', () => {
   });
 
   describe('process', () => {
-    const processFn = require('../../../source/controllers/process').processEntry;
-
     test('send a redirect to the URL provided, if the `redirect` option is provided, if `processEntry` succeeds', async () => {
       const redirectUrl = 'https://eduardoboucas.com';
       const mockProcessEntry = jest.fn((fields, options) =>
@@ -364,16 +325,13 @@ describe('Process controller', () => {
         })
       );
 
-      jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn((parameters) => ({
-          init: () => Promise.resolve(),
-          processEntry: mockProcessEntry,
-        }));
-      });
+      Staticman.mockImplementation(() => ({
+        init: jest.fn(),
+        processEntry: mockProcessEntry,
+      }));
 
       const res = mockHelpers.getMockResponse();
 
-      const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
       await staticman.init();
 
@@ -411,16 +369,13 @@ describe('Process controller', () => {
         })
       );
 
-      jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn((parameters) => ({
-          init: () => Promise.resolve(),
-          processEntry: mockProcessEntry,
-        }));
-      });
+      Staticman.mockImplementation(() => ({
+        init: jest.fn(),
+        processEntry: mockProcessEntry,
+      }));
 
       const res = mockHelpers.getMockResponse();
 
-      const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
       await staticman.init();
 
@@ -452,16 +407,13 @@ describe('Process controller', () => {
         return Promise.reject(processEntryError);
       });
 
-      jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn((parameters) => ({
-          init: () => Promise.resolve(),
-          processEntry: mockProcessEntry,
-        }));
-      });
+      Staticman.mockImplementation(() => ({
+        init: jest.fn(),
+        processEntry: mockProcessEntry,
+      }));
 
       const res = mockHelpers.getMockResponse();
 
-      const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
       await staticman.init();
 
@@ -490,8 +442,6 @@ describe('Process controller', () => {
   });
 
   describe('sendResponse', () => {
-    const { sendResponse } = require('../../../source/controllers/process');
-
     test('redirects if there is a `redirect` option and no errors', () => {
       const data = {
         redirect: 'https://eduardoboucas.com',

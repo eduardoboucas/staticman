@@ -1,10 +1,12 @@
+import universalAnalytics from 'universal-analytics';
+
 import config from '../config';
 import GitHub from '../lib/GitHub';
 import Staticman from '../lib/Staticman';
 
 export default async (repo, data) => {
   const ua = config.get('analytics.uaTrackingId')
-    ? require('universal-analytics')(config.get('analytics.uaTrackingId'))
+    ? universalAnalytics(config.get('analytics.uaTrackingId'))
     : null;
 
   if (!data.number) {

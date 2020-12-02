@@ -1,28 +1,30 @@
 import { getMockRequest } from '../../helpers';
 import * as sampleData from '../../helpers/sampleData';
+import GitHub from '../../../source/lib/GitHub';
+import handlePR from '../../../source/controllers/handlePR';
 import Review from '../../../source/lib/models/Review';
+import Staticman from '../../../source/lib/Staticman';
+
+jest.mock('../../../source/lib/GitHub');
+jest.mock('../../../source/lib/Staticman');
 
 let mockSetConfigPathFn;
 let mockProcessMergeFn;
 let req;
 
-// Mock Staticman module
-jest.mock('../../../source/lib/Staticman', () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      init: jest.fn(),
-      setConfigPath: mockSetConfigPathFn,
-      processMerge: mockProcessMergeFn,
-    };
-  });
-});
+Staticman.mockImplementation(() => ({
+  init: jest.fn(),
+  setConfigPath: mockSetConfigPathFn,
+  processMerge: mockProcessMergeFn,
+}));
 
 beforeEach(() => {
-  jest.resetModules();
   mockSetConfigPathFn = jest.fn();
   mockProcessMergeFn = jest.fn();
   req = getMockRequest();
 });
+
+afterEach(() => jest.clearAllMocks());
 
 describe('HandlePR controller', () => {
   test('ignores pull requests from branches not prefixed with `staticman_`', async () => {
@@ -49,16 +51,10 @@ describe('HandlePR controller', () => {
     const mockReview = new Review(pr.title, pr.body, 'false', pr.head.ref, pr.base.ref);
     const mockGetReview = jest.fn().mockResolvedValue(mockReview);
 
-    jest.mock('../../../source/lib/GitHub', () => {
-      return jest.fn().mockImplementation(() => {
-        return {
-          getReview: mockGetReview,
-          init: jest.fn(),
-        };
-      });
-    });
-
-    const handlePR = require('../../../source/controllers/handlePR').default;
+    GitHub.mockImplementation(() => ({
+      init: jest.fn(),
+      getReview: mockGetReview,
+    }));
 
     expect.assertions(1);
 
@@ -92,17 +88,11 @@ describe('HandlePR controller', () => {
       const mockGetReview = jest.fn().mockResolvedValue(mockReview);
       const mockDeleteBranch = jest.fn();
 
-      jest.mock('../../../source/lib/GitHub', () => {
-        return jest.fn().mockImplementation(() => {
-          return {
-            getReview: mockGetReview,
-            deleteBranch: mockDeleteBranch,
-            init: jest.fn(),
-          };
-        });
-      });
-
-      const handlePR = require('../../../source/controllers/handlePR').default;
+      GitHub.mockImplementation(() => ({
+        init: jest.fn(),
+        getReview: mockGetReview,
+        deleteBranch: mockDeleteBranch,
+      }));
 
       expect.assertions(2);
 
@@ -136,17 +126,11 @@ describe('HandlePR controller', () => {
       const mockDeleteBranch = jest.fn();
       const mockGetReview = jest.fn().mockResolvedValue(mockReview);
 
-      jest.mock('../../../source/lib/GitHub', () => {
-        return jest.fn().mockImplementation(() => {
-          return {
-            deleteBranch: mockDeleteBranch,
-            getReview: mockGetReview,
-            init: jest.fn(),
-          };
-        });
-      });
-
-      const handlePR = require('../../../source/controllers/handlePR').default;
+      GitHub.mockImplementation(() => ({
+        init: jest.fn(),
+        getReview: mockGetReview,
+        deleteBranch: mockDeleteBranch,
+      }));
 
       expect.assertions(5);
 

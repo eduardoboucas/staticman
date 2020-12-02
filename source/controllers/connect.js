@@ -1,9 +1,11 @@
+import universalAnalytics from 'universal-analytics';
+
 import config from '../config';
 import GitHub from '../lib/GitHub';
 
 export default async (req, res) => {
   const ua = config.get('analytics.uaTrackingId')
-    ? require('universal-analytics')(config.get('analytics.uaTrackingId'))
+    ? universalAnalytics(config.get('analytics.uaTrackingId'))
     : null;
 
   const github = new GitHub({
