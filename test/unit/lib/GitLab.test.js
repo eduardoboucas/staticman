@@ -1,5 +1,6 @@
 /* eslint-disable max-classes-per-file, no-shadow */
 
+import { Gitlab as GitLabApi } from 'gitlab';
 import yaml from 'js-yaml';
 
 import config from '../../../source/config';
@@ -7,6 +8,8 @@ import GitLab from '../../../source/lib/GitLab';
 import * as mockHelpers from '../../helpers';
 import * as sampleData from '../../helpers/sampleData';
 import User from '../../../source/lib/models/User';
+
+jest.mock('gitlab');
 
 let req;
 
@@ -20,53 +23,32 @@ beforeEach(() => {
   req.params.token = 'test-token';
 });
 
+afterEach(() => jest.clearAllMocks());
+
 describe('GitLab interface', () => {
   test('initialises the GitLab API wrapper', () => {
     const gitlab = new GitLab(req.params);
 
-    expect(gitlab.api).toBeDefined();
+    expect(gitlab).toBeDefined();
+    expect(GitLabApi).toHaveBeenCalled();
   });
 
   test('authenticates with the GitLab API using a personal access token', () => {
-    const mockConstructor = jest.fn();
-    jest.mock('gitlab/dist/es5', () => {
-      return {
-        default: class {
-          constructor(params) {
-            mockConstructor(params);
-          }
-        },
-      };
-    });
+    const gitlab = new GitLab(req.params);
 
-    const GitLab = require('../../../source/lib/GitLab').default;
-    const gitlab = new GitLab(req.params); // eslint-disable-line no-unused-vars
-
-    expect(mockConstructor).toHaveBeenCalledWith({
+    expect(gitlab).toBeDefined();
+    expect(GitLabApi).toHaveBeenCalledWith({
       url: 'https://gitlab.com',
       token: 'r4e3w2q1',
     });
   });
 
   test('authenticates with the GitLab API using an OAuth token', () => {
-    const mockConstructor = jest.fn();
-    jest.mock('gitlab/dist/es5', () => {
-      return {
-        default: class {
-          constructor(params) {
-            mockConstructor(params);
-          }
-        },
-      };
-    });
-
-    const GitLab = require('../../../source/lib/GitLab').default;
-
     const oauthToken = 'test-oauth-token';
-    // eslint-disable-next-line no-unused-vars
     const gitlab = new GitLab({ ...req.params, oauthToken });
 
-    expect(mockConstructor).toHaveBeenCalledWith({
+    expect(gitlab).toBeDefined();
+    expect(GitLabApi).toHaveBeenCalledWith({
       url: 'https://gitlab.com',
       oauthToken,
     });
@@ -79,59 +61,48 @@ describe('GitLab interface', () => {
   });
 
   describe('readFile', () => {
-    test('reads a file and returns its contents', () => {
+    test('reads a file and returns its contents', async () => {
       const fileContents = 'This is a text file!';
       const filePath = 'path/to/file.txt';
-      const mockRepoShowFile = jest.fn(() =>
-        Promise.resolve({
-          content: btoa(fileContents),
-        })
-      );
-
-      jest.mock('gitlab/dist/es5', () => {
-        return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
-                show: mockRepoShowFile,
-              },
-            };
-          },
-        };
+      const mockRepoShowFile = jest.fn().mockResolvedValue({
+        content: btoa(fileContents),
       });
 
-      const GitLab = require('../../../source/lib/GitLab').default;
+      GitLabApi.mockImplementation(() => ({
+        RepositoryFiles: {
+          show: mockRepoShowFile,
+        },
+      }));
+
       const gitlab = new GitLab(req.params);
 
-      return gitlab.readFile(filePath).then((contents) => {
-        expect(mockRepoShowFile).toHaveBeenCalledWith(
-          `${req.params.username}/${req.params.repository}`,
-          filePath,
-          req.params.branch
-        );
-      });
+      expect.assertions(1);
+
+      await gitlab.readFile(filePath);
+      expect(mockRepoShowFile).toHaveBeenCalledWith(
+        `${req.params.username}/${req.params.repository}`,
+        filePath,
+        req.params.branch
+      );
     });
 
-    test('returns an error if GitLab API call errors', () => {
+    test('returns an error if GitLab API call errors', async () => {
       const filePath = 'path/to/file.yml';
-      const mockShowRepoFile = jest.fn(() => Promise.reject()); // eslint-disable-line prefer-promise-reject-errors
+      const mockShowRepoFile = jest.fn().mockRejectedValue();
 
-      jest.mock('gitlab/dist/es5', () => {
-        return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
-                show: mockShowRepoFile,
-              },
-            };
-          },
-        };
-      });
+      GitLabApi.mockImplementation(() => ({
+        RepositoryFiles: {
+          show: mockShowRepoFile,
+        },
+      }));
 
-      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
 
-      return gitlab.readFile(filePath).catch((err) => {
+      expect.assertions(2);
+
+      try {
+        await gitlab.readFile(filePath);
+      } catch (err) {
         expect(mockShowRepoFile).toHaveBeenCalledWith(
           `${req.params.username}/${req.params.repository}`,
           filePath,
@@ -141,37 +112,32 @@ describe('GitLab interface', () => {
         expect(err).toEqual({
           _smErrorCode: 'GITLAB_READING_FILE',
         });
-      });
+      }
     });
 
-    test('returns an error if parsing fails for the given file', () => {
+    test('returns an error if parsing fails for the given file', async () => {
       const fileContents = `
         foo: "bar"
         baz
       `;
       const filePath = 'path/to/file.yml';
-      const mockShowRepoFile = jest.fn(() =>
-        Promise.resolve({
-          content: btoa(fileContents),
-        })
-      );
-
-      jest.mock('gitlab/dist/es5', () => {
-        return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
-                show: mockShowRepoFile,
-              },
-            };
-          },
-        };
+      const mockShowRepoFile = jest.fn().mockResolvedValue({
+        content: btoa(fileContents),
       });
 
-      const GitLab = require('../../../source/lib/GitLab').default;
+      GitLabApi.mockImplementation(() => ({
+        RepositoryFiles: {
+          show: mockShowRepoFile,
+        },
+      }));
+
       const gitlab = new GitLab(req.params);
 
-      return gitlab.readFile(filePath).catch((err) => {
+      expect.assertions(3);
+
+      try {
+        await gitlab.readFile(filePath);
+      } catch (err) {
         expect(mockShowRepoFile).toHaveBeenCalledWith(
           `${req.params.username}/${req.params.repository}`,
           filePath,
@@ -179,102 +145,81 @@ describe('GitLab interface', () => {
         );
         expect(err._smErrorCode).toBe('PARSING_ERROR');
         expect(err.message).toBeDefined();
-      });
+      }
     });
 
-    test('reads a YAML file and returns its parsed contents', () => {
+    test('reads a YAML file and returns its parsed contents', async () => {
       const filePath = 'path/to/file.yml';
       const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8');
-      const mockShowRepoFile = jest.fn(() =>
-        Promise.resolve({
-          content: btoa(sampleData.config1),
-        })
-      );
-
-      jest.mock('gitlab/dist/es5', () => {
-        return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
-                show: mockShowRepoFile,
-              },
-            };
-          },
-        };
+      const mockShowRepoFile = jest.fn().mockResolvedValue({
+        content: btoa(sampleData.config1),
       });
 
-      const GitLab = require('../../../source/lib/GitLab').default;
+      GitLabApi.mockImplementation(() => ({
+        RepositoryFiles: {
+          show: mockShowRepoFile,
+        },
+      }));
+
       const gitlab = new GitLab(req.params);
 
-      return gitlab.readFile(filePath).then((contents) => {
-        expect(mockShowRepoFile).toHaveBeenCalledWith(
-          `${req.params.username}/${req.params.repository}`,
-          filePath,
-          req.params.branch
-        );
-        expect(contents).toEqual(parsedConfig);
-      });
+      expect.assertions(2);
+
+      const contents = await gitlab.readFile(filePath);
+      expect(mockShowRepoFile).toHaveBeenCalledWith(
+        `${req.params.username}/${req.params.repository}`,
+        filePath,
+        req.params.branch
+      );
+      expect(contents).toEqual(parsedConfig);
     });
 
-    test('reads a YAML file and returns its parsed and raw contents if `getFullResponse` is `true`', () => {
+    test('reads a YAML file and returns its parsed and raw contents if `getFullResponse` is `true`', async () => {
       const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8');
       const fileContents = {
         content: btoa(sampleData.config1),
       };
       const filePath = 'path/to/file.yml';
-      const mockShowRepoFile = jest.fn(() => Promise.resolve(fileContents));
+      const mockShowRepoFile = jest.fn().mockResolvedValue(fileContents);
 
-      jest.mock('gitlab/dist/es5', () => {
-        return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
-                show: mockShowRepoFile,
-              },
-            };
-          },
-        };
-      });
+      GitLabApi.mockImplementation(() => ({
+        RepositoryFiles: {
+          show: mockShowRepoFile,
+        },
+      }));
 
-      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
 
-      return gitlab.readFile(filePath, true).then((response) => {
-        expect(response.content).toEqual(parsedConfig);
-        expect(response.file).toEqual(fileContents);
-      });
+      expect.assertions(2);
+
+      const response = await gitlab.readFile(filePath, true);
+      expect(response.content).toEqual(parsedConfig);
+      expect(response.file).toEqual(fileContents);
     });
 
-    test('reads a JSON file and returns its parsed contents', () => {
+    test('reads a JSON file and returns its parsed contents', async () => {
       const filePath = 'path/to/file.json';
       const parsedConfig = yaml.safeLoad(sampleData.config2, 'utf8');
-      const mockShowRepoFile = jest.fn(() =>
-        Promise.resolve({
-          content: btoa(sampleData.config2),
-        })
-      );
-
-      jest.mock('gitlab/dist/es5', () => {
-        return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
-                show: mockShowRepoFile,
-              },
-            };
-          },
-        };
+      const mockShowRepoFile = jest.fn().mockResolvedValue({
+        content: btoa(sampleData.config2),
       });
 
-      const GitLab = require('../../../source/lib/GitLab').default;
+      GitLabApi.mockImplementation(() => ({
+        RepositoryFiles: {
+          show: mockShowRepoFile,
+        },
+      }));
+
       const gitlab = new GitLab(req.params);
 
-      return gitlab.readFile(filePath).then((contents) => {
-        expect(contents).toEqual(parsedConfig);
-      });
+      expect.assertions(1);
+
+      const contents = await gitlab.readFile(filePath);
+
+      expect(contents).toEqual(parsedConfig);
     });
 
-    test('reads a JSON file and returns its parsed and raw contents if `getFullResponse` is `true`', () => {
+    test('reads a JSON file and returns its parsed and raw contents if `getFullResponse` is `true`', async () => {
       const fileContents = {
         content: btoa(sampleData.config2),
       };
@@ -282,86 +227,67 @@ describe('GitLab interface', () => {
       const parsedConfig = yaml.safeLoad(sampleData.config2, 'utf8');
       const mockShowRepoFile = jest.fn(() => Promise.resolve(fileContents));
 
-      jest.mock('gitlab/dist/es5', () => {
-        return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
-                show: mockShowRepoFile,
-              },
-            };
-          },
-        };
-      });
+      GitLabApi.mockImplementation(() => ({
+        RepositoryFiles: {
+          show: mockShowRepoFile,
+        },
+      }));
 
-      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
 
-      return gitlab.readFile(filePath, true).then((response) => {
-        expect(response.content).toEqual(parsedConfig);
-        expect(response.file).toEqual(fileContents);
-      });
+      expect.assertions(2);
+
+      const response = await gitlab.readFile(filePath, true);
+
+      expect(response.content).toEqual(parsedConfig);
+      expect(response.file).toEqual(fileContents);
     });
   });
 
   describe('writeFile', () => {
-    test('creates a file on the given branch using the commit title provided', () => {
+    test('creates a file on the given branch using the commit title provided', async () => {
       const options = {
         branch: 'master',
         commitTitle: 'Adds a new file',
         content: 'This is a new file',
         path: 'path/to/file.txt',
       };
-      const mockCreateRepoFile = jest.fn(() => Promise.resolve(null));
+      const mockCreateRepoFile = jest.fn().mockResolvedValue(null);
 
-      jest.mock('gitlab/dist/es5', () => {
-        return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
-                create: mockCreateRepoFile,
-              },
-            };
-          },
-        };
-      });
+      GitLabApi.mockImplementation(() => ({
+        RepositoryFiles: {
+          create: mockCreateRepoFile,
+        },
+      }));
 
-      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
 
-      return gitlab
-        .writeFile(options.path, options.content, options.branch, options.commitTitle)
-        .then((response) => {
-          expect(mockCreateRepoFile).toHaveBeenCalledTimes(1);
-          expect(mockCreateRepoFile).toHaveBeenCalledWith(
-            `${req.params.username}/${req.params.repository}`,
-            options.path,
-            options.branch,
-            expect.objectContaining({
-              content: btoa(options.content),
-              commit_message: options.commitTitle,
-              encoding: 'base64',
-            })
-          );
-        });
+      expect.assertions(2);
+
+      await gitlab.writeFile(options.path, options.content, options.branch, options.commitTitle);
+
+      expect(mockCreateRepoFile).toHaveBeenCalledTimes(1);
+      expect(mockCreateRepoFile).toHaveBeenCalledWith(
+        `${req.params.username}/${req.params.repository}`,
+        options.path,
+        options.branch,
+        expect.objectContaining({
+          content: btoa(options.content),
+          commit_message: options.commitTitle,
+          encoding: 'base64',
+        })
+      );
     });
 
-    test('creates a file using the branch present in the request, if one is not provided to the method, and the default commit title', () => {
-      const mockCreateRepoFile = jest.fn(() => Promise.resolve(null));
+    test('creates a file using the branch present in the request, if one is not provided to the method, and the default commit title', async () => {
+      const mockCreateRepoFile = jest.fn().mockResolvedValue(null);
 
-      jest.mock('gitlab/dist/es5', () => {
-        return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
-                create: mockCreateRepoFile,
-              },
-            };
-          },
-        };
-      });
+      GitLabApi.mockImplementation(() => ({
+        RepositoryFiles: {
+          create: mockCreateRepoFile,
+        },
+      }));
 
-      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
       const options = {
         content: 'This is a new file',
@@ -369,34 +295,29 @@ describe('GitLab interface', () => {
         path: 'path/to/file.txt',
       };
 
-      return gitlab.writeFile(options.path, options.content).then((response) => {
-        expect(mockCreateRepoFile).toHaveBeenCalledWith(
-          `${req.params.username}/${req.params.repository}`,
-          options.path,
-          req.params.branch,
-          expect.objectContaining({
-            content: btoa(options.content),
-            commit_message: options.commitTitle,
-            encoding: 'base64',
-          })
-        );
-      });
+      expect.assertions(1);
+
+      await gitlab.writeFile(options.path, options.content);
+
+      expect(mockCreateRepoFile).toHaveBeenCalledWith(
+        `${req.params.username}/${req.params.repository}`,
+        options.path,
+        req.params.branch,
+        expect.objectContaining({
+          content: btoa(options.content),
+          commit_message: options.commitTitle,
+          encoding: 'base64',
+        })
+      );
     });
 
-    test('returns an error object if the save operation fails', () => {
-      jest.mock('gitlab/dist/es5', () => {
-        return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
-                create: () => Promise.reject(new Error()),
-              },
-            };
-          },
-        };
-      });
+    test('returns an error object if the save operation fails', async () => {
+      GitLabApi.mockImplementation(() => ({
+        RepositoryFiles: {
+          create: jest.fn().mockRejectedValue(new Error()),
+        },
+      }));
 
-      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
       const options = {
         branch: 'master',
@@ -405,16 +326,18 @@ describe('GitLab interface', () => {
         path: 'path/to/file.txt',
       };
 
-      return gitlab
-        .writeFile(options.path, options.content, options.branch, options.commitTitle)
-        .catch((err) => {
-          expect(err._smErrorCode).toBe('GITLAB_WRITING_FILE');
-        });
+      expect.assertions(1);
+
+      try {
+        await gitlab.writeFile(options.path, options.content, options.branch, options.commitTitle);
+      } catch (err) {
+        expect(err._smErrorCode).toBe('GITLAB_WRITING_FILE');
+      }
     });
   });
 
   describe('writeFileAndSendReview', () => {
-    test('writes a file to a new branch and sends a PR to the base branch provided, using the given title and body for the commit/PR', () => {
+    test('writes a file to a new branch and sends a PR to the base branch provided, using the given title and body for the commit/PR', async () => {
       const options = {
         commitBody: 'This is a very cool file indeed...',
         commitTitle: 'Adds a new file',
@@ -424,97 +347,75 @@ describe('GitLab interface', () => {
         path: 'path/to/file.txt',
         sha: '7fd1a60b01f91b314f59955a4e4d4e80d8edf11d',
       };
-      const mockCreateMergeRequest = jest.fn(() =>
-        Promise.resolve({
-          number: 123,
-        })
-      );
-      const mockCreateBranch = jest.fn(() =>
-        Promise.resolve({
-          ref: `refs/heads/${options.newBranch}`,
-        })
-      );
-      const mockShowBranch = jest.fn(() =>
-        Promise.resolve({
-          commit: {
-            id: options.sha,
-          },
-        })
-      );
-
-      jest.mock('gitlab/dist/es5', () => {
-        return {
-          default: function mockGitlab() {
-            return {
-              Branches: {
-                create: mockCreateBranch,
-                show: mockShowBranch,
-              },
-              MergeRequests: {
-                create: mockCreateMergeRequest,
-              },
-              RepositoryFiles: {
-                create: () => Promise.resolve(null),
-              },
-            };
-          },
-        };
+      const mockCreateMergeRequest = jest.fn().mockResolvedValue({ number: 123 });
+      const mockCreateBranch = jest.fn().mockResolvedValue({
+        ref: `refs/heads/${options.newBranch}`,
+      });
+      const mockShowBranch = jest.fn().mockResolvedValue({
+        commit: {
+          id: options.sha,
+        },
       });
 
-      const GitLab = require('../../../source/lib/GitLab').default;
+      GitLabApi.mockImplementation(() => ({
+        Branches: {
+          create: mockCreateBranch,
+          show: mockShowBranch,
+        },
+        MergeRequests: {
+          create: mockCreateMergeRequest,
+        },
+        RepositoryFiles: {
+          create: jest.fn().mockResolvedValue(null),
+        },
+      }));
+
       const gitlab = new GitLab(req.params);
 
-      return gitlab
-        .writeFileAndSendReview(
-          options.path,
-          options.content,
-          options.newBranch,
-          options.commitTitle,
-          options.commitBody
-        )
-        .then((response) => {
-          expect(mockCreateMergeRequest).toHaveBeenCalledWith(
-            `${req.params.username}/${req.params.repository}`,
-            options.newBranch,
-            req.params.branch,
-            options.commitTitle,
-            expect.objectContaining({
-              description: options.commitBody,
-              remove_source_branch: true,
-            })
-          );
+      expect.assertions(3);
 
-          expect(mockCreateBranch).toHaveBeenCalledWith(
-            `${req.params.username}/${req.params.repository}`,
-            options.newBranch,
-            options.sha
-          );
+      await gitlab.writeFileAndSendReview(
+        options.path,
+        options.content,
+        options.newBranch,
+        options.commitTitle,
+        options.commitBody
+      );
 
-          expect(mockShowBranch).toHaveBeenCalledWith(
-            `${req.params.username}/${req.params.repository}`,
-            req.params.branch
-          );
-        });
+      expect(mockCreateMergeRequest).toHaveBeenCalledWith(
+        `${req.params.username}/${req.params.repository}`,
+        options.newBranch,
+        req.params.branch,
+        options.commitTitle,
+        expect.objectContaining({
+          description: options.commitBody,
+          remove_source_branch: true,
+        })
+      );
+
+      expect(mockCreateBranch).toHaveBeenCalledWith(
+        `${req.params.username}/${req.params.repository}`,
+        options.newBranch,
+        options.sha
+      );
+
+      expect(mockShowBranch).toHaveBeenCalledWith(
+        `${req.params.username}/${req.params.repository}`,
+        req.params.branch
+      );
     });
 
-    test('returns an error if any of the API calls fail', () => {
-      jest.mock('gitlab/dist/es5', () => {
-        return {
-          default: function mockGitlab() {
-            return {
-              Branches: {
-                create: () => Promise.resolve(),
-                show: () => Promise.reject(new Error()),
-              },
-              RepositoryFiles: {
-                create: () => Promise.reject(new Error()),
-              },
-            };
-          },
-        };
-      });
+    test('returns an error if any of the API calls fail', async () => {
+      GitLabApi.mockImplementation(() => ({
+        Branches: {
+          create: jest.fn().mockResolvedValue(),
+          show: jest.fn().mockRejectedValue(new Error()),
+        },
+        RepositoryFiles: {
+          create: jest.fn().mockRejectedValue(new Error()),
+        },
+      }));
 
-      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
       const options = {
         commitBody: '',
@@ -526,67 +427,60 @@ describe('GitLab interface', () => {
         sha: '7fd1a60b01f91b314f59955a4e4d4e80d8edf11d',
       };
 
-      return gitlab
-        .writeFileAndSendReview(
+      expect.assertions(1);
+
+      try {
+        await gitlab.writeFileAndSendReview(
           options.path,
           options.content,
           options.newBranch,
           options.commitTitle,
           options.commitBody
-        )
-        .catch((err) => {
-          expect(err._smErrorCode).toBe('GITLAB_CREATING_PR');
-        });
+        );
+      } catch (err) {
+        expect(err._smErrorCode).toBe('GITLAB_CREATING_PR');
+      }
     });
   });
 
   describe('getCurrentUser', () => {
-    test('returns the current authenticated user', () => {
+    test('returns the current authenticated user', async () => {
       const mockUser = {
         username: 'johndoe',
         email: 'johndoe@test.com',
         name: 'John Doe',
       };
 
-      jest.mock('gitlab/dist/es5', () => {
-        return {
-          default: function mockGitlab() {
-            return {
-              Users: {
-                current: () => Promise.resolve(mockUser),
-              },
-            };
-          },
-        };
-      });
+      GitLabApi.mockImplementation(() => ({
+        Users: {
+          current: jest.fn().mockResolvedValue(mockUser),
+        },
+      }));
 
-      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
 
-      return gitlab.getCurrentUser().then((user) => {
-        expect(user).toEqual(new User('gitlab', 'johndoe', 'johndoe@test.com', 'John Doe'));
-      });
+      expect.assertions(1);
+
+      const user = await gitlab.getCurrentUser();
+      expect(user).toEqual(new User('gitlab', 'johndoe', 'johndoe@test.com', 'John Doe'));
     });
 
-    test('throws an error if unable to retrieve the current unauthenticated user', () => {
-      jest.mock('gitlab/dist/es5', () => {
-        return {
-          default: function mockGitlab() {
-            return {
-              Users: {
-                current: () => Promise.reject(new Error()),
-              },
-            };
-          },
-        };
-      });
+    test('throws an error if unable to retrieve the current unauthenticated user', async () => {
+      GitLabApi.mockImplementation(() => ({
+        Users: {
+          current: jest.fn().mockRejectedValue(new Error()),
+        },
+      }));
 
-      const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
 
-      return gitlab.getCurrentUser().catch((err) => {
+      expect.assertions(1);
+
+      try {
+        await gitlab.getCurrentUser();
+      } catch (err) {
         expect(err._smErrorCode).toBe('GITLAB_GET_USER');
-      });
+      }
     });
   });
 });

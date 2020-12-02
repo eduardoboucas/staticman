@@ -1,11 +1,10 @@
+import { Gitlab as GitLabApi } from 'gitlab';
+
 import config from '../config';
 import errorHandler from './ErrorHandler';
 import GitService from './GitService';
 import Review from './models/Review';
 import User from './models/User';
-
-// TODO: Replace this. Import is ugly and dependency is deprecated.
-const GitLabApi = require('gitlab/dist/es5').default;
 
 export default class GitLab extends GitService {
   constructor(options = {}) {
