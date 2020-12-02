@@ -162,7 +162,7 @@ export default class Staticman {
     }
 
     if (!this.siteConfig.get('auth.required')) {
-      return Promise.resolve(false);
+      return false;
     }
 
     if (!this.options['auth-token']) {
@@ -180,16 +180,15 @@ export default class Staticman {
       version: this.parameters.version,
     });
 
-    return git.getCurrentUser().then((user) => {
-      this.gitUser = user;
+    const user = await git.getCurrentUser();
+    this.gitUser = user;
 
-      return true;
-    });
+    return true;
   }
 
   async _checkAuthV2() {
     if (!this.siteConfig.get('githubAuth.required')) {
-      return Promise.resolve(false);
+      return false;
     }
 
     if (!this.options['github-token']) {
@@ -209,11 +208,10 @@ export default class Staticman {
       version: this.parameters.version,
     });
 
-    return git.api.users.getAuthenticated({}).then(({ data }) => {
-      this.gitUser = data;
+    const { data } = await git.api.users.getAuthenticated({});
+    this.gitUser = data;
 
-      return true;
-    });
+    return true;
   }
 
   static _createDate(dateOptions) {

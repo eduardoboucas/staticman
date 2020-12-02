@@ -297,9 +297,10 @@ describe('Staticman interface', () => {
 
       const data = mockHelpers.getFields();
 
-      return staticman._applyTransforms(data).then((extendedData) => {
-        expect(extendedData).toEqual(data);
-      });
+      expect.assertions(1);
+
+      const extendedData = await staticman._applyTransforms(data);
+      expect(extendedData).toEqual(data);
     });
 
     test('transforms the fields defined in the `transforms` property', async () => {
@@ -319,9 +320,10 @@ describe('Staticman interface', () => {
         email: 'MAIL@EDUARDOBOUCAS.COM',
       };
 
-      return staticman._applyTransforms(data).then((transformedData) => {
-        expect(transformedData).toEqual(extendedData);
-      });
+      expect.assertions(1);
+
+      const transformedData = await staticman._applyTransforms(data);
+      expect(transformedData).toEqual(extendedData);
     });
 
     test('handles multiple transforms per field', async () => {
@@ -339,9 +341,10 @@ describe('Staticman interface', () => {
         email: '4F8072E22FAE3CD98B876DF304886BED',
       };
 
-      return staticman._applyTransforms(data).then((transformedData) => {
-        expect(transformedData).toEqual(extendedData);
-      });
+      expect.assertions(1);
+
+      const transformedData = await staticman._applyTransforms(data);
+      expect(transformedData).toEqual(extendedData);
     });
   });
 
@@ -354,9 +357,10 @@ describe('Staticman interface', () => {
       mockConfig.set('akismet.enabled', false);
       staticman.siteConfig = mockConfig;
 
-      return staticman._checkForSpam(fields).then((response) => {
-        expect(response).toEqual(fields);
-      });
+      expect.assertions(1);
+
+      const response = await staticman._checkForSpam(fields);
+      expect(response).toEqual(fields);
     });
 
     test('makes a request to the Akismet API sending the correct data', async () => {
@@ -380,27 +384,28 @@ describe('Staticman interface', () => {
       mockConfig.set('akismet.content', 'message');
       staticman.siteConfig = mockConfig;
 
-      return staticman._checkForSpam(fields).then((response) => {
-        expect(response).toEqual(fields);
+      expect.assertions(5);
 
-        expect(mockClientFn).toHaveBeenCalledTimes(1);
-        expect(mockClientFn).toHaveBeenCalledWith({
-          apiKey: config.get('akismet.apiKey'),
-          blog: config.get('akismet.site'),
-        });
+      const response = await staticman._checkForSpam(fields);
+      expect(response).toEqual(fields);
 
-        expect(mockCheckSpamFn).toHaveBeenCalledTimes(1);
-        expect(mockCheckSpamFn).toHaveBeenCalledWith(
-          {
-            comment_type: 'comment',
-            comment_author: fields.name,
-            comment_author_email: fields.email,
-            comment_author_url: fields.url,
-            comment_content: fields.message,
-          },
-          expect.any(Function)
-        );
+      expect(mockClientFn).toHaveBeenCalledTimes(1);
+      expect(mockClientFn).toHaveBeenCalledWith({
+        apiKey: config.get('akismet.apiKey'),
+        blog: config.get('akismet.site'),
       });
+
+      expect(mockCheckSpamFn).toHaveBeenCalledTimes(1);
+      expect(mockCheckSpamFn).toHaveBeenCalledWith(
+        {
+          comment_type: 'comment',
+          comment_author: fields.name,
+          comment_author_email: fields.email,
+          comment_author_url: fields.url,
+          comment_content: fields.message,
+        },
+        expect.any(Function)
+      );
     });
 
     test('throws an error if the Akismet API call fails', async () => {
@@ -477,12 +482,19 @@ describe('Staticman interface', () => {
       staticman.options = options;
       staticman.siteConfig = mockConfig;
 
-      return staticman._checkAuth().then((result) => expect(result).toBeFalsy());
+      expect.assertions(1);
+
+      const result = await staticman._checkAuth();
+      expect(result).toBeFalsy();
     });
 
     test('throws an error if `auth-token` field is missing', async () => {
       const fields = mockHelpers.getFields();
       const options = {};
+      mockParameters = {
+        ...mockParameters,
+        version: '3',
+      };
 
       const staticman = new Staticman(mockParameters);
       await staticman.init();
@@ -491,11 +503,15 @@ describe('Staticman interface', () => {
       staticman.options = options;
       staticman.siteConfig = mockConfig;
 
-      return staticman._checkAuth().catch((err) => {
+      expect.assertions(1);
+
+      try {
+        await staticman._checkAuth();
+      } catch (err) {
         expect(err).toEqual({
           _smErrorCode: 'AUTH_TOKEN_MISSING',
         });
-      });
+      }
     });
 
     test('throws an error if unable to decrypt the `auth-token` option', async () => {
@@ -577,7 +593,7 @@ describe('Staticman interface', () => {
 
     test('sets the `gitUser` property to the authenticated User and returns true for GitHub authentication', async () => {
       const mockUser = new User('github', 'johndoe', 'johndoe@test.com', 'John Doe');
-      const mockGetCurrentUser = jest.fn(() => Promise.resolve(mockUser));
+      const mockGetCurrentUser = jest.fn().mockResolvedValue(mockUser);
 
       GitHub.mockImplementation(() => ({
         getCurrentUser: mockGetCurrentUser,
@@ -652,7 +668,10 @@ describe('Staticman interface', () => {
       staticman.options = options;
       staticman.siteConfig = mockConfig;
 
-      return staticman._checkAuth().then((result) => expect(result).toBeFalsy());
+      expect.assertions(1);
+
+      const result = await staticman._checkAuth();
+      expect(result).toBeFalsy();
     });
 
     test('throws an error if `github-token` field is missing in v2 API', async () => {
@@ -668,11 +687,15 @@ describe('Staticman interface', () => {
       staticman.options = options;
       staticman.siteConfig = mockConfig;
 
-      return staticman._checkAuth().catch((err) => {
+      expect.assertions(1);
+
+      try {
+        await staticman._checkAuth();
+      } catch (err) {
         expect(err).toEqual({
           _smErrorCode: 'GITHUB_AUTH_TOKEN_MISSING',
         });
-      });
+      }
     });
 
     test('throws an error if unable to decrypt the `github-token` option in the v2 API', async () => {
@@ -702,11 +725,7 @@ describe('Staticman interface', () => {
         login: 'johndoe',
         name: 'John Doe',
       };
-      const mockGetCurrentUser = jest.fn(() =>
-        Promise.resolve({
-          data: mockUser,
-        })
-      );
+      const mockGetCurrentUser = jest.fn().mockResolvedValue({ data: mockUser });
 
       GitHub.mockImplementation(() => ({
         api: {
@@ -732,11 +751,10 @@ describe('Staticman interface', () => {
       staticman.options = options;
       staticman.siteConfig = mockConfig;
 
-      return staticman._checkAuth().then((result) => {
-        expect(mockGetCurrentUser).toHaveBeenCalledTimes(1);
-        expect(staticman.gitUser).toEqual(mockUser);
-        expect(result).toBeTruthy();
-      });
+      const result = await staticman._checkAuth();
+      expect(mockGetCurrentUser).toHaveBeenCalledTimes(1);
+      expect(staticman.gitUser).toEqual(mockUser);
+      expect(result).toBeTruthy();
     });
   });
 
@@ -794,9 +812,10 @@ describe('Staticman interface', () => {
       mockConfig.set('format', 'json');
       staticman.siteConfig = mockConfig;
 
-      return staticman._createFile(fields).then((file) => {
-        expect(file).toBe(JSON.stringify(fields));
-      });
+      expect.assertions(1);
+
+      const file = await staticman._createFile(fields);
+      expect(file).toBe(JSON.stringify(fields));
     });
 
     test('formats the given fields as YAML if `format` is set to `yaml` or `yml`', async () => {
@@ -814,12 +833,12 @@ describe('Staticman interface', () => {
       staticman1.siteConfig = config1;
       staticman2.siteConfig = config2;
 
-      return staticman1._createFile(fields).then((file1) => {
-        return staticman2._createFile(fields).then((file2) => {
-          expect(file1).toBe(yaml.safeDump(fields));
-          expect(file2).toBe(yaml.safeDump(fields));
-        });
-      });
+      expect.assertions(2);
+
+      const file1 = await staticman1._createFile(fields);
+      const file2 = await staticman2._createFile(fields);
+      expect(file1).toBe(yaml.safeDump(fields));
+      expect(file2).toBe(yaml.safeDump(fields));
     });
 
     test('formats the given fields as YAML/Frontmatter if `format` is set to `frontmatter`', async () => {
@@ -836,12 +855,13 @@ describe('Staticman interface', () => {
       const attributeFields = { ...fields };
       delete attributeFields.message;
 
-      return staticman._createFile(fields).then((file) => {
-        const parsedFile = frontMatter(file);
+      expect.assertions(2);
 
-        expect(parsedFile.attributes).toEqual(attributeFields);
-        expect(parsedFile.body.trim()).toBe(fields.message.trim());
-      });
+      const file = await staticman._createFile(fields);
+      const parsedFile = frontMatter(file);
+
+      expect(parsedFile.attributes).toEqual(attributeFields);
+      expect(parsedFile.body.trim()).toBe(fields.message.trim());
     });
 
     test('throws an error if `format` is set to `frontmatter` but there is no `frontmatterContent` transform defined', async () => {
@@ -853,11 +873,15 @@ describe('Staticman interface', () => {
       mockConfig.set('transforms', undefined);
       staticman.siteConfig = mockConfig;
 
-      return staticman._createFile(fields).catch((err) => {
+      expect.assertions(1);
+
+      try {
+        await staticman._createFile(fields);
+      } catch (err) {
         expect(err).toEqual({
           _smErrorCode: 'NO_FRONTMATTER_CONTENT_TRANSFORM',
         });
-      });
+      }
     });
 
     test('throws an error if `format` contains an invalid format', async () => {
@@ -1219,9 +1243,8 @@ describe('Staticman interface', () => {
 
       staticman.siteConfig = mockConfig;
 
-      return staticman.getSiteConfig().then((siteConfig) => {
-        expect(siteConfig).toEqual(mockConfig);
-      });
+      const siteConfig = await staticman.getSiteConfig();
+      expect(siteConfig).toEqual(mockConfig);
     });
 
     test('throws an error if the config path has not been set', async () => {
@@ -1247,15 +1270,14 @@ describe('Staticman interface', () => {
       staticman.setConfigPath(configObject);
       staticman.siteConfig = mockConfig;
       staticman.git = {
-        readFile: jest.fn(() => {
-          return Promise.resolve(mockHelpers.getParsedConfig());
-        }),
+        readFile: jest.fn().mockResolvedValue(mockHelpers.getParsedConfig()),
       };
 
-      return staticman.getSiteConfig(true).then(() => {
-        expect(staticman.git.readFile).toHaveBeenCalledTimes(1);
-        expect(staticman.git.readFile).toHaveBeenCalledWith(configObject.file);
-      });
+      expect.assertions(2);
+
+      await staticman.getSiteConfig(true);
+      expect(staticman.git.readFile).toHaveBeenCalledTimes(1);
+      expect(staticman.git.readFile).toHaveBeenCalledWith(configObject.file);
     });
 
     test('fetches the site config from the repository and throws an error if it fails validation', async () => {
@@ -1273,10 +1295,8 @@ describe('Staticman interface', () => {
 
       staticman.setConfigPath(configObject);
       staticman.git = {
-        readFile: jest.fn(() => {
-          return Promise.resolve({
-            [configObject.path]: invalidConfig,
-          });
+        readFile: jest.fn().mockResolvedValue({
+          [configObject.path]: invalidConfig,
         }),
       };
       staticman._validateConfig = jest.fn(() => validationErrors);
@@ -1297,10 +1317,8 @@ describe('Staticman interface', () => {
 
       staticman.setConfigPath(configObject);
       staticman.git = {
-        readFile: jest.fn(() => {
-          return Promise.resolve({
-            [configObject.path]: mockRemoteConfig,
-          });
+        readFile: jest.fn().mockResolvedValue({
+          [configObject.path]: mockRemoteConfig,
         }),
       };
       staticman._validateConfig = jest.fn(() => null);
@@ -1319,16 +1337,11 @@ describe('Staticman interface', () => {
 
       staticman.setConfigPath(configObject);
       staticman.git = {
-        readFile: jest.fn(() => {
-          const mockRemoteConfig = mockHelpers.getParsedConfig();
-
-          return Promise.resolve(mockRemoteConfig);
-        }),
+        readFile: jest.fn().mockResolvedValue(mockHelpers.getParsedConfig()),
       };
 
-      return staticman.getSiteConfig().then((siteConfig) => {
-        expect(siteConfig.getProperties()).toEqual(mockConfig.getProperties());
-      });
+      const siteConfig = await staticman.getSiteConfig();
+      expect(siteConfig.getProperties()).toEqual(mockConfig.getProperties());
     });
   });
 
@@ -1367,7 +1380,7 @@ describe('Staticman interface', () => {
 
       fields.someField1 = 'Some value';
 
-      staticman._checkForSpam = () => Promise.resolve(fields);
+      staticman._checkForSpam = jest.fn().mockResolvedValue(fields);
       staticman.siteConfig = mockConfig;
 
       return staticman.processEntry(mockHelpers.getFields(), {}).catch((err) => {
@@ -1386,7 +1399,7 @@ describe('Staticman interface', () => {
       mockConfig.set('allowedFields', Object.keys(fields));
 
       staticman.siteConfig = mockConfig;
-      staticman._checkForSpam = () => Promise.resolve(fields);
+      staticman._checkForSpam = jest.fn().mockResolvedValue(fields);
 
       const spyApplyGeneratedFields = jest.spyOn(staticman, '_applyGeneratedFields');
       const spyApplyTransforms = jest.spyOn(staticman, '_applyTransforms');
@@ -1426,8 +1439,8 @@ describe('Staticman interface', () => {
 
       staticman.siteConfig = mockConfig;
       staticman.parameters.version = '3';
-      staticman._checkForSpam = () => Promise.resolve(fields);
-      staticman.git.writeFile = jest.fn(() => Promise.resolve());
+      staticman._checkForSpam = jest.fn().mockResolvedValue(fields);
+      staticman.git.writeFile = jest.fn();
 
       const spyCheckAuth = jest.spyOn(staticman, '_checkAuth');
 
@@ -1448,8 +1461,8 @@ describe('Staticman interface', () => {
       mockConfig.set('auth.required', true);
 
       staticman.siteConfig = mockConfig;
-      staticman._checkForSpam = () => Promise.resolve(fields);
-      staticman.git.writeFile = jest.fn(() => Promise.resolve());
+      staticman._checkForSpam = jest.fn().mockResolvedValue(fields);
+      staticman.git.writeFile = jest.fn();
 
       return staticman.processEntry(fields, options).catch((err) => {
         expect(err._smErrorCode).toEqual('AUTH_TOKEN_INVALID');
@@ -1457,7 +1470,7 @@ describe('Staticman interface', () => {
     });
 
     test('subscribes the user to notifications', async () => {
-      const mockSubscriptionSet = jest.fn(() => Promise.resolve(true));
+      const mockSubscriptionSet = jest.fn().mockResolvedValue(true);
 
       SubscriptionsManager.mockImplementation(() => ({
         send: jest.fn(),
@@ -1477,10 +1490,8 @@ describe('Staticman interface', () => {
       mockConfig.set('notifications.enabled', true);
 
       staticman.siteConfig = mockConfig;
-      staticman._checkForSpam = () => Promise.resolve(fields);
-      staticman.git.writeFile = jest.fn(() => {
-        return Promise.resolve();
-      });
+      staticman._checkForSpam = jest.fn().mockResolvedValue(fields);
+      staticman.git.writeFile = jest.fn();
 
       expect.assertions(1);
 
@@ -1546,10 +1557,8 @@ describe('Staticman interface', () => {
       mockConfig.set('notifications.enabled', true);
 
       staticman.siteConfig = mockConfig;
-      staticman._checkForSpam = () => Promise.resolve(fields);
-      staticman.git.writeFile = jest.fn(() => {
-        return Promise.resolve();
-      });
+      staticman._checkForSpam = jest.fn().mockResolvedValue(fields);
+      staticman.git.writeFile = jest.fn();
 
       await staticman.processEntry(fields, options);
       const expectedFile = await staticman._createFile(staticman._applyInternalFields(fields));

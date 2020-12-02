@@ -3,7 +3,7 @@ import nock from 'nock';
 import * as oauth from '../../../source/lib/OAuth';
 
 describe('OAuth access tokens', () => {
-  test('requests OAuth access token from GitHub', () => {
+  test('requests OAuth access token from GitHub', async () => {
     const accessToken = 'asdfghjkl';
     const clientId = '123456789';
     const clientSecret = '1q2w3e4r5t6y7u8i9o';
@@ -22,12 +22,13 @@ describe('OAuth access tokens', () => {
         access_token: accessToken,
       });
 
-    oauth
-      .requestGitHubAccessToken(code, clientId, clientSecret, redirectUri)
-      .then((token) => expect(token).toEqual(accessToken));
+    expect.assertions(1);
+
+    const token = await oauth.requestGitHubAccessToken(code, clientId, clientSecret, redirectUri);
+    expect(token).toEqual(accessToken);
   });
 
-  test('requests OAuth access token from GitLab', () => {
+  test('requests OAuth access token from GitLab', async () => {
     const accessToken = 'asdfghjkl';
     const clientId = '123456789';
     const clientSecret = '1q2w3e4r5t6y7u8i9o';
@@ -47,8 +48,7 @@ describe('OAuth access tokens', () => {
         access_token: accessToken,
       });
 
-    oauth
-      .requestGitLabAccessToken(code, clientId, clientSecret, redirectUri)
-      .then((token) => expect(token).toEqual(accessToken));
+    const token = await oauth.requestGitLabAccessToken(code, clientId, clientSecret, redirectUri);
+    expect(token).toEqual(accessToken);
   });
 });

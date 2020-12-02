@@ -225,7 +225,7 @@ describe('GitLab interface', () => {
       };
       const filePath = 'path/to/file.json';
       const parsedConfig = yaml.safeLoad(sampleData.config2, 'utf8');
-      const mockShowRepoFile = jest.fn(() => Promise.resolve(fileContents));
+      const mockShowRepoFile = jest.fn().mockResolvedValue(fileContents);
 
       GitLabApi.mockImplementation(() => ({
         RepositoryFiles: {

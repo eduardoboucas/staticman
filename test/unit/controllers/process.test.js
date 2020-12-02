@@ -244,7 +244,7 @@ describe('Process controller', () => {
     test('displays an error if the reCaptcha verification fails', async () => {
       const reCaptchaError = new Error('someError');
       const mockInitFn = jest.fn();
-      const mockVerifyFn = jest.fn().mockImplementation(() => {
+      const mockVerifyFn = jest.fn(() => {
         throw reCaptchaError;
       });
 
