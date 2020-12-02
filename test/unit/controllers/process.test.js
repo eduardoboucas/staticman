@@ -236,7 +236,7 @@ describe('Process controller', () => {
 
       jest.mock('../../../source/lib/Staticman', () => {
         return jest.fn(() => ({
-          init: jest.fn().mockResolvedValue(),
+          init: jest.fn(),
           getSiteConfig: jest.fn().mockResolvedValue(mockSiteConfig),
         }));
       });
@@ -256,14 +256,16 @@ describe('Process controller', () => {
         },
       };
 
-      expect.assertions(5);
+      expect.assertions(4);
 
       const response = await checkRecaptcha(staticman, req);
       expect(response).toBe(true);
-      expect(mockInitFn.mock.calls).toHaveLength(1);
-      expect(mockInitFn.mock.calls[0][0]).toBe(mockSiteConfig.get('reCaptcha.siteKey'));
-      expect(mockInitFn.mock.calls[0][1]).toBe(mockSiteConfig.get('reCaptcha.secret'));
-      expect(mockVerifyFn.mock.calls[0][0]).toBe(req);
+      expect(mockInitFn).toHaveBeenCalledTimes(1);
+      expect(mockInitFn).toHaveBeenCalledWith(
+        mockSiteConfig.get('reCaptcha.siteKey'),
+        mockSiteConfig.get('reCaptcha.secret')
+      );
+      expect(mockVerifyFn).toHaveBeenCalledWith(req, expect.any(Function));
     });
 
     test('displays an error if the reCaptcha verification fails', async () => {
@@ -282,7 +284,7 @@ describe('Process controller', () => {
 
       jest.mock('../../../source/lib/Staticman', () => {
         return jest.fn(() => ({
-          init: jest.fn().mockResolvedValue(),
+          init: jest.fn(),
           getSiteConfig: jest.fn().mockResolvedValue(mockSiteConfig),
         }));
       });
@@ -395,7 +397,7 @@ describe('Process controller', () => {
       await processFn(staticman, req, res);
 
       expect(res.redirect.mock.calls).toHaveLength(1);
-      expect(res.redirect.mock.calls[0][0]).toBe(redirectUrl);
+      expect(res.redirect).toHaveBeenCalledWith(redirectUrl);
     });
 
     test('deliver an object with the processed fields if `processEntry` succeeds', async () => {
@@ -438,7 +440,7 @@ describe('Process controller', () => {
       await processFn(staticman, req, res);
 
       expect(res.send.mock.calls).toHaveLength(1);
-      expect(res.send.mock.calls[0][0]).toEqual({
+      expect(res.send).toHaveBeenCalledWith({
         fields,
         success: true,
       });
@@ -500,7 +502,7 @@ describe('Process controller', () => {
       sendResponse(res, data);
 
       expect(res.redirect.mock.calls).toHaveLength(1);
-      expect(res.redirect.mock.calls[0][0]).toBe(data.redirect);
+      expect(res.redirect).toHaveBeenCalledWith(data.redirect);
     });
 
     test('redirects if there is a `redirectError` option there is an error', () => {
@@ -515,7 +517,7 @@ describe('Process controller', () => {
       sendResponse(res, data);
 
       expect(res.redirect.mock.calls).toHaveLength(1);
-      expect(res.redirect.mock.calls[0][0]).toBe(data.redirectError);
+      expect(res.redirect).toHaveBeenCalledWith(data.redirectError);
     });
 
     test('sends a 200 with a fields object if there are no errors', () => {
@@ -531,12 +533,12 @@ describe('Process controller', () => {
       sendResponse(res, data);
 
       expect(res.send.mock.calls).toHaveLength(1);
-      expect(res.send.mock.calls[0][0]).toEqual({
+      expect(res.send).toHaveBeenCalledWith({
         success: true,
         fields: data.fields,
       });
       expect(res.status.mock.calls).toHaveLength(1);
-      expect(res.status.mock.calls[0][0]).toBe(200);
+      expect(res.status).toHaveBeenCalledWith(200);
     });
 
     test('sends a 500 with an error object if there is an error', () => {
@@ -560,7 +562,7 @@ describe('Process controller', () => {
         errorHandler.getErrorCode(data.err._smErrorCode)
       );
       expect(res.status.mock.calls).toHaveLength(1);
-      expect(res.status.mock.calls[0][0]).toBe(500);
+      expect(res.status).toHaveBeenCalledWith(500);
     });
   });
 });

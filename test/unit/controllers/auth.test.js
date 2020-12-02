@@ -145,7 +145,7 @@ describe('Auth controller', () => {
       expect.assertions(3);
 
       await auth(reqWithQuery, res);
-      expect(res.status.mock.calls[0][0]).toBe(401);
+      expect(res.status).toHaveBeenCalledWith(401);
       expect(res.send.mock.calls[0][0].statusCode).toBe(401);
       expect(res.send.mock.calls[0][0].message).toContain('invalid_code');
     });
@@ -192,7 +192,7 @@ describe('Auth controller', () => {
       expect.assertions(3);
 
       await auth(reqWithQuery, res);
-      expect(res.status.mock.calls[0][0]).toBe(401);
+      expect(res.status).toHaveBeenCalledWith(401);
       expect(res.send.mock.calls[0][0].statusCode).toBe(401);
       expect(res.send.mock.calls[0][0].message).toContain('Unauthorized');
     });
@@ -278,7 +278,7 @@ describe('Auth controller', () => {
       };
 
       return auth(reqWithQuery, res).then((result) => {
-        expect(res.status.mock.calls[0][0]).toBe(401);
+        expect(res.status).toHaveBeenCalledWith(401);
         expect(res.send.mock.calls[0][0].statusCode).toBe(401);
         expect(res.send.mock.calls[0][0].message).toContain('invalid_code');
       });
@@ -324,7 +324,7 @@ describe('Auth controller', () => {
       };
 
       return auth(reqWithQuery, res).then((result) => {
-        expect(res.status.mock.calls[0][0]).toBe(401);
+        expect(res.status).toHaveBeenCalledWith(401);
         expect(res.send.mock.calls[0][0].statusCode).toBe(401);
         expect(res.send.mock.calls[0][0].message).toContain('401 Unauthorized');
       });

@@ -20,7 +20,8 @@ beforeEach(() => {
 
 describe('GitHub interface', () => {
   test('initialises the GitHub API wrapper', async () => {
-    const githubInstance = await new GitHub(req.params);
+    const githubInstance = new GitHub(req.params);
+    await githubInstance.init();
     expect(githubInstance.api).toBeDefined();
   });
 
@@ -35,7 +36,8 @@ describe('GitHub interface', () => {
 
     expect.assertions(1);
 
-    const githubInstance = await new GitHub(req.params);
+    const githubInstance = new GitHub(req.params);
+    await githubInstance.init();
     await githubInstance.api.repos.listInvitationsForAuthenticatedUser();
     expect(scope.isDone()).toBe(true);
   });
@@ -51,10 +53,11 @@ describe('GitHub interface', () => {
 
     expect.assertions(1);
 
-    const githubInstance = await new GitHub({
+    const githubInstance = new GitHub({
       ...req.params,
       oauthToken: 'test-oauth-token',
     });
+    await githubInstance.init();
     await githubInstance.api.repos.listInvitationsForAuthenticatedUser();
     expect(scope.isDone()).toBe(true);
   });
@@ -63,7 +66,8 @@ describe('GitHub interface', () => {
     jest.spyOn(config, 'get').mockImplementation(() => null);
     expect.assertions(1);
     try {
-      await new GitHub({});
+      const github = new GitHub({});
+      await github.init();
     } catch (e) {
       expect(e.message).toBe('Require an `oauthToken` or `token` option');
     }
@@ -86,7 +90,8 @@ describe('GitHub interface', () => {
 
       expect.assertions(2);
 
-      const githubInstance = await new GitHub(req.params);
+      const githubInstance = new GitHub(req.params);
+      await githubInstance.init();
 
       const contents = await githubInstance.readFile(filePath);
       expect(contents).toEqual(parsedConfig);
@@ -104,7 +109,8 @@ describe('GitHub interface', () => {
         .get('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.yml?ref=master')
         .replyWithError('Error encountered oh no');
 
-      const githubInstance = await new GitHub(req.params);
+      const githubInstance = new GitHub(req.params);
+      await githubInstance.init();
 
       expect.assertions(2);
 
@@ -119,7 +125,8 @@ describe('GitHub interface', () => {
 
     test('returns an error if the config file cannot be read', async () => {
       const filePath = 'path/to/file.yml';
-      const githubInstance = await new GitHub(req.params);
+      const githubInstance = new GitHub(req.params);
+      await githubInstance.init();
 
       expect.assertions(2);
 
@@ -143,7 +150,8 @@ describe('GitHub interface', () => {
         });
 
       const filePath = 'path/to/file.yml';
-      const githubInstance = await new GitHub(req.params);
+      const githubInstance = new GitHub(req.params);
+      await githubInstance.init();
 
       expect.assertions(3);
 
@@ -173,7 +181,8 @@ describe('GitHub interface', () => {
 
       expect.assertions(2);
 
-      const githubInstance = await new GitHub(req.params);
+      const githubInstance = new GitHub(req.params);
+      await githubInstance.init();
 
       const contents = await githubInstance.readFile(filePath);
       expect(contents).toEqual(parsedConfig);
@@ -196,7 +205,8 @@ describe('GitHub interface', () => {
 
       expect.assertions(2);
 
-      const githubInstance = await new GitHub(req.params);
+      const githubInstance = new GitHub(req.params);
+      await githubInstance.init();
 
       const response = await githubInstance.readFile(filePath, true);
 
@@ -220,7 +230,8 @@ describe('GitHub interface', () => {
 
       expect.assertions(2);
 
-      const githubInstance = await new GitHub(req.params);
+      const githubInstance = new GitHub(req.params);
+      await githubInstance.init();
 
       const contents = await githubInstance.readFile(filePath);
 
@@ -247,7 +258,8 @@ describe('GitHub interface', () => {
 
       expect.assertions(3);
 
-      const githubInstance = await new GitHub(req.params);
+      const githubInstance = new GitHub(req.params);
+      await githubInstance.init();
 
       const response = await githubInstance.readFile(filePath, true);
       expect(response.content).toEqual(parsedConfig);
@@ -277,7 +289,8 @@ describe('GitHub interface', () => {
 
       expect.assertions(1);
 
-      const githubInstance = await new GitHub(req.params);
+      const githubInstance = new GitHub(req.params);
+      await githubInstance.init();
 
       await githubInstance.writeFile(
         options.path,
@@ -308,7 +321,8 @@ describe('GitHub interface', () => {
 
       expect.assertions(1);
 
-      const githubInstance = await new GitHub(req.params);
+      const githubInstance = new GitHub(req.params);
+      await githubInstance.init();
 
       await githubInstance.writeFile(options.path, options.content);
 
@@ -331,7 +345,8 @@ describe('GitHub interface', () => {
         .put('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.txt')
         .replyWithError('An error');
 
-      const githubInstance = await new GitHub(req.params);
+      const githubInstance = new GitHub(req.params);
+      await githubInstance.init();
 
       expect.assertions(2);
 
@@ -408,7 +423,8 @@ describe('GitHub interface', () => {
 
       expect.assertions(5);
 
-      const githubInstance = await new GitHub(req.params);
+      const githubInstance = new GitHub(req.params);
+      await githubInstance.init();
 
       const data = await githubInstance.writeFileAndSendReview(
         options.path,
@@ -446,7 +462,8 @@ describe('GitHub interface', () => {
         .get('/repos/johndoe/foobar/branches/master')
         .replyWithError('An error, oh no.');
 
-      const githubInstance = await new GitHub(req.params);
+      const githubInstance = new GitHub(req.params);
+      await githubInstance.init();
 
       expect.assertions(2);
 
@@ -481,7 +498,8 @@ describe('GitHub interface', () => {
 
       expect.assertions(2);
 
-      const githubInstance = await new GitHub(req.params);
+      const githubInstance = new GitHub(req.params);
+      await githubInstance.init();
 
       const user = await githubInstance.getCurrentUser();
       expect(user).toEqual(new User('github', 'johndoe', 'johndoe@test.com', 'John Doe'));
@@ -497,7 +515,8 @@ describe('GitHub interface', () => {
         .get('/user')
         .replyWithError('Oops, an error');
 
-      const githubInstance = await new GitHub(req.params);
+      const githubInstance = new GitHub(req.params);
+      await githubInstance.init();
 
       expect.assertions(2);
 

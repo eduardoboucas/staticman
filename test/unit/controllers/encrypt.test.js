@@ -19,6 +19,6 @@ describe('Encrypt controller', () => {
 
     encryptController(req, res);
 
-    expect(res.send.mock.calls[0][0]).toBe('Encrypted text');
+    expect(res.send).toHaveBeenCalledWith('Encrypted text');
   });
 });

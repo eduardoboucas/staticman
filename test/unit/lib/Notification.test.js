@@ -42,12 +42,15 @@ describe('Notification interface', () => {
 
     notification.send(recipient, mockData.fields, mockData.options, mockData.data);
 
-    expect(mockSendFn.mock.calls).toHaveLength(1);
-    expect(mockSendFn.mock.calls[0][0]).toEqual({
-      from: `${config.get('email.fromName')} <${config.get('email.fromAddress')}>`,
-      to: recipient,
-      subject: `New reply on "${mockData.data.siteName}"`,
-      html: message,
-    });
+    expect(mockSendFn).toHaveBeenCalledTimes(1);
+    expect(mockSendFn).toHaveBeenCalledWith(
+      {
+        from: `${config.get('email.fromName')} <${config.get('email.fromAddress')}>`,
+        to: recipient,
+        subject: `New reply on "${mockData.data.siteName}"`,
+        html: message,
+      },
+      expect.any(Function)
+    );
   });
 });

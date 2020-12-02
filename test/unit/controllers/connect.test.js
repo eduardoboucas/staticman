@@ -26,7 +26,6 @@ afterEach(() => jest.clearAllMocks());
 
 describe('Connect controller', () => {
   test('accepts the invitation if one is found and replies with "Staticman connected!"', async () => {
-    mockAcceptRepoInvite.mockResolvedValue();
     mockGetRepoInvites.mockResolvedValue({
       data: [
         {
@@ -43,11 +42,10 @@ describe('Connect controller', () => {
     await connect(req, res);
     expect(mockGetRepoInvites).toHaveBeenCalledTimes(1);
     expect(mockAcceptRepoInvite).toHaveBeenCalledTimes(1);
-    expect(res.send.mock.calls[0][0]).toBe('Staticman connected!');
+    expect(res.send).toHaveBeenCalledWith('Staticman connected!');
   });
 
   test('returns a 404 and an error message if a matching invitation is not found', async () => {
-    mockAcceptRepoInvite.mockResolvedValue();
     mockGetRepoInvites.mockResolvedValue({
       data: [
         {
@@ -64,12 +62,11 @@ describe('Connect controller', () => {
     await connect(req, res);
     expect(mockGetRepoInvites).toHaveBeenCalledTimes(1);
     expect(mockAcceptRepoInvite).not.toHaveBeenCalled();
-    expect(res.send.mock.calls[0][0]).toBe('Invitation not found');
-    expect(res.status.mock.calls[0][0]).toBe(404);
+    expect(res.send).toHaveBeenCalledWith('Invitation not found');
+    expect(res.status).toHaveBeenCalledWith(404);
   });
 
   test('returns a 404 and an error message if the response from GitHub is invalid', async () => {
-    mockAcceptRepoInvite.mockResolvedValue();
     mockGetRepoInvites.mockResolvedValue({
       data: {
         invalidProperty: 'invalidValue',
@@ -81,7 +78,7 @@ describe('Connect controller', () => {
     await connect(req, res);
     expect(mockGetRepoInvites).toHaveBeenCalledTimes(1);
     expect(mockAcceptRepoInvite).not.toHaveBeenCalled();
-    expect(res.send.mock.calls[0][0]).toBe('Invitation not found');
-    expect(res.status.mock.calls[0][0]).toBe(404);
+    expect(res.send).toHaveBeenCalledWith('Invitation not found');
+    expect(res.status).toHaveBeenCalledWith(404);
   });
 });

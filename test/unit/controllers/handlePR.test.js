@@ -10,7 +10,7 @@ let req;
 jest.mock('../../../source/lib/Staticman', () => {
   return jest.fn().mockImplementation(() => {
     return {
-      init: jest.fn().mockResolvedValue(),
+      init: jest.fn(),
       setConfigPath: mockSetConfigPathFn,
       processMerge: mockProcessMergeFn,
     };
@@ -53,6 +53,7 @@ describe('HandlePR controller', () => {
       return jest.fn().mockImplementation(() => {
         return {
           getReview: mockGetReview,
+          init: jest.fn(),
         };
       });
     });
@@ -96,6 +97,7 @@ describe('HandlePR controller', () => {
           return {
             getReview: mockGetReview,
             deleteBranch: mockDeleteBranch,
+            init: jest.fn(),
           };
         });
       });
@@ -139,6 +141,7 @@ describe('HandlePR controller', () => {
           return {
             deleteBranch: mockDeleteBranch,
             getReview: mockGetReview,
+            init: jest.fn(),
           };
         });
       });
@@ -149,7 +152,7 @@ describe('HandlePR controller', () => {
 
       await handlePR(req.params.repository, pr);
       expect(mockGetReview).toHaveBeenCalledTimes(1);
-      expect(mockGetReview.mock.calls[0][0]).toEqual(123);
+      expect(mockGetReview).toHaveBeenCalledWith(123);
       expect(mockDeleteBranch).toHaveBeenCalledTimes(1);
       expect(mockSetConfigPathFn.mock.calls).toHaveLength(1);
       expect(mockProcessMergeFn.mock.calls).toHaveLength(1);

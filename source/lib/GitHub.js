@@ -11,37 +11,36 @@ import User from './models/User';
 export default class GitHub extends GitService {
   constructor(options = {}) {
     super(options.username, options.repository, options.branch);
-
-    return (async () => {
-      const isAppAuth = config.get('githubAppID') && config.get('githubPrivateKey');
-      const isLegacyAuth = config.get('githubToken');
-
-      let authToken;
-
-      if (options.oauthToken) {
-        authToken = options.oauthToken;
-      } else if (isAppAuth) {
-        authToken = await GitHub._authenticate(options.username, options.repository);
-      } else if (isLegacyAuth) {
-        authToken = config.get('githubToken');
-      } else {
-        throw new Error('Require an `oauthToken` or `token` option');
-      }
-
-      this.api = new GithubApi({
-        auth: `token ${authToken}`,
-        userAgent: 'Staticman',
-        baseUrl: config.get('githubBaseUrl'),
-        request: {
-          timeout: 5000,
-        },
-      });
-
-      return this;
-    })();
+    this.options = options;
   }
 
-  static async _authenticate(username, repository) {
+  async init() {
+    const isAppAuth = config.get('githubAppID') && config.get('githubPrivateKey');
+    const isLegacyAuth = config.get('githubToken');
+
+    let authToken;
+
+    if (this.options.oauthToken) {
+      authToken = this.options.oauthToken;
+    } else if (isAppAuth) {
+      authToken = await GitHub._authenticateAsApp(this.options.username, this.options.repository);
+    } else if (isLegacyAuth) {
+      authToken = config.get('githubToken');
+    } else {
+      throw new Error('Require an `oauthToken` or `token` option');
+    }
+
+    this.api = new GithubApi({
+      auth: `token ${authToken}`,
+      userAgent: 'Staticman',
+      baseUrl: config.get('githubBaseUrl'),
+      request: {
+        timeout: 5000,
+      },
+    });
+  }
+
+  static async _authenticateAsApp(username, repository) {
     const app = new App({
       id: config.get('githubAppID'),
       privateKey: config.get('githubPrivateKey'),

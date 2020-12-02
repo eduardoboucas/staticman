@@ -11,11 +11,12 @@ export default async (repo, data) => {
     return;
   }
 
-  const github = await new GitHub({
+  const github = new GitHub({
     username: data.repository.owner.login,
     repository: data.repository.name,
     version: '1',
   });
+  await github.init();
 
   try {
     const review = await github.getReview(data.number);

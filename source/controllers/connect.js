@@ -6,13 +6,14 @@ export default async (req, res) => {
     ? require('universal-analytics')(config.get('analytics.uaTrackingId'))
     : null;
 
-  const github = await new GitHub({
+  const github = new GitHub({
     username: req.params.username,
     repository: req.params.repository,
     branch: req.params.branch,
     token: config.get('githubToken'),
     version: req.params.version,
   });
+  await github.init();
 
   if (_isAppAuth()) {
     return res.send('Staticman connected!');

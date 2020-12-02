@@ -42,7 +42,7 @@ describe('GitLab interface', () => {
     const GitLab = require('../../../source/lib/GitLab').default;
     const gitlab = new GitLab(req.params); // eslint-disable-line no-unused-vars
 
-    expect(mockConstructor.mock.calls[0][0]).toEqual({
+    expect(mockConstructor).toHaveBeenCalledWith({
       url: 'https://gitlab.com',
       token: 'r4e3w2q1',
     });
@@ -66,7 +66,7 @@ describe('GitLab interface', () => {
     // eslint-disable-next-line no-unused-vars
     const gitlab = new GitLab({ ...req.params, oauthToken });
 
-    expect(mockConstructor.mock.calls[0][0]).toEqual({
+    expect(mockConstructor).toHaveBeenCalledWith({
       url: 'https://gitlab.com',
       oauthToken,
     });
@@ -104,11 +104,11 @@ describe('GitLab interface', () => {
       const gitlab = new GitLab(req.params);
 
       return gitlab.readFile(filePath).then((contents) => {
-        expect(mockRepoShowFile.mock.calls[0][0]).toBe(
-          `${req.params.username}/${req.params.repository}`
+        expect(mockRepoShowFile).toHaveBeenCalledWith(
+          `${req.params.username}/${req.params.repository}`,
+          filePath,
+          req.params.branch
         );
-        expect(mockRepoShowFile.mock.calls[0][1]).toBe(filePath);
-        expect(mockRepoShowFile.mock.calls[0][2]).toBe(req.params.branch);
       });
     });
 
@@ -132,11 +132,11 @@ describe('GitLab interface', () => {
       const gitlab = new GitLab(req.params);
 
       return gitlab.readFile(filePath).catch((err) => {
-        expect(mockShowRepoFile.mock.calls[0][0]).toBe(
-          `${req.params.username}/${req.params.repository}`
+        expect(mockShowRepoFile).toHaveBeenCalledWith(
+          `${req.params.username}/${req.params.repository}`,
+          filePath,
+          req.params.branch
         );
-        expect(mockShowRepoFile.mock.calls[0][1]).toBe(filePath);
-        expect(mockShowRepoFile.mock.calls[0][2]).toBe(req.params.branch);
 
         expect(err).toEqual({
           _smErrorCode: 'GITLAB_READING_FILE',
@@ -172,11 +172,11 @@ describe('GitLab interface', () => {
       const gitlab = new GitLab(req.params);
 
       return gitlab.readFile(filePath).catch((err) => {
-        expect(mockShowRepoFile.mock.calls[0][0]).toBe(
-          `${req.params.username}/${req.params.repository}`
+        expect(mockShowRepoFile).toHaveBeenCalledWith(
+          `${req.params.username}/${req.params.repository}`,
+          filePath,
+          req.params.branch
         );
-        expect(mockShowRepoFile.mock.calls[0][1]).toBe(filePath);
-        expect(mockShowRepoFile.mock.calls[0][2]).toBe(req.params.branch);
         expect(err._smErrorCode).toBe('PARSING_ERROR');
         expect(err.message).toBeDefined();
       });
@@ -207,11 +207,11 @@ describe('GitLab interface', () => {
       const gitlab = new GitLab(req.params);
 
       return gitlab.readFile(filePath).then((contents) => {
-        expect(mockShowRepoFile.mock.calls[0][0]).toBe(
-          `${req.params.username}/${req.params.repository}`
+        expect(mockShowRepoFile).toHaveBeenCalledWith(
+          `${req.params.username}/${req.params.repository}`,
+          filePath,
+          req.params.branch
         );
-        expect(mockShowRepoFile.mock.calls[0][1]).toBe(filePath);
-        expect(mockShowRepoFile.mock.calls[0][2]).toBe(req.params.branch);
         expect(contents).toEqual(parsedConfig);
       });
     });
@@ -333,16 +333,16 @@ describe('GitLab interface', () => {
         .writeFile(options.path, options.content, options.branch, options.commitTitle)
         .then((response) => {
           expect(mockCreateRepoFile).toHaveBeenCalledTimes(1);
-          expect(mockCreateRepoFile.mock.calls[0][0]).toBe(
-            `${req.params.username}/${req.params.repository}`
+          expect(mockCreateRepoFile).toHaveBeenCalledWith(
+            `${req.params.username}/${req.params.repository}`,
+            options.path,
+            options.branch,
+            expect.objectContaining({
+              content: btoa(options.content),
+              commit_message: options.commitTitle,
+              encoding: 'base64',
+            })
           );
-          expect(mockCreateRepoFile.mock.calls[0][1]).toBe(options.path);
-          expect(mockCreateRepoFile.mock.calls[0][2]).toBe(options.branch);
-          expect(mockCreateRepoFile.mock.calls[0][3]).toEqual({
-            content: btoa(options.content),
-            commit_message: options.commitTitle,
-            encoding: 'base64',
-          });
         });
     });
 
@@ -370,16 +370,16 @@ describe('GitLab interface', () => {
       };
 
       return gitlab.writeFile(options.path, options.content).then((response) => {
-        expect(mockCreateRepoFile.mock.calls[0][0]).toBe(
-          `${req.params.username}/${req.params.repository}`
+        expect(mockCreateRepoFile).toHaveBeenCalledWith(
+          `${req.params.username}/${req.params.repository}`,
+          options.path,
+          req.params.branch,
+          expect.objectContaining({
+            content: btoa(options.content),
+            commit_message: options.commitTitle,
+            encoding: 'base64',
+          })
         );
-        expect(mockCreateRepoFile.mock.calls[0][1]).toBe(options.path);
-        expect(mockCreateRepoFile.mock.calls[0][2]).toBe(req.params.branch);
-        expect(mockCreateRepoFile.mock.calls[0][3]).toEqual({
-          content: btoa(options.content),
-          commit_message: options.commitTitle,
-          encoding: 'base64',
-        });
       });
     });
 
@@ -473,27 +473,27 @@ describe('GitLab interface', () => {
           options.commitBody
         )
         .then((response) => {
-          expect(mockCreateMergeRequest.mock.calls[0][0]).toBe(
-            `${req.params.username}/${req.params.repository}`
+          expect(mockCreateMergeRequest).toHaveBeenCalledWith(
+            `${req.params.username}/${req.params.repository}`,
+            options.newBranch,
+            req.params.branch,
+            options.commitTitle,
+            expect.objectContaining({
+              description: options.commitBody,
+              remove_source_branch: true,
+            })
           );
-          expect(mockCreateMergeRequest.mock.calls[0][1]).toBe(options.newBranch);
-          expect(mockCreateMergeRequest.mock.calls[0][2]).toBe(req.params.branch);
-          expect(mockCreateMergeRequest.mock.calls[0][3]).toBe(options.commitTitle);
-          expect(mockCreateMergeRequest.mock.calls[0][4]).toEqual({
-            description: options.commitBody,
-            remove_source_branch: true,
-          });
 
-          expect(mockCreateBranch.mock.calls[0][0]).toBe(
-            `${req.params.username}/${req.params.repository}`
+          expect(mockCreateBranch).toHaveBeenCalledWith(
+            `${req.params.username}/${req.params.repository}`,
+            options.newBranch,
+            options.sha
           );
-          expect(mockCreateBranch.mock.calls[0][1]).toBe(options.newBranch);
-          expect(mockCreateBranch.mock.calls[0][2]).toBe(options.sha);
 
-          expect(mockShowBranch.mock.calls[0][0]).toBe(
-            `${req.params.username}/${req.params.repository}`
+          expect(mockShowBranch).toHaveBeenCalledWith(
+            `${req.params.username}/${req.params.repository}`,
+            req.params.branch
           );
-          expect(mockShowBranch.mock.calls[0][1]).toBe(req.params.branch);
         });
     });
 
