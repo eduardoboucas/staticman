@@ -396,7 +396,7 @@ describe('Process controller', () => {
 
       await processFn(staticman, req, res);
 
-      expect(res.redirect.mock.calls).toHaveLength(1);
+      expect(res.redirect).toHaveBeenCalledTimes(1);
       expect(res.redirect).toHaveBeenCalledWith(redirectUrl);
     });
 
@@ -439,7 +439,7 @@ describe('Process controller', () => {
 
       await processFn(staticman, req, res);
 
-      expect(res.send.mock.calls).toHaveLength(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.send).toHaveBeenCalledWith({
         fields,
         success: true,
@@ -501,7 +501,7 @@ describe('Process controller', () => {
 
       sendResponse(res, data);
 
-      expect(res.redirect.mock.calls).toHaveLength(1);
+      expect(res.redirect).toHaveBeenCalledTimes(1);
       expect(res.redirect).toHaveBeenCalledWith(data.redirect);
     });
 
@@ -516,7 +516,7 @@ describe('Process controller', () => {
 
       sendResponse(res, data);
 
-      expect(res.redirect.mock.calls).toHaveLength(1);
+      expect(res.redirect).toHaveBeenCalledTimes(1);
       expect(res.redirect).toHaveBeenCalledWith(data.redirectError);
     });
 
@@ -532,12 +532,14 @@ describe('Process controller', () => {
 
       sendResponse(res, data);
 
-      expect(res.send.mock.calls).toHaveLength(1);
-      expect(res.send).toHaveBeenCalledWith({
-        success: true,
-        fields: data.fields,
-      });
-      expect(res.status.mock.calls).toHaveLength(1);
+      expect(res.send).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          fields: data.fields,
+        })
+      );
+      expect(res.status).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(200);
     });
 
@@ -553,15 +555,15 @@ describe('Process controller', () => {
 
       sendResponse(res, data);
 
-      expect(res.send.mock.calls).toHaveLength(1);
-      expect(res.send.mock.calls[0][0].success).toBe(false);
-      expect(res.send.mock.calls[0][0].message).toBe(
-        errorHandler.getMessage(data.err._smErrorCode)
+      expect(res.send).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          message: errorHandler.getMessage(data.err._smErrorCode),
+          errorCode: errorHandler.getErrorCode(data.err._smErrorCode),
+        })
       );
-      expect(res.send.mock.calls[0][0].errorCode).toBe(
-        errorHandler.getErrorCode(data.err._smErrorCode)
-      );
-      expect(res.status.mock.calls).toHaveLength(1);
+      expect(res.status).toHaveBeenCalledTimes(1);
       expect(res.status).toHaveBeenCalledWith(500);
     });
   });

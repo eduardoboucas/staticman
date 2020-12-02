@@ -61,10 +61,11 @@ describe('Auth controller', () => {
 
       await auth(reqWithQuery, res);
       expect(res.send).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledWith({
+        accessToken: expect.any(String),
+        user: new User('github', mockUser.login, mockUser.email, mockUser.name),
+      });
       expect(helpers.decrypt(res.send.mock.calls[0][0].accessToken)).toBe(mockAccessToken);
-      expect(res.send.mock.calls[0][0].user).toEqual(
-        new User('github', mockUser.login, mockUser.email, mockUser.name)
-      );
     });
 
     test('authenticates to GitHub with the given code and returns the original GitHub user when using v2 API', async () => {
@@ -111,8 +112,11 @@ describe('Auth controller', () => {
 
       await auth(reqWithQuery, res);
       expect(res.send).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledWith({
+        accessToken: expect.any(String),
+        user: mockUser,
+      });
       expect(helpers.decrypt(res.send.mock.calls[0][0].accessToken)).toBe(mockAccessToken);
-      expect(res.send.mock.calls[0][0].user).toEqual(mockUser);
     });
 
     test('returns a 401 response when unable to get an access token from GitHub', async () => {
@@ -142,12 +146,14 @@ describe('Auth controller', () => {
         },
       };
 
-      expect.assertions(3);
+      expect.assertions(2);
 
       await auth(reqWithQuery, res);
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.send.mock.calls[0][0].statusCode).toBe(401);
-      expect(res.send.mock.calls[0][0].message).toContain('invalid_code');
+      expect(res.send).toHaveBeenCalledWith({
+        statusCode: 401,
+        message: expect.stringContaining('invalid_code'),
+      });
     });
 
     test('returns a 401 response when an incorrect access token is used for the GitHub API', async () => {
@@ -189,17 +195,19 @@ describe('Auth controller', () => {
         },
       };
 
-      expect.assertions(3);
+      expect.assertions(2);
 
       await auth(reqWithQuery, res);
       expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.send.mock.calls[0][0].statusCode).toBe(401);
-      expect(res.send.mock.calls[0][0].message).toContain('Unauthorized');
+      expect(res.send).toHaveBeenCalledWith({
+        statusCode: 401,
+        message: 'Unauthorized',
+      });
     });
   });
 
   describe('GitLab', () => {
-    test('authenticates to GitLab with the given code and returns the authenticated user', () => {
+    test('authenticates to GitLab with the given code and returns the authenticated user', async () => {
       const mockAccessToken = 'qwertyuiop';
       const mockCode = '1q2w3e4r';
       const mockUser = {
@@ -241,16 +249,18 @@ describe('Auth controller', () => {
         },
       };
 
-      return auth(reqWithQuery, res).then((result) => {
-        expect(res.send).toHaveBeenCalledTimes(1);
-        expect(helpers.decrypt(res.send.mock.calls[0][0].accessToken)).toBe(mockAccessToken);
-        expect(res.send.mock.calls[0][0].user).toEqual(
-          new User('gitlab', mockUser.username, mockUser.email, mockUser.name)
-        );
+      expect.assertions(3);
+
+      await auth(reqWithQuery, res);
+      expect(res.send).toHaveBeenCalledTimes(1);
+      expect(res.send).toHaveBeenCalledWith({
+        accessToken: expect.any(String),
+        user: new User('gitlab', mockUser.username, mockUser.email, mockUser.name),
       });
+      expect(helpers.decrypt(res.send.mock.calls[0][0].accessToken)).toBe(mockAccessToken);
     });
 
-    test('returns a 401 response when unable to get an access token from GitLab', () => {
+    test('returns a 401 response when unable to get an access token from GitLab', async () => {
       const mockCode = '1q2w3e4r';
       const siteConfig = helpers.getConfig();
 
@@ -277,14 +287,15 @@ describe('Auth controller', () => {
         },
       };
 
-      return auth(reqWithQuery, res).then((result) => {
-        expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.send.mock.calls[0][0].statusCode).toBe(401);
-        expect(res.send.mock.calls[0][0].message).toContain('invalid_code');
+      await auth(reqWithQuery, res);
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.send).toHaveBeenCalledWith({
+        statusCode: 401,
+        message: expect.stringContaining('invalid_code'),
       });
     });
 
-    test('returns a 401 response when an incorrect access token is used for the GitLab API', () => {
+    test('returns a 401 response when an incorrect access token is used for the GitLab API', async () => {
       const mockAccessToken = 'qwertyuiop';
       const mockCode = '1q2w3e4r';
 
@@ -323,10 +334,11 @@ describe('Auth controller', () => {
         },
       };
 
-      return auth(reqWithQuery, res).then((result) => {
-        expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.send.mock.calls[0][0].statusCode).toBe(401);
-        expect(res.send.mock.calls[0][0].message).toContain('401 Unauthorized');
+      await auth(reqWithQuery, res);
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.send).toHaveBeenCalledWith({
+        statusCode: 401,
+        message: expect.stringContaining('401 Unauthorized'),
       });
     });
   });
