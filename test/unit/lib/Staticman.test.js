@@ -364,7 +364,7 @@ describe('Staticman interface', () => {
       const mockCheckSpamFn = jest.fn((_options, callback) => {
         callback(null, false);
       });
-      const mockClientFn = jest.fn((_options) => ({
+      const mockClientFn = jest.fn(() => ({
         checkSpam: mockCheckSpamFn,
       }));
 
@@ -409,7 +409,7 @@ describe('Staticman interface', () => {
       const mockCheckSpamFn = jest.fn((_options, callback) => {
         callback(akismetError);
       });
-      const mockClientFn = jest.fn((_options) => ({
+      const mockClientFn = jest.fn(() => ({
         checkSpam: mockCheckSpamFn,
       }));
 
@@ -432,10 +432,10 @@ describe('Staticman interface', () => {
 
     test('throws an error if the content is flagged as spam', async () => {
       const fields = mockHelpers.getFields();
-      const mockCheckSpamFn = jest.fn((options, callback) => {
+      const mockCheckSpamFn = jest.fn((_options, callback) => {
         callback(null, true);
       });
-      const mockClientFn = jest.fn((options) => ({
+      const mockClientFn = jest.fn(() => ({
         checkSpam: mockCheckSpamFn,
       }));
 
@@ -1349,9 +1349,7 @@ describe('Staticman interface', () => {
         return Promise.resolve(mockConfig);
       });
 
-      staticman._checkForSpam = jest.fn((fields) => {
-        throw errorHandler('IS_SPAM');
-      });
+      staticman._checkForSpam = jest.fn().mockRejectedValue(errorHandler('IS_SPAM'));
 
       return staticman.processEntry(mockHelpers.getFields(), {}).catch((err) => {
         expect(err).toEqual({
@@ -1484,12 +1482,13 @@ describe('Staticman interface', () => {
         return Promise.resolve();
       });
 
-      return staticman.processEntry(fields, options).then((response) => {
-        expect(mockSubscriptionSet).toHaveBeenCalledWith(
-          options.parent,
-          mockHelpers.getFields().email
-        );
-      });
+      expect.assertions(1);
+
+      await staticman.processEntry(fields, options);
+      expect(mockSubscriptionSet).toHaveBeenCalledWith(
+        options.parent,
+        mockHelpers.getFields().email
+      );
     });
 
     test('creates a pull request with the generated file if moderation is enabled', async () => {
@@ -1502,33 +1501,28 @@ describe('Staticman interface', () => {
       mockConfig.set('notifications.enabled', false);
 
       staticman.siteConfig = mockConfig;
-      staticman._checkForSpam = () => Promise.resolve(fields);
-      staticman.git.writeFileAndSendReview = jest.fn(() => {
-        return Promise.resolve();
-      });
+      staticman._checkForSpam = jest.fn().mockResolvedValue(fields);
+      staticman.git.writeFileAndSendReview = jest.fn().mockResolvedValue();
 
-      return staticman
-        .processEntry(fields, {})
-        .then((response) => {
-          return staticman._createFile(staticman._applyInternalFields(fields));
-        })
-        .then((expectedFile) => {
-          const expectedCommitMessage = staticman._resolvePlaceholders(
-            mockConfig.get('commitMessage'),
-            {
-              fields,
-              options: {},
-            }
-          );
+      expect.assertions(1);
 
-          expect(staticman.git.writeFileAndSendReview).toHaveBeenCalledWith(
-            staticman._getNewFilePath(fields),
-            expectedFile,
-            `staticman_${staticman.uid}`,
-            expectedCommitMessage,
-            staticman._generateReviewBody(fields)
-          );
-        });
+      await staticman.processEntry(fields, {});
+      const expectedFile = await staticman._createFile(staticman._applyInternalFields(fields));
+      const expectedCommitMessage = staticman._resolvePlaceholders(
+        mockConfig.get('commitMessage'),
+        {
+          fields,
+          options: {},
+        }
+      );
+
+      expect(staticman.git.writeFileAndSendReview).toHaveBeenCalledWith(
+        staticman._getNewFilePath(fields),
+        expectedFile,
+        `staticman_${staticman.uid}`,
+        expectedCommitMessage,
+        staticman._generateReviewBody(fields)
+      );
     });
 
     test('commits the generated file directly if moderation is disabled', async () => {

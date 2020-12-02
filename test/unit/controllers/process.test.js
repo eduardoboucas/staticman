@@ -318,12 +318,10 @@ describe('Process controller', () => {
   describe('process', () => {
     test('send a redirect to the URL provided, if the `redirect` option is provided, if `processEntry` succeeds', async () => {
       const redirectUrl = 'https://eduardoboucas.com';
-      const mockProcessEntry = jest.fn((fields, options) =>
-        Promise.resolve({
-          fields: ['name', 'email'],
-          redirect: redirectUrl,
-        })
-      );
+      const mockProcessEntry = jest.fn().mockResolvedValue({
+        fields: ['name', 'email'],
+        redirect: redirectUrl,
+      });
 
       Staticman.mockImplementation(() => ({
         init: jest.fn(),
@@ -363,11 +361,7 @@ describe('Process controller', () => {
         name: 'Eduardo Boucas',
         email: 'mail@eduardoboucas.com',
       };
-      const mockProcessEntry = jest.fn((mockFields, options) =>
-        Promise.resolve({
-          fields,
-        })
-      );
+      const mockProcessEntry = jest.fn().mockResolvedValue({ fields });
 
       Staticman.mockImplementation(() => ({
         init: jest.fn(),
@@ -403,9 +397,7 @@ describe('Process controller', () => {
 
     test('reject if `processEntry` fails', async () => {
       const processEntryError = new Error('someError');
-      const mockProcessEntry = jest.fn((fields, options) => {
-        return Promise.reject(processEntryError);
-      });
+      const mockProcessEntry = jest.fn().mockRejectedValue(processEntryError);
 
       Staticman.mockImplementation(() => ({
         init: jest.fn(),
