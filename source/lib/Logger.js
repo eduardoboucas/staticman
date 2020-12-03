@@ -1,34 +1,32 @@
-import BunyanSlack from 'bunyan-slack'
-import logger from '@dadi/logger'
+import BunyanSlack from 'bunyan-slack';
+import logger from '@dadi/logger';
 
-import config from '../config'
+import config from '../config';
 
 class Logger {
-  constructor () {
+  constructor() {
     const options = {
       enabled: true,
       level: 'info',
-      stream: process.stdout
-    }
+      stream: process.stdout,
+    };
 
     if (typeof config.get('logging.slackWebhook') === 'string') {
-      this.formatFn = t => '```\n' + t + '\n```'
+      this.formatFn = (t) => `\`\`\`\n${t}\n\`\`\``;
 
       options.stream = new BunyanSlack({
-        webhook_url: config.get('logging.slackWebhook')
-      })
+        webhook_url: config.get('logging.slackWebhook'),
+      });
     }
 
-    logger.init(options)
+    logger.init(options);
   }
 
-  info (data) {
-    const formattedData = typeof this.formatFn === 'function'
-      ? this.formatFn(data)
-      : data
+  info(data) {
+    const formattedData = typeof this.formatFn === 'function' ? this.formatFn(data) : data;
 
-    logger.info(formattedData)
+    logger.info(formattedData);
   }
 }
 
-export const instance = new Logger()
+export default new Logger();

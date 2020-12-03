@@ -1,6 +1,6 @@
 <img src="logo.png" width="300">
 
-# Staticman [![coverage](https://img.shields.io/badge/coverage-81%25-yellow.svg?style=flat)](https://github.com/eduardoboucas/staticman) [![Build Status](https://travis-ci.org/eduardoboucas/staticman.svg?branch=master)](https://travis-ci.org/eduardoboucas/staticman) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+# Staticman [![coverage](https://img.shields.io/badge/coverage-81%25-yellow.svg?style=flat)](https://github.com/eduardoboucas/staticman) [![Build Status](https://travis-ci.org/eduardoboucas/staticman.svg?branch=master)](https://travis-ci.org/eduardoboucas/staticman) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-airbnb-brightgreen.svg)](https://github.com/airbnb/javascript)
 
 > Static sites with superpowers
 
@@ -16,12 +16,13 @@ You can download and run the Staticman API on your own infrastructure. The easie
 
 ## Requirements
 
-- Node.js 8.11.3+
+- Node.js 14.15.1+
 - npm
 - A [personal access token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) for the GitHub and/or GitLab account you want to run Staticman with
 - An RSA key in PEM format
 
 ## Setting up the server on your own infrastructure
+
 NOTE: The below steps are not required if deploying to Heroku. To deploy to Heroku, click the above deploy button and enter your configuration variables in the Heroku Dashboard.
 
 - Clone the repository and install the dependencies via npm.
@@ -64,7 +65,7 @@ The full Staticman API documentation [can be found here](https://api.staticman.n
 
 ## Site configuration
 
-Staticman will look for a config file. For the deprecated `v1` endpoints, this is a  `_config.yml` with a `staticman` property inside; for `v2` endpoints, Staticman looks for a `staticman.yml` file at the root of the repository.
+Staticman will look for a config file. For the deprecated `v1` endpoints, this is a `_config.yml` with a `staticman` property inside; for `v2` endpoints, Staticman looks for a `staticman.yml` file at the root of the repository.
 
 For a list of available configuration parameters, please refer to the [documentation page](https://staticman.net/docs/configuration).
 
@@ -74,6 +75,8 @@ Would you like to contribute to Staticman? That's great! Here's how:
 
 1. Read the [contributing guidelines](CONTRIBUTING.md)
 1. Pull the repository and start hacking
+1. Run the dev server with `npm start-dev`
+1. Generated API docs are accessible at the `/api-docs` endpoint
 1. Make sure tests are passing by running `npm test`
 1. Send a pull request and celebrate
 
