@@ -1,7 +1,7 @@
 import nock from 'nock';
 import request from 'supertest';
 
-import * as helpers from '../helpers';
+import { encrypt, parameters } from '../helpers';
 import * as GitHubMocks from '../helpers/githubApiMocks';
 import * as sampleData from '../helpers/sampleData';
 import StaticmanAPI from '../../source/server';
@@ -9,26 +9,38 @@ import StaticmanAPI from '../../source/server';
 const staticman = new StaticmanAPI().server;
 const supportedApiVersions = [['v1'], ['v2'], ['v3']];
 
+let mockParameters;
+let baseEntryBody;
+
+beforeEach(() => {
+  mockParameters = parameters;
+  baseEntryBody = {
+    fields: {
+      name: 'Eduardo Boucas',
+    },
+    options: {
+      reCaptcha: {
+        siteKey: 'someSiteKey',
+        secret: 'someSecret',
+      },
+    },
+  };
+});
+
 afterEach(() => {
   nock.cleanAll();
 });
 
-const repoData = {
-  ...helpers.getParameters(),
-  path: 'staticman.yml',
-};
-
 describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
   it('returns a RECAPTCHA_CONFIG_MISMATCH error if reCaptcha options contain the wrong site key', async () => {
-    const reCaptchaSecret = helpers.encrypt('Some little secret');
+    const reCaptchaSecret = encrypt('Some little secret');
+    baseEntryBody.options.reCaptcha.secret = reCaptchaSecret;
     const mockConfig = sampleData.config1.replace('@reCaptchaSecret@', reCaptchaSecret);
 
     const mockConfigInfo = {
+      ...mockParameters,
       contents: mockConfig,
       version: version.charAt(1),
-      username: repoData.username,
-      repository: repoData.repository,
-      branch: repoData.branch,
     };
 
     const configMock = GitHubMocks.fetchConfigFile(mockConfigInfo);
@@ -37,17 +49,7 @@ describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
 
     await request(staticman)
       .post(_constructEntryEndpoint(version))
-      .send({
-        fields: {
-          name: 'Eduardo Boucas',
-        },
-        options: {
-          reCaptcha: {
-            siteKey: 'wrongSiteKey',
-            secret: reCaptchaSecret,
-          },
-        },
-      })
+      .send(baseEntryBody)
       .set('Content-Type', 'application/x-www-form-urlencoded')
       .expect(500)
       .expect('Content-Type', 'application/json; charset=utf-8')
@@ -64,17 +66,12 @@ describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
 
   it('returns a RECAPTCHA_CONFIG_MISMATCH error if reCaptcha secret does not match', async () => {
     const reCaptchaSecret = 'Some little secret';
-    const mockConfig = sampleData.config1.replace(
-      '@reCaptchaSecret@',
-      helpers.encrypt(reCaptchaSecret)
-    );
+    const mockConfig = sampleData.config1.replace('@reCaptchaSecret@', encrypt(reCaptchaSecret));
 
     const mockConfigInfo = {
+      ...mockParameters,
       contents: mockConfig,
       version: version.charAt(1),
-      username: repoData.username,
-      repository: repoData.repository,
-      branch: repoData.branch,
     };
 
     const configMock = GitHubMocks.fetchConfigFile(mockConfigInfo);
@@ -83,17 +80,7 @@ describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
 
     await request(staticman)
       .post(_constructEntryEndpoint(version))
-      .send({
-        fields: {
-          name: 'Eduardo Boucas',
-        },
-        options: {
-          reCaptcha: {
-            siteKey: '123456789',
-            secret: 'foo',
-          },
-        },
-      })
+      .send(baseEntryBody)
       .set('Content-Type', 'application/x-www-form-urlencoded')
       .expect(500)
       .expect('Content-Type', 'application/json; charset=utf-8')
@@ -110,12 +97,12 @@ describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
 
   it('outputs a PARSING_ERROR error if the site config is malformed', async () => {
     const mockConfigInfo = {
+      ...mockParameters,
       contents: sampleData.config3,
       version: version.charAt(1),
-      username: repoData.username,
-      repository: repoData.repository,
-      branch: repoData.branch,
     };
+
+    delete baseEntryBody.options;
 
     const configMock = GitHubMocks.fetchConfigFile(mockConfigInfo);
 
@@ -123,11 +110,7 @@ describe.each(supportedApiVersions)('API %s - Entry endpoints', (version) => {
 
     await request(staticman)
       .post(_constructEntryEndpoint(version))
-      .send({
-        fields: {
-          name: 'Eduardo Boucas',
-        },
-      })
+      .send(baseEntryBody)
       .set('Content-Type', 'application/x-www-form-urlencoded')
       .expect(500)
       .expect('Content-Type', 'application/json; charset=utf-8')
@@ -149,13 +132,13 @@ function _constructEntryEndpoint(version, service) {
   const gitService = service ?? 'github';
   switch (version) {
     case 'v1':
-      return `/${version}/entry/${repoData.username}/${repoData.repository}/${repoData.branch}`;
+      return `/${version}/entry/${mockParameters.username}/${mockParameters.repository}/${mockParameters.branch}`;
 
     case 'v2':
-      return `/${version}/entry/${repoData.username}/${repoData.repository}/${repoData.branch}/${repoData.property}`;
+      return `/${version}/entry/${mockParameters.username}/${mockParameters.repository}/${mockParameters.branch}/${mockParameters.property}`;
 
     case 'v3':
     default:
-      return `/${version}/entry/${gitService}/${repoData.username}/${repoData.repository}/${repoData.branch}/${repoData.property}`;
+      return `/${version}/entry/${gitService}/${mockParameters.username}/${mockParameters.repository}/${mockParameters.branch}/${mockParameters.property}`;
   }
 }
