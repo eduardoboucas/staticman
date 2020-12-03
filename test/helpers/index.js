@@ -7,14 +7,14 @@ import * as RSA from '../../source/lib/RSA';
 import * as sampleData from './sampleData';
 import SiteConfig from '../../source/siteConfig';
 
-const fields = {
+export const fields = {
   name: 'Eduardo Bouças',
   email: 'mail@eduardoboucas.com',
   url: 'https://eduardoboucas.com',
   message: 'This is a sample comment',
 };
 
-const parameters = {
+export const parameters = {
   branch: 'master',
   property: 'comments',
   repository: 'foobar',
@@ -24,8 +24,6 @@ const parameters = {
 
 const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8');
 const siteConfig = SiteConfig(parsedConfig.comments);
-
-export const baseUrl = '';
 
 export function decrypt(text) {
   return RSA.decrypt(text);
@@ -92,7 +90,7 @@ export const getParameters = () => {
 };
 
 export function getParsedConfig() {
-  return yaml.safeLoad(sampleData.config1, 'utf8');
+  return cloneDeep(parsedConfig);
 }
 
 export function getUserAgent() {
