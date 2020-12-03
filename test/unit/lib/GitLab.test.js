@@ -13,8 +13,6 @@ jest.mock('gitlab');
 
 let req;
 
-const btoa = (contents) => Buffer.from(contents).toString('base64');
-
 beforeEach(() => {
   jest.resetModules();
   jest.restoreAllMocks();
@@ -65,7 +63,7 @@ describe('GitLab interface', () => {
       const fileContents = 'This is a text file!';
       const filePath = 'path/to/file.txt';
       const mockRepoShowFile = jest.fn().mockResolvedValue({
-        content: btoa(fileContents),
+        content: mockHelpers.btoa(fileContents),
       });
 
       GitLabApi.mockImplementation(() => ({
@@ -118,7 +116,7 @@ describe('GitLab interface', () => {
       `;
       const filePath = 'path/to/file.yml';
       const mockShowRepoFile = jest.fn().mockResolvedValue({
-        content: btoa(fileContents),
+        content: mockHelpers.btoa(fileContents),
       });
 
       GitLabApi.mockImplementation(() => ({
@@ -148,7 +146,7 @@ describe('GitLab interface', () => {
       const filePath = 'path/to/file.yml';
       const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8');
       const mockShowRepoFile = jest.fn().mockResolvedValue({
-        content: btoa(sampleData.config1),
+        content: mockHelpers.btoa(sampleData.config1),
       });
 
       GitLabApi.mockImplementation(() => ({
@@ -173,7 +171,7 @@ describe('GitLab interface', () => {
     test('reads a YAML file and returns its parsed and raw contents if `getFullResponse` is `true`', async () => {
       const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8');
       const fileContents = {
-        content: btoa(sampleData.config1),
+        content: mockHelpers.btoa(sampleData.config1),
       };
       const filePath = 'path/to/file.yml';
       const mockShowRepoFile = jest.fn().mockResolvedValue(fileContents);
@@ -197,7 +195,7 @@ describe('GitLab interface', () => {
       const filePath = 'path/to/file.json';
       const parsedConfig = yaml.safeLoad(sampleData.config2, 'utf8');
       const mockShowRepoFile = jest.fn().mockResolvedValue({
-        content: btoa(sampleData.config2),
+        content: mockHelpers.btoa(sampleData.config2),
       });
 
       GitLabApi.mockImplementation(() => ({
@@ -217,7 +215,7 @@ describe('GitLab interface', () => {
 
     test('reads a JSON file and returns its parsed and raw contents if `getFullResponse` is `true`', async () => {
       const fileContents = {
-        content: btoa(sampleData.config2),
+        content: mockHelpers.btoa(sampleData.config2),
       };
       const filePath = 'path/to/file.json';
       const parsedConfig = yaml.safeLoad(sampleData.config2, 'utf8');
@@ -268,7 +266,7 @@ describe('GitLab interface', () => {
         options.path,
         options.branch,
         expect.objectContaining({
-          content: btoa(options.content),
+          content: mockHelpers.btoa(options.content),
           commit_message: options.commitTitle,
           encoding: 'base64',
         })
@@ -300,7 +298,7 @@ describe('GitLab interface', () => {
         options.path,
         req.params.branch,
         expect.objectContaining({
-          content: btoa(options.content),
+          content: mockHelpers.btoa(options.content),
           commit_message: options.commitTitle,
           encoding: 'base64',
         })

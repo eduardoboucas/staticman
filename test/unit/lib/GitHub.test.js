@@ -9,8 +9,6 @@ import User from '../../../source/lib/models/User';
 
 let req;
 
-const btoa = (contents) => Buffer.from(contents).toString('base64');
-
 beforeEach(() => {
   jest.resetModules();
   jest.restoreAllMocks();
@@ -83,7 +81,7 @@ describe('GitHub interface', () => {
       })
         .get('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.yml?ref=master')
         .reply(200, {
-          content: btoa(sampleData.config1),
+          content: mockHelpers.btoa(sampleData.config1),
         });
 
       expect.assertions(2);
@@ -140,7 +138,7 @@ describe('GitHub interface', () => {
       })
         .get('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.yml?ref=master')
         .reply(200, {
-          content: btoa(sampleData.configInvalidYML),
+          content: mockHelpers.btoa(sampleData.configInvalidYML),
         });
 
       const filePath = 'path/to/file.yml';
@@ -168,7 +166,7 @@ describe('GitHub interface', () => {
       })
         .get('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.yml?ref=master')
         .reply(200, {
-          content: btoa(sampleData.config1),
+          content: mockHelpers.btoa(sampleData.config1),
         });
 
       expect.assertions(2);
@@ -192,7 +190,7 @@ describe('GitHub interface', () => {
       })
         .get('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.yml?ref=master')
         .reply(200, {
-          content: btoa(sampleData.config1),
+          content: mockHelpers.btoa(sampleData.config1),
         });
 
       expect.assertions(2);
@@ -217,7 +215,7 @@ describe('GitHub interface', () => {
       })
         .get('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.json?ref=master')
         .reply(200, {
-          content: btoa(sampleData.config2),
+          content: mockHelpers.btoa(sampleData.config2),
         });
 
       expect.assertions(2);
@@ -233,7 +231,7 @@ describe('GitHub interface', () => {
 
     test('reads a JSON file and returns its parsed and raw contents if `getFullResponse` is `true`', async () => {
       const fileContents = {
-        content: btoa(sampleData.config2),
+        content: mockHelpers.btoa(sampleData.config2),
       };
       const filePath = 'path/to/file.json';
       const parsedConfig = yaml.safeLoad(sampleData.config2, 'utf8');
@@ -245,7 +243,7 @@ describe('GitHub interface', () => {
       })
         .get('/repos/johndoe/foobar/contents/path%2Fto%2Ffile.json?ref=master')
         .reply(200, {
-          content: btoa(sampleData.config2),
+          content: mockHelpers.btoa(sampleData.config2),
         });
 
       expect.assertions(3);
