@@ -17,6 +17,10 @@ beforeEach(() => {
   res = helpers.getMockResponse();
 });
 
+afterEach(() => {
+  nock.cleanAll();
+});
+
 describe('Auth controller', () => {
   describe('GitHub', () => {
     test('authenticates to GitHub with the given code and returns the authenticated user', async () => {
@@ -31,8 +35,7 @@ describe('Auth controller', () => {
       const siteConfig = helpers.getConfig();
 
       nock(/github\.com/)
-        .post('/login/oauth/access_token')
-        .query({
+        .post('/login/oauth/access_token', {
           client_id: siteConfig.get('githubAuth.clientId'),
           client_secret: siteConfig.get('githubAuth.clientSecret'),
           code: mockCode,
@@ -40,6 +43,8 @@ describe('Auth controller', () => {
         })
         .reply(200, {
           access_token: mockAccessToken,
+          scope: 'repos',
+          token_type: 'bearer',
         });
 
       nock(/github\.com/, {
@@ -73,13 +78,14 @@ describe('Auth controller', () => {
       const mockCode = '1q2w3e4r';
       const mockUser = {
         login: 'johndoe',
+        name: 'John Doe',
+        email: 'johndoe@test.com',
       };
 
       const siteConfig = helpers.getConfig();
 
       nock(/github\.com/)
-        .post('/login/oauth/access_token')
-        .query({
+        .post('/login/oauth/access_token', {
           client_id: siteConfig.get('githubAuth.clientId'),
           client_secret: siteConfig.get('githubAuth.clientSecret'),
           code: mockCode,
@@ -87,6 +93,8 @@ describe('Auth controller', () => {
         })
         .reply(200, {
           access_token: mockAccessToken,
+          scope: 'repos',
+          token_type: 'bearer',
         });
 
       nock(/github\.com/, {
@@ -100,6 +108,7 @@ describe('Auth controller', () => {
       const reqWithQuery = {
         ...req,
         params: {
+          ...req.params,
           service: 'github',
           version: '2',
         },
@@ -114,7 +123,7 @@ describe('Auth controller', () => {
       expect(res.send).toHaveBeenCalledTimes(1);
       expect(res.send).toHaveBeenCalledWith({
         accessToken: expect.any(String),
-        user: mockUser,
+        user: new User('github', mockUser.login, mockUser.email, mockUser.name),
       });
       expect(helpers.decrypt(res.send.mock.calls[0][0].accessToken)).toBe(mockAccessToken);
     });
@@ -124,8 +133,7 @@ describe('Auth controller', () => {
       const siteConfig = helpers.getConfig();
 
       nock(/github\.com/)
-        .post('/login/oauth/access_token')
-        .query({
+        .post('/login/oauth/access_token', {
           client_id: siteConfig.get('githubAuth.clientId'),
           client_secret: siteConfig.get('githubAuth.clientSecret'),
           code: mockCode,
@@ -163,8 +171,7 @@ describe('Auth controller', () => {
       const siteConfig = helpers.getConfig();
 
       nock(/github\.com/)
-        .post('/login/oauth/access_token')
-        .query({
+        .post('/login/oauth/access_token', {
           client_id: siteConfig.get('githubAuth.clientId'),
           client_secret: siteConfig.get('githubAuth.clientSecret'),
           code: mockCode,
@@ -172,6 +179,8 @@ describe('Auth controller', () => {
         })
         .reply(200, {
           access_token: mockAccessToken,
+          scope: 'repo',
+          token_type: 'bearer',
         });
 
       nock(/github\.com/, {

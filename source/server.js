@@ -191,6 +191,7 @@ export default class StaticmanAPI {
      * @param {string} repository.path - Github repository name
      * @param {string} branch.path - Repository branch
      * @param {string} property.path - Name of the top level key in the Staticman config
+     * @param {string} code.query.required - Code received from git provider in step 1 of oauth flow
      * @return {string} 200 - Success
      * @return {string} 401 - Authentication error
      */

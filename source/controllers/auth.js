@@ -39,10 +39,7 @@ export default async (req, res) => {
     });
 
     // TODO: Simplify this when v2 support is dropped.
-    const user =
-      req.params.version === '2' && req.params.service === 'github'
-        ? await git.api.users.getAuthenticated({}).then(({ data }) => data)
-        : await git.getCurrentUser();
+    const user = await git.getCurrentUser();
 
     res.send({
       accessToken: RSA.encrypt(accessToken),

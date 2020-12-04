@@ -2,6 +2,7 @@ import assertString from '../TypeUtils';
 
 export default class Review {
   /**
+   * Pull request
    * @param {string} title
    * @param {string} body
    * @param {string} state

@@ -31,6 +31,7 @@
   "dependencies": {
     "@dadi/logger": "^1.4.1",
     "@octokit/app": "^4.1.0",
+    "@octokit/auth-oauth-app": "^3.0.7",
     "@octokit/request": "^5.3.1",
     "@octokit/rest": "^18.0.9",
     "akismet": "^1.0.0",

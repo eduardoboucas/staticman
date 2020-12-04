@@ -2,7 +2,8 @@ import assertString from '../TypeUtils';
 
 export default class User {
   /**
-   * @param {string} type
+   * Git service user
+   * @param {string} type - git service name
    * @param {string} username
    * @param {string} email
    * @param {string} name

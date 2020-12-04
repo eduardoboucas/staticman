@@ -114,6 +114,12 @@ export const schema = {
       format: Boolean,
       default: false,
     },
+    state: {
+      doc:
+        'An unguessable random string. It is used to protect against cross-site request forgery attacks.',
+      format: 'EncryptedString',
+      default: '',
+    },
   },
   gitlabAuth: {
     clientId: {

@@ -2,6 +2,10 @@ import nock from 'nock';
 
 import * as oauth from '../../../source/lib/OAuth';
 
+afterEach(() => {
+  nock.cleanAll();
+});
+
 describe('OAuth access tokens', () => {
   test('requests OAuth access token from GitHub', async () => {
     const accessToken = 'asdfghjkl';
@@ -9,22 +13,30 @@ describe('OAuth access tokens', () => {
     const clientSecret = '1q2w3e4r5t6y7u8i9o';
     const code = 'abcdefghijklmnopqrst';
     const redirectUri = 'http://my-test-site.com';
+    const state = 'somestatestring';
 
     nock(/github\.com/)
-      .post('/login/oauth/access_token')
-      .query({
+      .post('/login/oauth/access_token', {
         client_id: clientId,
         client_secret: clientSecret,
         code,
         redirect_uri: redirectUri,
+        state,
       })
       .reply(200, {
         access_token: accessToken,
+        scope: 'repo',
       });
 
     expect.assertions(1);
 
-    const token = await oauth.requestGitHubAccessToken(code, clientId, clientSecret, redirectUri);
+    const token = await oauth.requestGitHubAccessToken(
+      code,
+      clientId,
+      clientSecret,
+      redirectUri,
+      state
+    );
     expect(token).toEqual(accessToken);
   });
 

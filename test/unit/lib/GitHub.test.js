@@ -16,6 +16,11 @@ beforeEach(() => {
   req = mockHelpers.getMockRequest();
 });
 
+afterEach(() => {
+  nock.cleanAll();
+});
+
+
 describe('GitHub interface', () => {
   test('initialises the GitHub API wrapper', async () => {
     const githubInstance = new GitHub(req.params);
