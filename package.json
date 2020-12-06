@@ -2,7 +2,10 @@
   "name": "staticman",
   "version": "3.0.0",
   "description": "Static sites with superpowers",
-  "main": "index.js",
+  "main": "build/index.js",
+  "files": [
+    "build/**/*"
+  ],
   "scripts": {
     "prestart": "if [ ! -d node_modules ]; then npm install; fi",
     "clean": "rm -rf build && mkdir build",
@@ -10,6 +13,7 @@
     "build": "npm run clean && npm run build-babel",
     "start": "npm run build && node build/index.js",
     "start-dev": "nodemon --exec babel-node -- source/index.js",
+    "prepublishOnly": "npm run build",
     "pretest": "eslint .",
     "test": "jest",
     "test-dev": "jest --watch --silent",
