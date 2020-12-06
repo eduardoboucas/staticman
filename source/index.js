@@ -1,11 +1,5 @@
-import StaticmanAPI from './server';
+import checkRecaptcha from './lib/ReCaptcha';
+import { getInstance } from './lib/ErrorHandler';
+import Staticman from './lib/Staticman';
 
-try {
-  const api = new StaticmanAPI();
-
-  api.start((port) => {
-    console.log('Staticman API running on port', port);
-  });
-} catch (e) {
-  console.error(e);
-}
+export { checkRecaptcha, getInstance as getErrorHandlerInstance, Staticman };

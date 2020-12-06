@@ -11,13 +11,13 @@
     "clean": "rm -rf build && mkdir build",
     "build-babel": "babel source -d ./build",
     "build": "npm run clean && npm run build-babel",
-    "start": "npm run build && node build/index.js",
-    "start-dev": "nodemon --exec babel-node -- source/index.js",
+    "start": "npm run build && node build/start.js",
+    "start-dev": "nodemon --exec babel-node -- source/start.js",
     "prepublishOnly": "npm run build",
     "pretest": "eslint .",
     "test": "jest",
     "test-dev": "jest --watch --silent",
-    "debug": "nodemon --inspect source/index.js"
+    "debug": "nodemon --inspect source/start.js"
   },
   "engines": {
     "node": ">=14.15.1"
