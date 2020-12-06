@@ -1,49 +1,6 @@
-import reCaptcha from 'express-recaptcha';
-import universalAnalytics from 'universal-analytics';
-
-import config from '../config';
-import errorHandler, { getInstance } from '../lib/ErrorHandler';
+import checkRecaptcha from '../lib/ReCaptcha';
+import { getInstance } from '../lib/ErrorHandler';
 import Staticman from '../lib/Staticman';
-
-export function checkRecaptcha(staticman, req) {
-  return new Promise((resolve, reject) => {
-    staticman
-      .getSiteConfig()
-      .then((siteConfig) => {
-        if (!siteConfig.get('reCaptcha.enabled')) {
-          return resolve(false);
-        }
-
-        const reCaptchaOptions = req?.body?.options?.reCaptcha;
-
-        if (!reCaptchaOptions || !reCaptchaOptions.siteKey || !reCaptchaOptions.secret) {
-          return reject(errorHandler('RECAPTCHA_MISSING_CREDENTIALS'));
-        }
-
-        let decryptedSecret;
-
-        try {
-          decryptedSecret = staticman.decrypt(reCaptchaOptions.secret);
-        } catch (err) {
-          return reject(errorHandler('RECAPTCHA_CONFIG_MISMATCH'));
-        }
-
-        if (
-          reCaptchaOptions.siteKey !== siteConfig.get('reCaptcha.siteKey') ||
-          decryptedSecret !== siteConfig.get('reCaptcha.secret')
-        ) {
-          return reject(errorHandler('RECAPTCHA_CONFIG_MISMATCH'));
-        }
-
-        reCaptcha.init(reCaptchaOptions.siteKey, decryptedSecret);
-        reCaptcha.verify(req, () =>
-          req?.recaptcha?.error ? reject(errorHandler(req.reCaptcha.error)) : resolve(true)
-        );
-        return resolve(true);
-      })
-      .catch((err) => reject(err));
-  });
-}
 
 export function createConfigObject(apiVersion, property) {
   const remoteConfig = {};
@@ -59,22 +16,14 @@ export function createConfigObject(apiVersion, property) {
   return remoteConfig;
 }
 
-export function processEntry(staticman, req, res) {
-  const ua = config.get('analytics.uaTrackingId')
-    ? universalAnalytics(config.get('analytics.uaTrackingId'))
-    : null;
+export async function processEntry(staticman, req, res) {
   const fields = req.query.fields || req.body.fields;
-  const options = req.query.options || req.body.options || {};
+  const options = req.query.options || req.body.options;
+  const data = await staticman.processEntry(fields, options);
 
-  return staticman.processEntry(fields, options).then((data) => {
-    sendResponse(res, {
-      redirect: data.redirect,
-      fields: data.fields,
-    });
-
-    if (ua) {
-      ua.event('Entries', 'New entry').send();
-    }
+  sendResponse(res, {
+    redirect: data.redirect,
+    fields: data.fields,
   });
 }
 
@@ -121,19 +70,20 @@ export function sendResponse(res, data) {
 }
 
 export default async (req, res) => {
-  const staticman = await new Staticman(req.params);
+  const staticman = await new Staticman(req.params, {
+    ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+    userAgent: req.headers['user-agent'],
+  });
 
-  staticman.setConfigPath();
-  staticman.setIp(req.headers['x-forwarded-for'] || req.connection.remoteAddress);
-  staticman.setUserAgent(req.headers['user-agent']);
+  try {
+    await checkRecaptcha(staticman, req);
 
-  return checkRecaptcha(staticman, req)
-    .then(() => processEntry(staticman, req, res))
-    .catch((err) =>
-      sendResponse(res, {
-        err,
-        redirect: req?.body?.options?.redirect,
-        redirectError: req?.body?.options?.redirectError,
-      })
-    );
+    processEntry(staticman, req, res);
+  } catch (err) {
+    sendResponse(res, {
+      err,
+      redirect: req?.body?.options?.redirect,
+      redirectError: req?.body?.options?.redirectError,
+    });
+  }
 };
