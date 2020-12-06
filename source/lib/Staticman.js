@@ -17,7 +17,7 @@ import SubscriptionsManager from './SubscriptionsManager';
 import * as Transforms from './Transforms';
 
 export default class Staticman {
-  constructor(parameters) {
+  constructor(parameters, { configPath, ip, userAgent } = {}) {
     return (async () => {
       this.parameters = parameters;
 
@@ -34,8 +34,16 @@ export default class Staticman {
       // Generate unique id
       this.uid = uuidv1();
 
-      this.rsa = new NodeRSA();
-      this.rsa.importKey(config.get('rsaPrivateKey'), 'private');
+      const privateKey = config.get('rsaPrivateKey');
+
+      if (privateKey) {
+        this.rsa = new NodeRSA();
+        this.rsa.importKey(privateKey, 'private');
+      }
+
+      this.setConfigPath(configPath);
+      this.setIp(ip);
+      this.setUserAgent(userAgent);
 
       return this;
     })();

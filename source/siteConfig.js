@@ -210,7 +210,7 @@ export default (data, rsa) => {
     name: 'EncryptedString',
     validate: () => true,
     coerce: (val) => {
-      return rsa.decrypt(val, 'utf8');
+      return rsa ? rsa.decrypt(val, 'utf8') : val;
     },
   });
 

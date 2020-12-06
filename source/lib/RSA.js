@@ -4,10 +4,10 @@ import config from '../config';
 
 const key = new NodeRSA();
 
-key.importKey(config.get('rsaPrivateKey'), 'private');
-
 export const encrypt = (text) => {
   try {
+    key.importKey(config.get('rsaPrivateKey'), 'private');
+
     const encryptedText = key.encrypt(text, 'base64');
 
     return encryptedText;
@@ -18,6 +18,8 @@ export const encrypt = (text) => {
 
 export const decrypt = (text) => {
   try {
+    key.importKey(config.get('rsaPrivateKey'), 'private');
+
     return key.decrypt(text, 'utf8');
   } catch (err) {
     return null;
