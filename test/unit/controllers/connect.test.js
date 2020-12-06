@@ -28,12 +28,16 @@ describe('Connect controller', () => {
       })
     );
 
-    jest.mock('@octokit/rest', () => (_) => ({
-      authenticate: jest.fn(),
-      repos: {
-        acceptInvitation: mockAcceptRepoInvite,
-        listInvitationsForAuthenticatedUser: mockGetRepoInvites,
-      },
+    function MockApi() {}
+
+    MockApi.prototype.authenticate = jest.fn();
+    MockApi.prototype.repos = {
+      acceptInvitation: mockAcceptRepoInvite,
+      listInvitationsForAuthenticatedUser: mockGetRepoInvites,
+    };
+
+    jest.mock('@octokit/rest', () => ({
+      Octokit: MockApi,
     }));
 
     const connect = require('../../../source/controllers/connect').default;
@@ -61,12 +65,16 @@ describe('Connect controller', () => {
       })
     );
 
-    jest.mock('@octokit/rest', () => (_) => ({
-      authenticate: jest.fn(),
-      repos: {
-        acceptInvitation: mockAcceptRepoInvite,
-        listInvitationsForAuthenticatedUser: mockGetRepoInvites,
-      },
+    function MockApi() {}
+
+    MockApi.prototype.authenticate = jest.fn();
+    MockApi.prototype.repos = {
+      acceptInvitation: mockAcceptRepoInvite,
+      listInvitationsForAuthenticatedUser: mockGetRepoInvites,
+    };
+
+    jest.mock('@octokit/rest', () => ({
+      Octokit: MockApi,
     }));
 
     const connect = require('../../../source/controllers/connect').default;
@@ -89,12 +97,16 @@ describe('Connect controller', () => {
       })
     );
 
-    jest.mock('@octokit/rest', () => (_) => ({
-      authenticate: jest.fn(),
-      repos: {
-        acceptInvitation: mockAcceptRepoInvite,
-        listInvitationsForAuthenticatedUser: mockGetRepoInvites,
-      },
+    function MockApi() {}
+
+    MockApi.prototype.authenticate = jest.fn();
+    MockApi.prototype.repos = {
+      acceptInvitation: mockAcceptRepoInvite,
+      listInvitationsForAuthenticatedUser: mockGetRepoInvites,
+    };
+
+    jest.mock('@octokit/rest', () => ({
+      Octokit: MockApi,
     }));
 
     const connect = require('../../../source/controllers/connect').default;
