@@ -38,7 +38,6 @@ export default async (req, res) => {
       version: req.params.version,
     });
 
-    // TODO: Simplify this when v2 support is dropped.
     const user = await git.getCurrentUser();
 
     res.send({

@@ -199,7 +199,7 @@ export default class GitHub extends GitService {
 
   async getCurrentUser() {
     try {
-      const { data } = await this.api.users.getAuthenticated({});
+      const { data } = await this.api.users.getAuthenticated();
       const { login, email, avatar_url: avatarUrl, name, bio, company, blog } = data;
       return new User('github', login, email, name, avatarUrl, bio, blog, company);
     } catch (err) {
