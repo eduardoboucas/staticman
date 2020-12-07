@@ -32,6 +32,14 @@ export function invitation() {
   };
 }
 
+export function oauth(token) {
+  return {
+    access_token: token,
+    scope: 'repos',
+    token_type: 'bearer',
+  };
+}
+
 export function pullRequest() {
   const basePrBody = pullRequestBody();
 
