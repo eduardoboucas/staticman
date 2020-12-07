@@ -1,6 +1,6 @@
 {
   "name": "staticman",
-  "version": "3.0.0-beta.1",
+  "version": "3.0.0-beta.2",
   "description": "Static sites with superpowers",
   "main": "build/index.js",
   "files": [
