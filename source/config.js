@@ -133,10 +133,14 @@ export const schema = {
 };
 
 const config = convict(schema);
-
 const fileName = `${config.get('env')}.json`;
+const filePath = path.join('config', fileName);
 
-config.loadFile(path.join('config', fileName));
-config.validate();
+try {
+  config.loadFile(filePath);
+  config.validate();
+} catch (error) {
+  console.log(`Config file not found at ${filePath}`);
+}
 
 export default config;
