@@ -1,0 +1,12 @@
+.idea/
+.vscode/
+*.iml
+
+config.json
+config/*.json
+!config/test.json
+!config/sample.json
+build/
+coverage/
+node_modules/
+staticman_key
