@@ -1,7 +1,7 @@
-import { getInstance } from '../../../source/lib/ErrorHandler';
+import { getErrorHandlerInstance, Staticman } from '@staticman/core';
 import * as mockHelpers from '../../helpers';
 
-const errorHandler = getInstance();
+const errorHandler = getErrorHandlerInstance();
 
 let mockSiteConfig;
 let req;
@@ -56,7 +56,7 @@ describe('Process controller', () => {
   describe('process', () => {
     const processFn = require('../../../source/controllers/process').processEntry;
 
-    test('send a redirect to the URL provided, if the `redirect` option is provided, if `processEntry` succeeds', () => {
+    test('send a redirect to the URL provided, if the `redirect` option is provided, if `processEntry` succeeds', async () => {
       const redirectUrl = 'https://eduardoboucas.com';
       const mockProcessEntry = jest.fn((fields, options) =>
         Promise.resolve({
@@ -65,16 +65,11 @@ describe('Process controller', () => {
         })
       );
 
-      jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn((parameters) => ({
-          processEntry: mockProcessEntry,
-        }));
-      });
-
       const res = mockHelpers.getMockResponse();
-
-      const Staticman = require('../../../source/lib/Staticman');
+      const { processEntry } = Staticman.prototype;
       const staticman = new Staticman(req.params);
+
+      staticman.processEntry = mockProcessEntry;
 
       req.body = {
         fields: {
@@ -91,13 +86,15 @@ describe('Process controller', () => {
       };
       req.query = {};
 
-      return processFn(staticman, req, res).then((response) => {
-        expect(res.redirect.mock.calls).toHaveLength(1);
-        expect(res.redirect.mock.calls[0][0]).toBe(redirectUrl);
-      });
+      await processFn(staticman, req, res);
+
+      staticman.processEntry = processEntry;
+
+      expect(res.redirect.mock.calls).toHaveLength(1);
+      expect(res.redirect.mock.calls[0][0]).toBe(redirectUrl);
     });
 
-    test('deliver an object with the processed fields if `processEntry` succeeds', () => {
+    test('deliver an object with the processed fields if `processEntry` succeeds', async () => {
       const fields = {
         name: 'Eduardo Boucas',
         email: 'mail@eduardoboucas.com',
@@ -107,17 +104,11 @@ describe('Process controller', () => {
           fields,
         })
       );
-
-      jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn((parameters) => ({
-          processEntry: mockProcessEntry,
-        }));
-      });
-
+      const { processEntry } = Staticman.prototype;
       const res = mockHelpers.getMockResponse();
-
-      const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
+
+      staticman.processEntry = mockProcessEntry;
 
       req.body = {
         fields,
@@ -130,31 +121,27 @@ describe('Process controller', () => {
       };
       req.query = {};
 
-      return processFn(staticman, req, res).then(() => {
-        expect(res.send.mock.calls).toHaveLength(1);
-        expect(res.send.mock.calls[0][0]).toEqual({
-          fields,
-          success: true,
-        });
+      await processFn(staticman, req, res);
+
+      staticman.processEntry = processEntry;
+
+      expect(res.send.mock.calls).toHaveLength(1);
+      expect(res.send.mock.calls[0][0]).toEqual({
+        fields,
+        success: true,
       });
     });
 
-    test('reject if `processEntry` fails', () => {
+    test('reject if `processEntry` fails', async () => {
       const processEntryError = new Error('someError');
       const mockProcessEntry = jest.fn((fields, options) => {
         return Promise.reject(processEntryError);
       });
-
-      jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn((parameters) => ({
-          processEntry: mockProcessEntry,
-        }));
-      });
-
+      const { processEntry } = Staticman.prototype;
       const res = mockHelpers.getMockResponse();
-
-      const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
+
+      staticman.processEntry = mockProcessEntry;
 
       req.body = {
         fields: {
@@ -170,9 +157,13 @@ describe('Process controller', () => {
       };
       req.query = {};
 
-      return processFn(staticman, req, res).catch((err) => {
+      try {
+        await processFn(staticman, req, res);
+      } catch (err) {
         expect(err).toEqual(processEntryError);
-      });
+      }
+
+      staticman.processEntry = processEntry;
     });
   });
 

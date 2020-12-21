@@ -1,9 +1,8 @@
 import nock from 'nock';
+import { Staticman, User } from '@staticman/core';
 
 import auth from '../../../source/controllers/auth';
 import * as helpers from '../../helpers';
-import Staticman from '../../../source/lib/Staticman';
-import User from '../../../source/lib/models/User';
 
 Staticman.prototype.getSiteConfig = function getMockSiteConfig() {
   return Promise.resolve(helpers.getConfig());
@@ -58,6 +57,7 @@ describe('Auth controller', () => {
       };
 
       await auth(reqWithQuery, res);
+
       expect(res.send).toHaveBeenCalledTimes(1);
       expect(helpers.decrypt(res.send.mock.calls[0][0].accessToken)).toBe(mockAccessToken);
       expect(res.send.mock.calls[0][0].user).toEqual(

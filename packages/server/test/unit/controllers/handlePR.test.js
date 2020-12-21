@@ -1,26 +1,17 @@
+// eslint-disable-next-line max-classes-per-file
+import { GitHub, Review, Staticman } from '@staticman/core';
+
 import { getMockRequest } from '../../helpers';
 import * as sampleData from '../../helpers/sampleData';
-import Review from '../../../source/lib/models/Review';
 
-let mockSetConfigPathFn;
 let mockProcessMergeFn;
 let req;
 
-// Mock Staticman module
-jest.mock('../../../source/lib/Staticman', () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      setConfigPath: mockSetConfigPathFn,
-      processMerge: mockProcessMergeFn,
-    };
-  });
-});
-
 beforeEach(() => {
   jest.resetModules();
-  mockSetConfigPathFn = jest.fn();
   mockProcessMergeFn = jest.fn();
   req = getMockRequest();
+  jest.unmock('@staticman/core');
 });
 
 describe('HandlePR controller', () => {
@@ -48,17 +39,26 @@ describe('HandlePR controller', () => {
     const mockReview = new Review(pr.title, pr.body, 'false', pr.head.ref, pr.base.ref);
     const mockGetReview = jest.fn().mockResolvedValue(mockReview);
 
-    jest.mock('../../../source/lib/GitHub', () => {
-      return jest.fn().mockImplementation(() => {
-        return {
-          getReview: mockGetReview,
-        };
-      });
-    });
+    class MockGitHub extends GitHub {
+      // eslint-disable-next-line class-methods-use-this
+      authenticate() {
+        return jest.fn();
+      }
+
+      getReview(...args) {
+        return mockGetReview.apply(this, args);
+      }
+    }
+
+    jest.mock('@staticman/core', () => ({
+      ...jest.requireActual('@staticman/core'),
+      GitHub: MockGitHub,
+    }));
 
     const handlePR = require('../../../source/controllers/handlePR').default;
 
     await handlePR(req.params.repository, pr);
+
     expect(mockGetReview).toHaveBeenCalledTimes(1);
   });
 
@@ -88,18 +88,30 @@ describe('HandlePR controller', () => {
       const mockGetReview = jest.fn().mockResolvedValue(mockReview);
       const mockDeleteBranch = jest.fn();
 
-      jest.mock('../../../source/lib/GitHub', () => {
-        return jest.fn().mockImplementation(() => {
-          return {
-            getReview: mockGetReview,
-            deleteBranch: mockDeleteBranch,
-          };
-        });
-      });
+      class MockGitHub extends GitHub {
+        // eslint-disable-next-line class-methods-use-this
+        authenticate() {
+          return jest.fn();
+        }
+
+        deleteBranch(...args) {
+          return mockDeleteBranch.apply(this, args);
+        }
+
+        getReview(...args) {
+          return mockGetReview.apply(this, args);
+        }
+      }
+
+      jest.mock('@staticman/core', () => ({
+        ...jest.requireActual('@staticman/core'),
+        GitHub: MockGitHub,
+      }));
 
       const handlePR = require('../../../source/controllers/handlePR').default;
 
       await handlePR(req.params.repository, pr);
+
       expect(mockGetReview).toHaveBeenCalledTimes(1);
       expect(mockDeleteBranch).not.toHaveBeenCalled();
     });
@@ -129,22 +141,40 @@ describe('HandlePR controller', () => {
       const mockDeleteBranch = jest.fn();
       const mockGetReview = jest.fn().mockResolvedValue(mockReview);
 
-      jest.mock('../../../source/lib/GitHub', () => {
-        return jest.fn().mockImplementation(() => {
-          return {
-            deleteBranch: mockDeleteBranch,
-            getReview: mockGetReview,
-          };
-        });
-      });
+      class MockGitHub extends GitHub {
+        // eslint-disable-next-line class-methods-use-this
+        authenticate() {
+          return jest.fn();
+        }
+
+        deleteBranch(...args) {
+          return mockDeleteBranch.apply(this, args);
+        }
+
+        getReview(...args) {
+          return mockGetReview.apply(this, args);
+        }
+      }
+
+      class MockStaticman extends Staticman {
+        processMerge(...args) {
+          return mockProcessMergeFn.apply(this, args);
+        }
+      }
+
+      jest.mock('@staticman/core', () => ({
+        ...jest.requireActual('@staticman/core'),
+        GitHub: MockGitHub,
+        Staticman: MockStaticman,
+      }));
 
       const handlePR = require('../../../source/controllers/handlePR').default;
 
       await handlePR(req.params.repository, pr);
+
       expect(mockGetReview).toHaveBeenCalledTimes(1);
       expect(mockGetReview.mock.calls[0][0]).toEqual(123);
       expect(mockDeleteBranch).toHaveBeenCalledTimes(1);
-      expect(mockSetConfigPathFn.mock.calls).toHaveLength(1);
       expect(mockProcessMergeFn.mock.calls).toHaveLength(1);
     });
   });

@@ -647,7 +647,7 @@ describe('Staticman interface', () => {
     });
   });
 
-  describe('authentication v2', async () => {
+  describe('authentication v2', () => {
     beforeEach(() => {
       mockConfig.set('githubAuth.required', true);
     });
@@ -761,9 +761,7 @@ describe('Staticman interface', () => {
     const mockDate = new Date('1988-08-31T11:00:00');
 
     // eslint-disable-next-line no-global-assign
-    Date = class extends (
-      Date
-    ) {
+    Date = class extends Date {
       constructor() {
         return mockDate;
       }
@@ -1097,9 +1095,7 @@ describe('Staticman interface', () => {
       const mockDate = new Date('1988-08-31T11:00:00');
 
       // eslint-disable-next-line no-global-assign
-      Date = class extends (
-        Date
-      ) {
+      Date = class extends Date {
         constructor() {
           return mockDate;
         }
@@ -1124,9 +1120,7 @@ describe('Staticman interface', () => {
       const mockDate = new Date('1988-08-31T11:00:00');
 
       // eslint-disable-next-line no-global-assign
-      Date = class extends (
-        Date
-      ) {
+      Date = class extends Date {
         constructor() {
           return mockDate;
         }

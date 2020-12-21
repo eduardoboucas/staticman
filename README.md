@@ -1,6 +1,6 @@
 <img src="logo.png" width="300">
 
-# Staticman [![coverage](https://img.shields.io/badge/coverage-81%25-yellow.svg?style=flat)](https://github.com/eduardoboucas/staticman) [![Build Status](https://travis-ci.org/eduardoboucas/staticman.svg?branch=master)](https://travis-ci.org/eduardoboucas/staticman) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-airbnb-brightgreen.svg)](https://github.com/airbnb/javascript)
+# Staticman [![coverage](https://img.shields.io/badge/coverage-81%25-yellow.svg?style=flat)](https://github.com/eduardoboucas/staticman) [![Build Status](https://travis-ci.org/eduardoboucas/staticman.svg?branch=master)](https://travis-ci.org/eduardoboucas/staticman) [![JavaScript Style Guide](https://img.shields.io/badge/code_style-airbnb-brightgreen.svg)](https://github.com/airbnb/javascript) [![lerna](https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg)](https://lerna.js.org/)
 
 > Static sites with superpowers
 
@@ -31,6 +31,7 @@ NOTE: The below steps are not required if deploying to Heroku. To deploy to Hero
   git clone git@github.com:eduardoboucas/staticman.git
   cd staticman
   npm install
+  npm run bootstrap
   ```
 
 - Create a development config file from the sample file.
@@ -40,6 +41,12 @@ NOTE: The below steps are not required if deploying to Heroku. To deploy to Hero
   ```
 
 - Edit the newly-created config file with your GitHub and/or GitLab access token, SSH private key and the port to run the server. Click [here](https://staticman.net/docs/api) for the list of available configuration parameters.
+
+- Build the application bundle
+
+  ```
+  npm run build
+  ```
 
 - Start the server.
 

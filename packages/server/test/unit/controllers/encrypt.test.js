@@ -13,12 +13,13 @@ beforeEach(() => {
   mockEncryptFn = jest.fn(() => 'Encrypted text');
   mockImportKeyFn = jest.fn();
 
-  jest.mock('node-rsa', () => {
-    return jest.fn(() => ({
+  jest.mock('@staticman/core', () => ({
+    ...jest.requireActual('@staticman/core'),
+    RSA: {
       encrypt: mockEncryptFn,
       importKey: mockImportKeyFn,
-    }));
-  });
+    },
+  }));
 
   encrypt = require('../../../source/controllers/encrypt').default;
 });

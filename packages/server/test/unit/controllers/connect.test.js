@@ -8,7 +8,7 @@ beforeEach(() => {
   res = helpers.getMockResponse();
 
   jest.resetModules();
-  jest.unmock('@octokit/rest');
+  jest.unmock('@staticman/core');
 });
 
 describe('Connect controller', () => {
@@ -31,13 +31,16 @@ describe('Connect controller', () => {
     function MockApi() {}
 
     MockApi.prototype.authenticate = jest.fn();
-    MockApi.prototype.repos = {
-      acceptInvitation: mockAcceptRepoInvite,
-      listInvitationsForAuthenticatedUser: mockGetRepoInvites,
+    MockApi.prototype.api = {
+      repos: {
+        acceptInvitation: mockAcceptRepoInvite,
+        listInvitationsForAuthenticatedUser: mockGetRepoInvites,
+      },
     };
 
-    jest.mock('@octokit/rest', () => ({
-      Octokit: MockApi,
+    jest.mock('@staticman/core', () => ({
+      ...jest.requireActual('@staticman/core'),
+      GitHub: MockApi,
     }));
 
     const connect = require('../../../source/controllers/connect').default;
@@ -68,13 +71,16 @@ describe('Connect controller', () => {
     function MockApi() {}
 
     MockApi.prototype.authenticate = jest.fn();
-    MockApi.prototype.repos = {
-      acceptInvitation: mockAcceptRepoInvite,
-      listInvitationsForAuthenticatedUser: mockGetRepoInvites,
+    MockApi.prototype.api = {
+      repos: {
+        acceptInvitation: mockAcceptRepoInvite,
+        listInvitationsForAuthenticatedUser: mockGetRepoInvites,
+      },
     };
 
-    jest.mock('@octokit/rest', () => ({
-      Octokit: MockApi,
+    jest.mock('@staticman/core', () => ({
+      ...jest.requireActual('@staticman/core'),
+      GitHub: MockApi,
     }));
 
     const connect = require('../../../source/controllers/connect').default;
@@ -100,13 +106,16 @@ describe('Connect controller', () => {
     function MockApi() {}
 
     MockApi.prototype.authenticate = jest.fn();
-    MockApi.prototype.repos = {
-      acceptInvitation: mockAcceptRepoInvite,
-      listInvitationsForAuthenticatedUser: mockGetRepoInvites,
+    MockApi.prototype.api = {
+      repos: {
+        acceptInvitation: mockAcceptRepoInvite,
+        listInvitationsForAuthenticatedUser: mockGetRepoInvites,
+      },
     };
 
-    jest.mock('@octokit/rest', () => ({
-      Octokit: MockApi,
+    jest.mock('@staticman/core', () => ({
+      ...jest.requireActual('@staticman/core'),
+      GitHub: MockApi,
     }));
 
     const connect = require('../../../source/controllers/connect').default;

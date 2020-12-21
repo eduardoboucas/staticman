@@ -215,7 +215,7 @@ describe('ReCaptcha service', () => {
       return checkRecaptcha(staticman, req).then((response) => {
         expect(response).toBe(true);
         expect(mockInitFn.mock.calls).toHaveLength(1);
-        expect(mockInitFn.mock.calls[0][0]).toBe(mockSiteConfig.get('reCaptcha.siteKey'));
+        expect(mockInitFn.mock.calls[0][0]).toBe('*');
         expect(mockInitFn.mock.calls[0][1]).toBe(mockSiteConfig.get('reCaptcha.secret'));
         expect(mockVerifyFn.mock.calls[0][0]).toBe(req);
       });
