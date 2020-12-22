@@ -3,7 +3,8 @@
   "scripts": {
     "bootstrap": "lerna bootstrap && lerna run build",
     "test": "lerna run test --stream",
-    "start": "lerna run start --stream"
+    "start": "lerna run start --stream",
+    "start-dev": "lerna run start-dev --stream --parallel"
   },
   "devDependencies": {
     "lerna": "^3.21.0"

@@ -178,6 +178,11 @@ export const schema = {
     format: Array,
     default: [],
   },
+  repo: {
+    doc: 'The name of the repository where the site lives',
+    format: String,
+    default: '',
+  },
   transforms: {
     doc:
       'List of transformations to be applied to any of the fields supplied. It consists of an object where keys correspond to the names of the fields being transformed. The value determines the type of transformation being applied.',
@@ -201,6 +206,7 @@ export const schema = {
       doc: 'Encrypted Secret for your reCAPTCHA site registration',
       format: 'EncryptedString',
       default: '',
+      env: 'RECAPTCHA_SECRET',
     },
   },
 };

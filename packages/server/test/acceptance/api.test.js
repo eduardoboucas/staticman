@@ -1,7 +1,7 @@
 import nock from 'nock';
 import querystring from 'querystring';
+import { config } from '@staticman/config';
 
-import config from '../../source/config';
 import * as helpers from '../helpers';
 import * as sampleData from '../helpers/sampleData';
 import StaticmanAPI from '../../source/server';

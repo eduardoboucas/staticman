@@ -1,4 +1,4 @@
-import config from '../config';
+import { config } from '@staticman/config';
 
 export default class Notification {
   constructor(mailAgent) {

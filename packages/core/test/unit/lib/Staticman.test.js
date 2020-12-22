@@ -1,11 +1,11 @@
 /* eslint-disable max-classes-per-file */
 
+import { config } from '@staticman/config';
 import frontMatter from 'front-matter';
 import moment from 'moment';
 import slugify from 'slug';
 import yaml from 'js-yaml';
 
-import config from '../../../source/config';
 import errorHandler from '../../../source/lib/ErrorHandler';
 import * as mockHelpers from '../../helpers';
 import User from '../../../source/lib/models/User';

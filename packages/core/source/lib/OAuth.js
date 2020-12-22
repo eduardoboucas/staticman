@@ -1,6 +1,6 @@
+import { config } from '@staticman/config';
 import request from 'request-promise';
 
-import config from '../config';
 import errorHandler from './ErrorHandler';
 
 export const requestGitHubAccessToken = (code, clientId, clientSecret, redirectUri) => {

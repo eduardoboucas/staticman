@@ -1,7 +1,6 @@
+import { config } from '@staticman/config';
 import BunyanSlack from 'bunyan-slack';
 import logger from '@dadi/logger';
-
-import config from '../config';
 
 class Logger {
   constructor() {

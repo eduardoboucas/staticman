@@ -1,6 +1,5 @@
+import { config } from '@staticman/config';
 import NodeRSA from 'node-rsa';
-
-import config from '../config';
 
 const key = new NodeRSA();
 

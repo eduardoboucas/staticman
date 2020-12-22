@@ -1,4 +1,5 @@
-import config from '../config';
+import { config } from '@staticman/config';
+
 import errorHandler from './ErrorHandler';
 import GitService from './GitService';
 import Review from './models/Review';

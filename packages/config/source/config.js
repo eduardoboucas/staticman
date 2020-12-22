@@ -1,8 +1,6 @@
 import convict from 'convict';
 import path from 'path';
 
-import { schema as siteConfigSchema } from './siteConfig';
-
 export const schema = {
   akismet: {
     site: {

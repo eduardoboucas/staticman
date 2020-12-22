@@ -1,4 +1,4 @@
-import config from '../../../source/config';
+import { config } from '@staticman/config';
 import Notification from '../../../source/lib/Notification';
 
 const mockSendFn = jest.fn();

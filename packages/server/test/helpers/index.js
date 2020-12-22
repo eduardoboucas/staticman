@@ -4,9 +4,9 @@ import markdownTable from 'markdown-table';
 import NodeRSA from 'node-rsa';
 import request from 'request-promise';
 import yaml from 'js-yaml';
+import { config } from '@staticman/config';
 
 import CatchAllApiMock from './CatchAllApiMock';
-import config from '../../source/config';
 import * as sampleData from './sampleData';
 import SiteConfig from '../../source/siteConfig';
 

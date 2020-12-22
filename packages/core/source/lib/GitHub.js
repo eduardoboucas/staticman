@@ -1,8 +1,8 @@
 import { App } from '@octokit/app';
 import { Octokit as GithubApi } from '@octokit/rest';
 import { request } from '@octokit/request';
+import { config } from '@staticman/config';
 
-import config from '../config';
 import errorHandler from './ErrorHandler';
 import GitService from './GitService';
 import Review from './models/Review';

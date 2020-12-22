@@ -1,6 +1,5 @@
+import { config } from '@staticman/config';
 import { GitHub, Staticman } from '@staticman/core';
-
-import config from '../config';
 
 export default async (repo, data) => {
   const ua = config.get('analytics.uaTrackingId')

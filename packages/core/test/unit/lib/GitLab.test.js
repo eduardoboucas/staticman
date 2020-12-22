@@ -1,8 +1,8 @@
 /* eslint-disable max-classes-per-file, no-shadow */
 
+import { config } from '@staticman/config';
 import yaml from 'js-yaml';
 
-import config from '../../../source/config';
 import GitLab from '../../../source/lib/GitLab';
 import * as mockHelpers from '../../helpers';
 import * as sampleData from '../../helpers/sampleData';

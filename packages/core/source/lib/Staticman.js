@@ -1,4 +1,5 @@
 import akismetApi from 'akismet';
+import { config, siteConfigFactory } from '@staticman/config';
 import Mailgun from 'mailgun-js';
 import markdownTable from 'markdown-table';
 import moment from 'moment';
@@ -8,11 +9,9 @@ import slugify from 'slug';
 import uuidv1 from 'uuid/v1';
 import yaml from 'js-yaml';
 
-import config from '../config';
 import errorHandler from './ErrorHandler';
 import gitFactory from './GitServiceFactory';
 import * as RSA from './RSA';
-import SiteConfig from '../siteConfig';
 import SubscriptionsManager from './SubscriptionsManager';
 import * as Transforms from './Transforms';
 
@@ -22,6 +21,8 @@ export default class Staticman {
       this.parameters = parameters;
 
       const { branch, repository, service, username, version } = parameters;
+
+      this.siteSpecificEnviroment = Staticman.getSiteSpecificEnvironmentVariables();
 
       // Initialise the Git service API
       this.git = await gitFactory(service, {
@@ -47,6 +48,54 @@ export default class Staticman {
 
       return this;
     })();
+  }
+
+  // Converts any environment variables following the format SITE_{X}_{Y} and
+  // forms an object mapping keys Y to their values, grouped by X.
+  //
+  // e.g. SITE_1_RECAPTCHA_KEY=123456 => {1: {RECAPTCHA_KEY: 123456}}
+  static getSiteSpecificEnvironmentVariables() {
+    return Object.entries(process.env).reduce((result, [key, value]) => {
+      const match = key.match(/^SITE_(\d+)_(.*)$/);
+
+      if (!match) {
+        return result;
+      }
+
+      const [, index, variable] = match;
+
+      return {
+        ...result,
+        [index]: {
+          ...result[index],
+          [variable]: value,
+        },
+      };
+    }, {});
+  }
+
+  static validateConfig(siteConfig) {
+    if (!siteConfig) {
+      return errorHandler('MISSING_CONFIG_BLOCK');
+    }
+
+    const requiredFields = ['allowedFields', 'branch', 'format', 'path'];
+    const missingFields = [];
+
+    // Checking for missing required fields
+    requiredFields.forEach((requiredField) => {
+      if (objectPath.get(siteConfig, requiredField) === undefined) {
+        missingFields.push(requiredField);
+      }
+    });
+
+    if (missingFields.length) {
+      return errorHandler('MISSING_CONFIG_FIELDS', {
+        data: missingFields,
+      });
+    }
+
+    return null;
   }
 
   _applyInternalFields(data) {
@@ -416,33 +465,6 @@ export default class Staticman {
     return completedSubject;
   }
 
-  _validateConfig(siteConfig) {
-    if (!siteConfig) {
-      return errorHandler('MISSING_CONFIG_BLOCK');
-    }
-
-    const requiredFields = ['allowedFields', 'branch', 'format', 'path'];
-
-    const missingFields = [];
-
-    // Checking for missing required fields
-    requiredFields.forEach((requiredField) => {
-      if (objectPath.get(siteConfig, requiredField) === undefined) {
-        missingFields.push(requiredField);
-      }
-    });
-
-    if (missingFields.length) {
-      return errorHandler('MISSING_CONFIG_FIELDS', {
-        data: missingFields,
-      });
-    }
-
-    this.siteConfig = SiteConfig(siteConfig, this.rsa);
-
-    return null;
-  }
-
   _validateFields(fields) {
     const validatedConfigFields = fields;
     const missingRequiredFields = [];
@@ -494,24 +516,50 @@ export default class Staticman {
   }
 
   getSiteConfig(force) {
-    if (this.siteConfig && !force) return Promise.resolve(this.siteConfig);
+    if (this.siteConfig && !force) {
+      return Promise.resolve(this.siteConfig);
+    }
 
-    if (!this.configPath) return Promise.reject(errorHandler('NO_CONFIG_PATH'));
+    const { repository, username } = this.parameters;
+    const sitesBlock = config.get('sites');
+    const siteIndex = sitesBlock.findIndex((site) => site.repo === `${username}/${repository}`);
 
-    return this.git.readFile(this.configPath.file).then((data) => {
-      const siteConfig = objectPath.get(data, this.configPath.path);
-      const validationErrors = this._validateConfig(siteConfig);
-
-      if (validationErrors) {
-        return Promise.reject(validationErrors);
+    // If we've found a config block for this repo on the `sites` config prop,
+    // we'll use that straight away, saving a trip to the Git provider.
+    if (siteIndex === -1) {
+      if (!this.configPath) {
+        return Promise.reject(errorHandler('NO_CONFIG_PATH'));
       }
 
-      if (siteConfig.branch !== this.parameters.branch) {
-        return Promise.reject(errorHandler('BRANCH_MISMATCH'));
-      }
+      return this.git.readFile(this.configPath.file).then((data) => {
+        const siteConfig = objectPath.get(data, this.configPath.path);
+        const validationErrors = Staticman.validateConfig(siteConfig);
 
-      return this.siteConfig;
-    });
+        this.siteConfig = siteConfigFactory(siteConfig, {}, this.rsa);
+
+        if (validationErrors) {
+          return Promise.reject(validationErrors);
+        }
+
+        if (siteConfig.branch !== this.parameters.branch) {
+          return Promise.reject(errorHandler('BRANCH_MISMATCH'));
+        }
+
+        return this.siteConfig;
+      });
+    }
+
+    const site = sitesBlock[siteIndex];
+    const environment = this.siteSpecificEnviroment[siteIndex + 1];
+    const validationErrors = Staticman.validateConfig(site);
+
+    if (validationErrors) {
+      return Promise.reject(validationErrors);
+    }
+
+    this.siteConfig = siteConfigFactory(site, environment, this.rsa);
+
+    return this.siteConfig;
   }
 
   processEntry(fields, options) {

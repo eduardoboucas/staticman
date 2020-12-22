@@ -1,5 +1,8 @@
 import convict from 'convict';
+import deepMerge from 'lodash/merge';
 import path from 'path';
+
+import { schema as siteConfigSchema } from './siteConfig';
 
 export const schema = {
   akismet: {
@@ -25,6 +28,12 @@ export const schema = {
       default: '',
       env: 'UA_TRACKING_ID',
     },
+  },
+  bruteforceProtection: {
+    doc: 'Whether to enable bruteforce protection',
+    format: Boolean,
+    default: true,
+    env: 'BRUTEFORCE_PROTECTION',
   },
   email: {
     apiKey: {
@@ -108,6 +117,14 @@ export const schema = {
     default: '',
     env: 'GITLAB_TOKEN',
   },
+  logging: {
+    slackWebhook: {
+      doc: 'Slack webhook URL to pipe log output to',
+      format: String,
+      default: '',
+      env: 'SLACK_WEBHOOK',
+    },
+  },
   port: {
     doc: 'The port to bind the application to.',
     format: 'port',
@@ -122,23 +139,15 @@ export const schema = {
     default: '',
     env: 'RSA_PRIVATE_KEY',
   },
-  logging: {
-    slackWebhook: {
-      doc: 'Slack webhook URL to pipe log output to',
-      format: String,
-      default: '',
-      env: 'SLACK_WEBHOOK',
-    },
-  },
-  bruteforceProtection: {
-    doc: 'Whether to enable bruteforce protection',
-    format: Boolean,
-    default: true,
-    env: 'BRUTEFORCE_PROTECTION',
-  },
 };
 
-const config = convict(schema);
+convict.addFormat({
+  name: 'EncryptedString',
+  validate: () => true,
+  coerce: (val) => val,
+});
+
+const config = convict(deepMerge(siteConfigSchema, schema));
 const fileName = `${config.get('env')}.json`;
 const filePath = path.join('config', fileName);
 

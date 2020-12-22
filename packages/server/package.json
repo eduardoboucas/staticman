@@ -33,6 +33,7 @@
   },
   "homepage": "https://github.com/eduardoboucas/staticman#readme",
   "dependencies": {
+    "@staticman/config": "^1.0.0",
     "@staticman/core": "^1.0.0",
     "body-parser": "^1.17.x",
     "convict": "^6.0.0",
@@ -40,7 +41,6 @@
     "express-brute": "^0.6.0",
     "express-github-webhook": "^1.0.5",
     "express-jsdoc-swagger": "^1.2.0",
-    "express-recaptcha": "^2.1.0",
     "js-yaml": "^3.14.1",
     "markdown-table": "^2.0.0",
     "node-rsa": "^1.1.1",

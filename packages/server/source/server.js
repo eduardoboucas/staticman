@@ -4,9 +4,9 @@ import ExpressBrute from 'express-brute';
 import expressJSDocSwagger from 'express-jsdoc-swagger';
 import GithubWebHook from 'express-github-webhook';
 import objectPath from 'object-path';
+import { config } from '@staticman/config';
 
 import auth from './controllers/auth';
-import config from './config';
 import connect from './controllers/connect';
 import encrypt from './controllers/encrypt';
 import handlePR from './controllers/handlePR';
