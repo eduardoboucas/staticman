@@ -6,6 +6,9 @@
   "files": [
     "build/**/*"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "prestart": "if [ ! -d node_modules ]; then npm install; fi",
     "clean": "rm -rf build && mkdir build",
@@ -160,5 +163,6 @@
   "prettier": {
     "printWidth": 100,
     "singleQuote": true
-  }
+  },
+  "gitHead": "6462363bcefa156d39a316248be753d4cf14d09b"
 }
