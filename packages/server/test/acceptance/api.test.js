@@ -99,7 +99,7 @@ describe('Connect endpoint', () => {
 });
 
 describe('Entry endpoint', () => {
-  test('outputs a RECAPTCHA_CONFIG_MISMATCH error if reCaptcha options do not match (wrong site key)', async () => {
+  test('outputs a RECAPTCHA_INVALID_INPUT_RESPONSE error if reCaptcha options do not match (wrong site key)', async () => {
     const data = {
       ...helpers.getParameters(),
       path: 'staticman.yml',
@@ -141,8 +141,6 @@ describe('Entry endpoint', () => {
     };
     const formData = querystring.stringify(form);
 
-    expect.assertions(3);
-
     try {
       await request({
         body: formData,
@@ -156,12 +154,11 @@ describe('Entry endpoint', () => {
       const error = JSON.parse(response.error);
 
       expect(error.success).toBe(false);
-      expect(error.errorCode).toBe('RECAPTCHA_CONFIG_MISMATCH');
-      expect(error.message).toBe('reCAPTCHA options do not match Staticman config');
+      expect(error.errorCode).toBe('RECAPTCHA_INVALID_INPUT_RESPONSE');
     }
   });
 
-  test('outputs a RECAPTCHA_CONFIG_MISMATCH error if reCaptcha options do not match (wrong secret)', async () => {
+  test('outputs a RECAPTCHA_INVALID_INPUT_RESPONSE error if reCaptcha options do not match (wrong secret)', async () => {
     const data = {
       ...helpers.getParameters(),
       path: 'staticman.yml',
@@ -206,8 +203,6 @@ describe('Entry endpoint', () => {
     };
     const formData = querystring.stringify(form);
 
-    expect.assertions(3);
-
     try {
       await request({
         body: formData,
@@ -221,8 +216,7 @@ describe('Entry endpoint', () => {
       const error = JSON.parse(response.error);
 
       expect(error.success).toBe(false);
-      expect(error.errorCode).toBe('RECAPTCHA_CONFIG_MISMATCH');
-      expect(error.message).toBe('reCAPTCHA options do not match Staticman config');
+      expect(error.errorCode).toBe('RECAPTCHA_INVALID_INPUT_RESPONSE');
     }
   });
 

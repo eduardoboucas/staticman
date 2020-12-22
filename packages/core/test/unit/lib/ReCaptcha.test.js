@@ -1,3 +1,5 @@
+import nock from 'nock';
+
 import * as mockHelpers from '../../helpers';
 
 let mockSiteConfig;
@@ -49,55 +51,7 @@ describe('ReCaptcha service', () => {
       };
 
       return checkRecaptcha(staticman, req).catch((err) => {
-        expect(err._smErrorCode).toBe('RECAPTCHA_MISSING_CREDENTIALS');
-      });
-    });
-
-    test('throws an error if reCaptcha site key is not in the request body', () => {
-      jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn((parameters) => ({
-          getSiteConfig: () => Promise.resolve(mockSiteConfig),
-        }));
-      });
-
-      const { default: checkRecaptcha } = require('../../../source/lib/ReCaptcha');
-      const Staticman = require('../../../source/lib/Staticman');
-      const staticman = new Staticman(req.params);
-
-      req.body = {
-        options: {
-          reCaptcha: {
-            secret: '1q2w3e4r',
-          },
-        },
-      };
-
-      return checkRecaptcha(staticman, req).catch((err) => {
-        expect(err._smErrorCode).toBe('RECAPTCHA_MISSING_CREDENTIALS');
-      });
-    });
-
-    test('throws an error if reCaptcha secret is not in the request body', () => {
-      jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn((parameters) => ({
-          getSiteConfig: () => Promise.resolve(mockSiteConfig),
-        }));
-      });
-
-      const { default: checkRecaptcha } = require('../../../source/lib/ReCaptcha');
-      const Staticman = require('../../../source/lib/Staticman');
-      const staticman = new Staticman(req.params);
-
-      req.body = {
-        options: {
-          reCaptcha: {
-            siteKey: '123456789',
-          },
-        },
-      };
-
-      return checkRecaptcha(staticman, req).catch((err) => {
-        expect(err._smErrorCode).toBe('RECAPTCHA_MISSING_CREDENTIALS');
+        expect(err._smErrorCode).toBe('RECAPTCHA_INVALID_INPUT_RESPONSE');
       });
     });
 
@@ -125,72 +79,14 @@ describe('ReCaptcha service', () => {
       };
 
       return checkRecaptcha(staticman, req).catch((err) => {
-        expect(err._smErrorCode).toBe('RECAPTCHA_CONFIG_MISMATCH');
-      });
-    });
-
-    test('throws an error if the reCatpcha siteKey provided does not match the one in config', () => {
-      jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn((parameters) => ({
-          getSiteConfig: () => Promise.resolve(mockSiteConfig),
-        }));
-      });
-
-      const { default: checkRecaptcha } = require('../../../source/lib/ReCaptcha');
-      const Staticman = require('../../../source/lib/Staticman');
-      const staticman = new Staticman(req.params);
-
-      req.body = {
-        options: {
-          reCaptcha: {
-            siteKey: '987654321',
-            secret: mockSiteConfig.getRaw('reCaptcha.secret'),
-          },
-        },
-      };
-
-      return checkRecaptcha(staticman, req).catch((err) => {
-        expect(err._smErrorCode).toBe('RECAPTCHA_CONFIG_MISMATCH');
-      });
-    });
-
-    test('throws an error if the reCatpcha secret provided does not match the one in config', () => {
-      jest.mock('../../../source/lib/Staticman', () => {
-        return jest.fn((parameters) => ({
-          getSiteConfig: () => Promise.resolve(mockSiteConfig),
-        }));
-      });
-
-      const { default: checkRecaptcha } = require('../../../source/lib/ReCaptcha');
-      const Staticman = require('../../../source/lib/Staticman');
-      const staticman = new Staticman(req.params);
-
-      req.body = {
-        options: {
-          reCaptcha: {
-            siteKey: mockSiteConfig.get('reCaptcha.siteKey'),
-            secret: mockHelpers.encrypt('some other secret'),
-          },
-        },
-      };
-
-      return checkRecaptcha(staticman, req).catch((err) => {
-        expect(err._smErrorCode).toBe('RECAPTCHA_CONFIG_MISMATCH');
+        expect(err._smErrorCode).toBe('RECAPTCHA_INVALID_INPUT_RESPONSE');
       });
     });
 
     test('initialises and triggers a verification from the reCaptcha module', () => {
-      const mockInitFn = jest.fn();
-      const mockVerifyFn = jest.fn((mockReq, reCaptchaCallback) => {
-        reCaptchaCallback(false);
-      });
-
-      jest.mock('express-recaptcha', () => {
-        return {
-          init: mockInitFn,
-          verify: mockVerifyFn,
-        };
-      });
+      const scope = nock(/www\.google\.com/)
+        .post('/recaptcha/api/siteverify')
+        .reply(200, { success: true });
 
       jest.mock('../../../source/lib/Staticman', () => {
         return jest.fn((parameters) => ({
@@ -214,26 +110,14 @@ describe('ReCaptcha service', () => {
 
       return checkRecaptcha(staticman, req).then((response) => {
         expect(response).toBe(true);
-        expect(mockInitFn.mock.calls).toHaveLength(1);
-        expect(mockInitFn.mock.calls[0][0]).toBe('*');
-        expect(mockInitFn.mock.calls[0][1]).toBe(mockSiteConfig.get('reCaptcha.secret'));
-        expect(mockVerifyFn.mock.calls[0][0]).toBe(req);
+        expect(scope.isDone()).toBe(true);
       });
     });
 
     test('displays an error if the reCaptcha verification fails', () => {
-      const reCaptchaError = new Error('someError');
-      const mockInitFn = jest.fn();
-      const mockVerifyFn = jest.fn((verifyReq, reCaptchaCallback) => {
-        reCaptchaCallback(reCaptchaError);
-      });
-
-      jest.mock('express-recaptcha', () => {
-        return {
-          init: mockInitFn,
-          verify: mockVerifyFn,
-        };
-      });
+      const scope = nock(/www\.google\.com/)
+        .post('/recaptcha/api/siteverify')
+        .reply(200, { success: false, 'error-codes': ['invalid-input-response'] });
 
       jest.mock('../../../source/lib/Staticman', () => {
         return jest.fn((parameters) => ({
@@ -256,8 +140,9 @@ describe('ReCaptcha service', () => {
       };
 
       return checkRecaptcha(staticman, req).catch((err) => {
+        expect(scope.isDone()).toBe(true);
         expect(err).toEqual({
-          _smErrorCode: reCaptchaError,
+          _smErrorCode: 'RECAPTCHA_INVALID_INPUT_RESPONSE',
         });
       });
     });

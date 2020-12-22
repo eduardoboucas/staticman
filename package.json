@@ -2,9 +2,10 @@
   "private": true,
   "scripts": {
     "bootstrap": "lerna bootstrap && lerna run build",
-    "test": "lerna run test --stream",
+    "release": "lerna publish",
     "start": "lerna run start --stream",
-    "start-dev": "lerna run start-dev --stream --parallel"
+    "start-dev": "lerna run start-dev --stream --parallel",
+    "test": "lerna run test --stream"
   },
   "devDependencies": {
     "lerna": "^3.21.0"

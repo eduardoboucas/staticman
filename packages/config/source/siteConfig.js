@@ -65,6 +65,11 @@ export const schema = {
     format: String,
     default: 'Add Staticman data',
   },
+  envVariablePrefix: {
+    doc: 'Environment variables prefix',
+    format: String,
+    default: '',
+  },
   extension: {
     doc:
       'The extension to be used in the generated data files (defaults to the extension associated with the `format` field)',
@@ -210,10 +215,16 @@ export default (data, env, rsa) => {
   convict.addFormat({
     name: 'EncryptedString',
     validate: () => true,
-    coerce: (val) => (rsa ? rsa.decrypt(val, 'utf8') : val),
+    coerce: (val) => (rsa && val ? rsa.decrypt(val, 'utf8') : val),
   });
 
-  const config = convict(schema, { env });
+  const configEnv = {};
+
+  Object.keys(process.env).forEach((key) => {
+    configEnv[key] = process.env[key];
+  });
+
+  const config = convict(schema, { env: { ...configEnv, ...env } });
 
   config.load(data);
   config.validate();

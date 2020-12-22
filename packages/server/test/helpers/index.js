@@ -4,14 +4,14 @@ import markdownTable from 'markdown-table';
 import NodeRSA from 'node-rsa';
 import request from 'request-promise';
 import yaml from 'js-yaml';
-import { config } from '@staticman/config';
+import { config, siteConfigFactory } from '@staticman/config';
 
 import CatchAllApiMock from './CatchAllApiMock';
 import * as sampleData from './sampleData';
-import SiteConfig from '../../source/siteConfig';
 
 const rsa = new NodeRSA();
 const rsaKey = config.get('rsaPrivateKey');
+
 rsa.importKey(rsaKey, 'private');
 
 const fields = {
@@ -30,7 +30,7 @@ const parameters = {
 };
 
 const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8');
-const siteConfig = SiteConfig(parsedConfig.comments, rsa);
+const siteConfig = siteConfigFactory(parsedConfig.comments, {}, rsa);
 
 export const baseUrl = '';
 

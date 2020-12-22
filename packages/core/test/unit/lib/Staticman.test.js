@@ -1144,43 +1144,23 @@ describe('Staticman interface', () => {
   describe('`_validateConfig`', () => {
     test('throws an error if no config is provided', async () => {
       const Staticman = require('../../../source/lib/Staticman').default;
-      const staticman = await new Staticman(mockParameters);
 
-      expect(staticman._validateConfig(null)).toEqual({
+      expect(Staticman.validateConfig(null)).toEqual({
         _smErrorCode: 'MISSING_CONFIG_BLOCK',
       });
     });
 
     test('throws an error if the config provided is missing any of the required fields', async () => {
       const Staticman = require('../../../source/lib/Staticman').default;
-      const staticman = await new Staticman(mockParameters);
       const expectedSiteConfig = {
         allowedFields: ['name', 'email'],
         format: 'json',
       };
 
-      expect(staticman._validateConfig(expectedSiteConfig)).toEqual({
+      expect(Staticman.validateConfig(expectedSiteConfig)).toEqual({
         _smErrorCode: 'MISSING_CONFIG_FIELDS',
         data: ['branch', 'path'],
       });
-    });
-
-    test('creates a SiteConfig object and assigns it to the Staticman instance', async () => {
-      const Staticman = require('../../../source/lib/Staticman').default;
-      const staticman = await new Staticman(mockParameters);
-      const expectedSiteConfig = {
-        allowedFields: ['name', 'email'],
-        branch: 'master',
-        format: 'json',
-        path: 'some/path',
-      };
-
-      staticman._validateConfig(expectedSiteConfig);
-
-      expect(staticman.siteConfig.get('allowedFields')).toEqual(expectedSiteConfig.allowedFields);
-      expect(staticman.siteConfig.get('branch')).toEqual(expectedSiteConfig.branch);
-      expect(staticman.siteConfig.get('format')).toEqual(expectedSiteConfig.format);
-      expect(staticman.siteConfig.get('path')).toEqual(expectedSiteConfig.path);
     });
   });
 
@@ -1285,16 +1265,18 @@ describe('Staticman interface', () => {
 
     test('fetches the site config from the repository and throws an error if it fails validation', async () => {
       const Staticman = require('../../../source/lib/Staticman').default;
+      const { validateConfig } = Staticman;
       const staticman = await new Staticman(mockParameters);
       const configObject = mockHelpers.getConfigObject();
       const validationErrors = {
         _smErrorCode: 'MISSING_CONFIG_FIELDS',
-        data: ['branch', 'path'],
+        data: ['allowedFields', 'branch', 'format', 'path'],
       };
-
       const invalidConfig = {
         missingFields: true,
       };
+
+      Staticman.validateConfig = jest.fn(() => validationErrors);
 
       staticman.setConfigPath(configObject);
       staticman.git = {
@@ -1304,19 +1286,21 @@ describe('Staticman interface', () => {
           });
         }),
       };
-      staticman._validateConfig = jest.fn(() => validationErrors);
 
       return staticman.getSiteConfig().catch((err) => {
         expect(err).toEqual(validationErrors);
-        expect(staticman._validateConfig.mock.calls[0][0]).toEqual(invalidConfig);
+        expect(Staticman.validateConfig.mock.calls[0][0]).toEqual(invalidConfig);
+
+        Staticman.validateConfig = validateConfig;
       });
     });
 
     test('fetches the site config from the repository and throws an error if there is a branch mismatch', async () => {
       const Staticman = require('../../../source/lib/Staticman').default;
+      const { validateConfig } = Staticman;
       const staticman = await new Staticman(mockParameters);
       const configObject = mockHelpers.getConfigObject();
-      const mockRemoteConfig = { ...mockConfig.getProperties() };
+      const mockRemoteConfig = { ...mockConfig.values };
 
       mockRemoteConfig.branch = 'some-other-branch';
 
@@ -1328,9 +1312,12 @@ describe('Staticman interface', () => {
           });
         }),
       };
-      staticman._validateConfig = jest.fn(() => null);
+
+      Staticman.validateConfig = jest.fn(() => null);
 
       return staticman.getSiteConfig().catch((err) => {
+        Staticman.validateConfig = validateConfig;
+
         expect(err).toEqual({
           _smErrorCode: 'BRANCH_MISMATCH',
         });

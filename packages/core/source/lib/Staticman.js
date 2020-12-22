@@ -521,45 +521,59 @@ export default class Staticman {
     }
 
     const { repository, username } = this.parameters;
-    const sitesBlock = config.get('sites');
-    const siteIndex = sitesBlock.findIndex((site) => site.repo === `${username}/${repository}`);
+    const siteBlock = config.get('sites')[`${username}/${repository}`];
 
     // If we've found a config block for this repo on the `sites` config prop,
     // we'll use that straight away, saving a trip to the Git provider.
-    if (siteIndex === -1) {
-      if (!this.configPath) {
-        return Promise.reject(errorHandler('NO_CONFIG_PATH'));
+    if (siteBlock) {
+      const { envVariablePrefix } = siteBlock;
+      const environment = {};
+
+      if (envVariablePrefix) {
+        const regexp = new RegExp(`^${envVariablePrefix}_(.*)$`);
+
+        Object.keys(process.env).forEach((key) => {
+          const match = key.match(regexp);
+
+          if (!match) {
+            return;
+          }
+
+          environment[match[1]] = process.env[key];
+        });
       }
 
-      return this.git.readFile(this.configPath.file).then((data) => {
-        const siteConfig = objectPath.get(data, this.configPath.path);
-        const validationErrors = Staticman.validateConfig(siteConfig);
+      const validationErrors = Staticman.validateConfig(siteBlock);
 
-        this.siteConfig = siteConfigFactory(siteConfig, {}, this.rsa);
+      if (validationErrors) {
+        return Promise.reject(validationErrors);
+      }
 
-        if (validationErrors) {
-          return Promise.reject(validationErrors);
-        }
+      this.siteConfig = siteConfigFactory(siteBlock, environment, this.rsa);
 
-        if (siteConfig.branch !== this.parameters.branch) {
-          return Promise.reject(errorHandler('BRANCH_MISMATCH'));
-        }
-
-        return this.siteConfig;
-      });
+      return this.siteConfig;
     }
 
-    const site = sitesBlock[siteIndex];
-    const environment = this.siteSpecificEnviroment[siteIndex + 1];
-    const validationErrors = Staticman.validateConfig(site);
-
-    if (validationErrors) {
-      return Promise.reject(validationErrors);
+    if (!this.configPath) {
+      return Promise.reject(errorHandler('NO_CONFIG_PATH'));
     }
 
-    this.siteConfig = siteConfigFactory(site, environment, this.rsa);
+    return this.git.readFile(this.configPath.file).then((data) => {
+      const siteConfig = objectPath.get(data, this.configPath.path);
+      const validationErrors = Staticman.validateConfig(siteConfig);
 
-    return this.siteConfig;
+      this.siteConfig = siteConfigFactory(siteConfig, {}, this.rsa);
+
+      if (validationErrors) {
+        return Promise.reject(validationErrors);
+      }
+
+      if (siteConfig.branch !== this.parameters.branch) {
+        return Promise.reject(errorHandler('BRANCH_MISMATCH'));
+      }
+
+      return this.siteConfig;
+    });
   }
 
   processEntry(fields, options) {

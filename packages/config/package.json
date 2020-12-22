@@ -13,8 +13,6 @@
     "build": "npm run clean && npm run build-babel",
     "prepublishOnly": "npm run build",
     "pretest": "eslint .",
-    "test": "jest",
-    "test-dev": "jest --watch --silent",
     "debug": "nodemon --inspect source/start.js",
     "start-dev": "babel source -d ./build --watch"
   },

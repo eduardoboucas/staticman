@@ -1,6 +1,8 @@
 import request from 'request-promise';
 
-import errorHandler from './ErrorHandler';
+import errorHandler, { getInstance } from './ErrorHandler';
+
+const VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify';
 
 export default async function checkRecaptcha(staticman, req) {
   const siteConfig = await staticman.getSiteConfig();
@@ -9,18 +11,14 @@ export default async function checkRecaptcha(staticman, req) {
     return false;
   }
 
-  const configRecaptchaSecret = siteConfig.get('reCaptcha.secret');
-  const reCaptchaOptions = req?.body?.options?.reCaptcha;
+  const configSiteSecret = siteConfig.get('reCaptcha.secret');
+  const requestOptions = req?.body?.options?.reCaptcha;
 
-  if (!configRecaptchaSecret && (!reCaptchaOptions?.siteKey || !reCaptchaOptions?.secret)) {
-    throw errorHandler('RECAPTCHA_MISSING_CREDENTIALS');
-  }
-
-  let secret = configRecaptchaSecret;
+  let secret = configSiteSecret;
 
   if (!secret) {
     try {
-      secret = staticman.decrypt(reCaptchaOptions.secret);
+      secret = staticman.decrypt(requestOptions.secret);
     } catch (err) {
       throw errorHandler('RECAPTCHA_CONFIG_MISMATCH');
     }
@@ -38,10 +36,13 @@ export default async function checkRecaptcha(staticman, req) {
     },
     json: true,
     method: 'post',
-    uri: 'https://www.google.com/recaptcha/api/siteverify',
+    uri: VERIFY_URL,
   });
+
   if (response.success !== true) {
-    throw errorHandler(response['error-codes'][0]);
+    const errorCode = getInstance().getErrorCode(response['error-codes'][0]);
+
+    throw errorHandler(errorCode);
   }
 
   return response.success === true;

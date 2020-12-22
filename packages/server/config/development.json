@@ -1,7 +1,7 @@
 {
   "port": 8094,
-  "sites": [
-    {
+  "sites": {
+    "eduardoboucas/staticman-recaptcha": {
       "allowedFields": ["name", "language", "message"],
       "branch": "master",
       "commitMessage": "Add Staticman data ({fields.name})",
@@ -10,12 +10,10 @@
       "moderation": false,
       "name": "staticman-recaptcha",
       "path": "_data/entries",
-      "repo": "eduardoboucas/staticman-recaptcha",
       "requiredFields": ["name", "language"],
       "reCaptcha": {
-        "enabled": true,
-        "siteKey": "6LdimBcUAAAAANX016gDfwSdk0CXduIsYGj9VhSY"
+        "enabled": true
       }
     }
-  ]
+  }
 }

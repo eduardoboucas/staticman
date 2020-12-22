@@ -138,8 +138,8 @@ export const schema = {
   },
   sites: {
     doc: 'Site-specific configuration',
-    format: Array,
-    default: [],
+    format: Object,
+    default: {},
   },
 };
 

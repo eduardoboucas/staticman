@@ -1,4 +1,3 @@
-import cloneDeep from 'lodash/cloneDeep';
 import { config, siteConfigFactory } from '@staticman/config';
 import objectPath from 'object-path';
 import markdownTable from 'markdown-table';
@@ -11,6 +10,7 @@ import * as sampleData from './sampleData';
 
 const rsa = new NodeRSA();
 const rsaKey = config.get('rsaPrivateKey');
+
 rsa.importKey(rsaKey, 'private');
 
 const fields = {
@@ -28,9 +28,6 @@ const parameters = {
   version: '2',
 };
 
-const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8');
-const siteConfig = siteConfigFactory(parsedConfig.comments, {}, rsa);
-
 export const baseUrl = '';
 
 export function decrypt(text) {
@@ -46,10 +43,13 @@ export function getCatchAllApiMock(callback) {
 }
 
 export function getConfig() {
-  const siteConfigCopy = cloneDeep(siteConfig);
-  siteConfigCopy.getRaw = (key) => objectPath.get(parsedConfig, `comments.${key}`);
+  const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8');
+  const siteConfig = siteConfigFactory(parsedConfig.comments, {}, rsa);
 
-  return siteConfigCopy;
+  siteConfig.getRaw = (key) => objectPath.get(parsedConfig, `comments.${key}`);
+  siteConfig.values = parsedConfig;
+
+  return siteConfig;
 }
 
 export function getConfigObject() {
