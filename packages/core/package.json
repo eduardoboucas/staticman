@@ -1,6 +1,6 @@
 {
   "name": "@staticman/core",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Static sites with superpowers",
   "main": "build/index.js",
   "files": [
@@ -36,7 +36,7 @@
     "@octokit/app": "^4.1.0",
     "@octokit/request": "^5.3.1",
     "@octokit/rest": "^16.35.0",
-    "@staticman/config": "^1.0.0",
+    "@staticman/config": "^1.1.0",
     "akismet": "^1.0.0",
     "bunyan-slack": "0.0.10",
     "convict": "^6.0.0",
