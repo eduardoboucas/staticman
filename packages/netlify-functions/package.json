@@ -1,6 +1,6 @@
 {
   "name": "@staticman/netlify-functions",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Static sites with superpowers",
   "main": "build/index.js",
   "files": [
@@ -42,7 +42,7 @@
     "@babel/eslint-parser": "^7.12.1",
     "@babel/node": "^7.12.6",
     "@babel/preset-env": "^7.12.7",
-    "@staticman/core": "^1.1.1",
+    "@staticman/core": "^1.1.2",
     "eslint": "^7.14.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-prettier": "^6.15.0",
@@ -122,5 +122,5 @@
     "printWidth": 100,
     "singleQuote": true
   },
-  "gitHead": "6462363bcefa156d39a316248be753d4cf14d09b"
+  "gitHead": "c27bc905341f016a521d3d71bc45912cbf4c141f"
 }

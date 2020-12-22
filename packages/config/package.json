@@ -1,6 +1,6 @@
 {
   "name": "@staticman/config",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Static sites with superpowers",
   "main": "build/index.js",
   "files": [
@@ -121,5 +121,5 @@
     "printWidth": 100,
     "singleQuote": true
   },
-  "gitHead": "6462363bcefa156d39a316248be753d4cf14d09b"
+  "gitHead": "c27bc905341f016a521d3d71bc45912cbf4c141f"
 }
