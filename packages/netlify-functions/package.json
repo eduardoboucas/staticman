@@ -1,6 +1,6 @@
 {
   "name": "@staticman/netlify-functions",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Static sites with superpowers",
   "main": "build/index.js",
   "files": [
@@ -42,7 +42,7 @@
     "@babel/eslint-parser": "^7.12.1",
     "@babel/node": "^7.12.6",
     "@babel/preset-env": "^7.12.7",
-    "@staticman/core": "^1.1.0",
+    "@staticman/core": "^1.1.1",
     "eslint": "^7.14.0",
     "eslint-config-airbnb": "^18.2.1",
     "eslint-config-prettier": "^6.15.0",
