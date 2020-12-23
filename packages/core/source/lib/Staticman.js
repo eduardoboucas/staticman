@@ -16,9 +16,10 @@ import SubscriptionsManager from './SubscriptionsManager';
 import * as Transforms from './Transforms';
 
 export default class Staticman {
-  constructor(parameters, { configPath, ip, userAgent } = {}) {
+  constructor(parameters, { configPath, ip, userAgent, sites } = {}) {
     return (async () => {
       this.parameters = parameters;
+      this.constructorSites = sites;
 
       const { branch, repository, service, username, version } = parameters;
 
@@ -521,7 +522,7 @@ export default class Staticman {
     }
 
     const { repository, username } = this.parameters;
-    const sites = config.get('sites');
+    const sites = this.constructorSites || config.get('sites');
     const siteBlock = sites[`${username}/${repository}`] || sites['*'];
 
     // If we've found a config block for this repo on the `sites` config prop,
