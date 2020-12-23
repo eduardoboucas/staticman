@@ -16,10 +16,11 @@ import SubscriptionsManager from './SubscriptionsManager';
 import * as Transforms from './Transforms';
 
 export default class Staticman {
-  constructor(parameters, { configPath, ip, userAgent, sites } = {}) {
+  constructor(parameters, { configPath, ip, origin, userAgent, sites } = {}) {
     return (async () => {
-      this.parameters = parameters;
       this.constructorSites = sites;
+      this.origin = origin;
+      this.parameters = parameters;
 
       const { branch, repository, service, username, version } = parameters;
 
@@ -647,9 +648,22 @@ export default class Staticman {
         return this.git.writeFile(filePath, data, this.parameters.branch, commitMessage);
       })
       .then(() => {
+        let redirectUrl = options.redirect;
+
+        // If the redirect URL is relative (e.g. /success) and there is an
+        // origin configured, we compute the full redirect URL by appending
+        // the latter to the former.
+        if (redirectUrl && redirectUrl.indexOf('/') === 0 && this.origin) {
+          const fullRedirectUrl = new URL(this.origin);
+
+          fullRedirectUrl.pathname = redirectUrl;
+
+          redirectUrl = fullRedirectUrl.toString();
+        }
+
         return {
           fields,
-          redirect: options.redirect ? options.redirect : false,
+          redirect: redirectUrl || false,
         };
       })
       .catch((err) => {
