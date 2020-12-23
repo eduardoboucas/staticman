@@ -37,6 +37,7 @@
   "dependencies": {
     "@dadi/logger": "^1.4.1",
     "@octokit/app": "^4.1.0",
+    "@octokit/core": "^3.2.4",
     "@octokit/request": "^5.3.1",
     "@octokit/rest": "^16.35.0",
     "@staticman/config": "^1.1.2",
