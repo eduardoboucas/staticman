@@ -521,7 +521,8 @@ export default class Staticman {
     }
 
     const { repository, username } = this.parameters;
-    const siteBlock = config.get('sites')[`${username}/${repository}`];
+    const sites = config.get('sites');
+    const siteBlock = sites[`${username}/${repository}`] || sites['*'];
 
     // If we've found a config block for this repo on the `sites` config prop,
     // we'll use that straight away, saving a trip to the Git provider.

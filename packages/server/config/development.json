@@ -1,7 +1,7 @@
 {
   "port": 8094,
   "sites": {
-    "eduardoboucas/staticman-recaptcha": {
+    "*": {
       "allowedFields": ["name", "language", "message"],
       "branch": "master",
       "commitMessage": "Add Staticman data ({fields.name})",
