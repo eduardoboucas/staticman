@@ -1,6 +1,6 @@
 {
   "name": "@staticman/server",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "Static sites with superpowers",
   "main": "build/index.js",
   "files": [
@@ -37,7 +37,7 @@
   "homepage": "https://github.com/eduardoboucas/staticman#readme",
   "dependencies": {
     "@staticman/config": "^1.1.2",
-    "@staticman/core": "^1.7.0",
+    "@staticman/core": "^1.7.1",
     "body-parser": "^1.17.x",
     "convict": "^6.0.0",
     "express": "^4.14.0",
