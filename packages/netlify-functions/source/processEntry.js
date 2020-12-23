@@ -74,7 +74,7 @@ function sendResponse(callback, data) {
   });
 }
 
-export default async function processEntry(event, _, callback) {
+export default async function processEntry(configParameters, event, _, callback) {
   const { body, headers, queryStringParameters } = event;
   const query = resolveArraySyntax(queryStringParameters);
   const parameters = {
@@ -93,6 +93,7 @@ export default async function processEntry(event, _, callback) {
   const staticman = await new Staticman(parameters, {
     ip: headers['x-forwarded-for'],
     userAgent: headers['user-agent'],
+    ...configParameters,
   });
   const fields = query.fields || body.fields;
   const options = query.options || body.options;
