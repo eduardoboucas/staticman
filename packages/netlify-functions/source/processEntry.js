@@ -74,7 +74,7 @@ function sendResponse(callback, data) {
   });
 }
 
-export default async function processEntry(configParameters, event, _, callback) {
+export default async function processEntry(event, _, callback, configParameters) {
   const { body, headers, queryStringParameters } = event;
   const query = resolveArraySyntax(queryStringParameters);
   const parameters = {
