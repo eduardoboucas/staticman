@@ -1,6 +1,6 @@
 {
   "name": "@staticman/netlify-functions",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Static sites with superpowers",
   "main": "build/index.js",
   "files": [
