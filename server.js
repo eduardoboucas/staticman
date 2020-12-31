@@ -13,7 +13,8 @@ class StaticmanAPI {
       auth: require('./controllers/auth'),
       handlePR: require('./controllers/handlePR'),
       home: require('./controllers/home'),
-      process: require('./controllers/process')
+      process: require('./controllers/process'),
+      webhook: require('./controllers/webhook')
     }
 
     this.server = express()
@@ -23,7 +24,7 @@ class StaticmanAPI {
       // type: '*'
     }))
 
-    this.initialiseWebhookHandler()
+    this.initialiseGitHubWebhookHandler()
     this.initialiseCORS()
     this.initialiseBruteforceProtection()
     this.initialiseRoutes()
@@ -96,6 +97,14 @@ class StaticmanAPI {
       this.controllers.auth
     )
 
+    this.server.post(
+      '/v:version/webhook/:service/',
+      this.bruteforce.prevent,
+      this.requireApiVersion([3]),
+      this.requireService(['gitlab']),
+      this.controllers.webhook
+    )
+
     // Route: root
     this.server.get(
       '/',
@@ -103,14 +112,46 @@ class StaticmanAPI {
     )
   }
 
-  initialiseWebhookHandler () {
-    const webhookHandler = GithubWebHook({
-      path: '/v1/webhook'
-    })
+  initialiseGitHubWebhookHandler () {
+    /*
+     * The express-github-webhook module is frustrating, as it only allows for a simplistic match
+     * for equality against one path. No string patterns (e.g., /v1?3?/webhook(/github)?). No
+     * regular expressions (e.g., /\/v[13]\/webhook(?:\/github)?/). As such, create one instance
+     * of the module per supported path. This won't scale well as Staticman API versions are added.
+     */
+    for (const onePath of ['/v1/webhook', '/v3/webhook/github']) {
+      const webhookHandler = GithubWebHook({
+        path: onePath,
+        secret: config.get('githubWebhookSecret')
+      })
 
-    webhookHandler.on('pull_request', this.controllers.handlePR)
+      /*
+       * Wrap the handlePR callback so that we can catch any errors thrown and log them. This
+       * also has the benefit of eliminating noisy UnhandledPromiseRejectionWarning messages.
+       *
+       * Frustratingly, the express-github-webhook module only passes along body.data (and the
+       * repository name) to the callback, not the whole request.
+       */
+      const handlePrWrapper = function (repo, data) {
+        this.controllers.handlePR(repo, data).catch((error) => {
+          /*
+           * Unfortunately, the express-github-webhook module returns a 200 (success) regardless
+           * of any errors raised in the downstream handler. So, all we can do is log errors.
+           */
+          console.error(error)
+        })
+      }.bind(this)
 
-    this.server.use(webhookHandler)
+      webhookHandler.on('pull_request', handlePrWrapper)
+
+      /*
+       * Explicit handler for errors raised inside the express-github-webhook module that mimmicks
+       * the system/express error handler. But, allows for customization and debugging.
+       */
+      webhookHandler.on('error', (error) => console.error(error.stack || error))
+
+      this.server.use(webhookHandler)
+    }
   }
 
   requireApiVersion (versions) {

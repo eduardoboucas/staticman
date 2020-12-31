@@ -84,6 +84,12 @@ const schema = {
     default: null,
     env: 'GITHUB_TOKEN'
   },
+  githubWebhookSecret: {
+    doc: 'Token to verify that webhook requests are from GitHub',
+    format: String,
+    default: null,
+    env: 'GITHUB_WEBHOOK_SECRET'
+  },
   gitlabAccessTokenUri: {
     doc: 'URI for the GitLab authentication provider.',
     format: String,
@@ -101,6 +107,12 @@ const schema = {
     format: String,
     default: null,
     env: 'GITLAB_TOKEN'
+  },
+  gitlabWebhookSecret: {
+    doc: 'Token to verify that webhook requests are from GitLab',
+    format: String,
+    default: null,
+    env: 'GITLAB_WEBHOOK_SECRET'
   },
   port: {
     doc: 'The port to bind the application to.',
