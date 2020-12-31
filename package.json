@@ -6,7 +6,7 @@
   "scripts": {
     "prestart": "if [ ! -d node_modules ]; then npm install; fi",
     "clean": "rm -rf build && mkdir build",
-    "build-babel": "npx babel source -d ./build",
+    "build-babel": "babel source -d ./build",
     "build": "npm run clean && npm run build-babel",
     "start": "npm run build && node build/index.js",
     "start-dev": "nodemon --exec babel-node -- source/index.js",
