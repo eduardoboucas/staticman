@@ -7,7 +7,7 @@
   "env": {
     "NPM_CONFIG_PRODUCTION": "false",
     "RSA_PRIVATE_KEY": {
-      "description": "RSA private key used for encrypting site config secrets.",
-      "required": "true"
+      "description": "RSA private key used for encrypting site config secrets."
     }
+  }
 }
