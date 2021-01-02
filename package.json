@@ -30,7 +30,7 @@
   "homepage": "https://github.com/eduardoboucas/staticman#readme",
   "dependencies": {
     "@dadi/logger": "^1.4.1",
-    "@octokit/app": "^4.1.0",
+    "@octokit/auth-app": "^2.10.5",
     "@octokit/request": "^5.3.1",
     "@octokit/rest": "^16.35.0",
     "akismet": "^1.0.0",
