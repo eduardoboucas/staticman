@@ -52,16 +52,14 @@ export default class GitHub extends GitService {
 
     const jwt = await auth({ type: "app" });
 
-    const { data } = await request('GET /repos/:owner/:repo/installation', {
-      owner: username,
-      repo: repository,
+    const { data } = await request('GET /app/installations', {
       headers: {
         authorization: `Bearer ${jwt}`,
-        accept: 'application/vnd.github.machine-man-preview+json',
+        accept: 'application/vnd.github.v3+json',
       },
     });
 
-    const installationId = data.id;
+    const installationId = data[0].id;
 
     const token = await auth({ type: "installation", installationId });
 
