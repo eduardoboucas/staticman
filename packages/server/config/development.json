@@ -1,0 +1,19 @@
+{
+  "port": 8094,
+  "sites": {
+    "*": {
+      "allowedFields": ["name", "language", "message"],
+      "branch": "master",
+      "commitMessage": "Add Staticman data ({fields.name})",
+      "filename": "entry{@timestamp}",
+      "format": "yaml",
+      "moderation": false,
+      "name": "staticman-recaptcha",
+      "path": "_data/entries",
+      "requiredFields": ["name", "language"],
+      "reCaptcha": {
+        "enabled": true
+      }
+    }
+  }
+}

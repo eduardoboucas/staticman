@@ -1,0 +1,10 @@
+version: '2'
+services:
+  staticman:
+    extends:
+      file: docker-compose.yml
+      service: staticman
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./:/app

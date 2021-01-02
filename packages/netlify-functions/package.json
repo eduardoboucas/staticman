@@ -1,0 +1,126 @@
+{
+  "name": "@staticman/netlify-functions",
+  "version": "1.7.1",
+  "description": "Static sites with superpowers",
+  "main": "build/index.js",
+  "files": [
+    "build/**/*"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prestart": "if [ ! -d node_modules ]; then npm install; fi",
+    "clean": "rm -rf build && mkdir build",
+    "build-babel": "babel source -d ./build",
+    "build": "npm run clean && npm run build-babel",
+    "prepublishOnly": "npm run build",
+    "pretest": "eslint .",
+    "debug": "nodemon --inspect source/start.js",
+    "start-dev": "babel source -d ./build --watch"
+  },
+  "engines": {
+    "node": ">=14.15.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eduardoboucas/staticman.git"
+  },
+  "author": "Eduardo Boucas <mail@eduardoboucas.com> (https://eduardoboucas.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/eduardoboucas/staticman/issues"
+  },
+  "homepage": "https://github.com/eduardoboucas/staticman#readme",
+  "dependencies": {
+    "@staticman/core": "^1.7.1",
+    "convict": "^6.0.0",
+    "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.12.7",
+    "@babel/core": "^7.12.9",
+    "@babel/eslint-parser": "^7.12.1",
+    "@babel/node": "^7.12.6",
+    "@babel/preset-env": "^7.12.7",
+    "eslint": "^7.14.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.1.3",
+    "front-matter": "^2.1.2",
+    "husky": "^4.3.0",
+    "istanbul-cobertura-badger": "^1.3.0",
+    "jest": "^26.6.3",
+    "lerna": "^3.21.0",
+    "lint-staged": "^10.5.2",
+    "nock": "^11.7.0",
+    "prettier": "^2.2.0",
+    "regenerator-runtime": "^0.13.7"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js}": [
+      "npx prettier --write",
+      "npx eslint --fix"
+    ],
+    "*.{json,md,yml}": [
+      "npx prettier --write"
+    ]
+  },
+  "eslintConfig": {
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "airbnb/base",
+      "plugin:jest/style",
+      "prettier"
+    ],
+    "ignorePatterns": [
+      "build/*"
+    ],
+    "parser": "@babel/eslint-parser",
+    "rules": {
+      "global-require": "off",
+      "no-console": "off",
+      "no-underscore-dangle": "off",
+      "no-use-before-define": [
+        "error",
+        {
+          "functions": false
+        }
+      ]
+    },
+    "overrides": [
+      {
+        "env": {
+          "jest": true
+        },
+        "files": [
+          "test/**/*.js"
+        ],
+        "plugins": [
+          "jest"
+        ],
+        "rules": {
+          "no-unused-vars": [
+            "error",
+            {
+              "args": "none"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true
+  },
+  "gitHead": "c27bc905341f016a521d3d71bc45912cbf4c141f"
+}
