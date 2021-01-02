@@ -1,4 +1,4 @@
-import { createAppAuth } from '@octokit/auth-app';
+import { App } from '@octokit/app';
 import GithubApi from '@octokit/rest';
 import { request } from '@octokit/request';
 
@@ -44,12 +44,13 @@ export default class GitHub extends GitService {
   }
 
   static async _authenticate(username, repository) {
-    const auth = createAppAuth({
-      appId: config.get('githubAppID'),
+    const app = new App({
+      id: config.get('githubAppID'),
       privateKey: config.get('githubPrivateKey'),
+      baseUrl: config.get('githubBaseUrl'),
     });
 
-    const jwt = await auth({ type: "app" });
+    const jwt = app.getSignedJsonWebToken();
 
     const { data } = await request('GET /repos/:owner/:repo/installation', {
       owner: username,
@@ -62,7 +63,7 @@ export default class GitHub extends GitService {
 
     const installationId = data.id;
 
-    const token = await auth({ type: "installation", installationId })
+    const token = await app.getInstallationAccessToken({ installationId });
 
     return token;
   }
