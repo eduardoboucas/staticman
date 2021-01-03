@@ -32,7 +32,7 @@
     "@dadi/logger": "^1.4.1",
     "@octokit/auth-app": "^2.10.5",
     "@octokit/request": "^5.4.12",
-    "@octokit/rest": "^16.35.0",
+    "@octokit/rest": "^18.0.12",
     "akismet": "^1.0.0",
     "body-parser": "^1.17.x",
     "bunyan-slack": "0.0.10",
