@@ -47,19 +47,19 @@ export default class GitHub extends GitService {
     const auth = createAppAuth({
       appId: config.get('githubAppID'),
       privateKey: config.get('githubPrivateKey'),
-      baseUrl: config.get('githubBaseUrl'),
     });
 
-    const jwt = await auth({ type: "app" });
+    const appAuth = await auth({ type: "app" });
 
-    const { data } = await request('GET /app/installations', {
+    const { data } = await request('GET /repos/{owner}/{repo}/installation', {
       headers: {
-        authorization: `Bearer ${jwt}`,
-        accept: 'application/vnd.github.v3+json',
+        authorization: `Bearer ${appAuth.token}`,
       },
+      owner: username,
+      repo: repository,
     });
 
-    const installationId = data[0].id;
+    const installationId = data.id;
 
     const token = await auth({ type: "installation", installationId });
 
