@@ -3,5 +3,23 @@
   "description": "A Node.js application that enables dynamic content as part of a fully static website.",
   "repository": "https://github.com/eduardoboucas/staticman/",
   "logo": "https://staticman.net/assets/images/staticman-avatar.png",
-  "keywords": ["node", "express", "static", "staticman", "github-pages"]
+  "keywords": ["node", "express", "static", "staticman", "github-pages"],
+  "env": {
+    "NPM_CONFIG_PRODUCTION": "false",
+    "RSA_PRIVATE_KEY": {
+      "description": "RSA private key used for encrypting site config secrets."
+    },
+    "GITHUB_APP_ID": {
+      "description": "Application ID used if authenticating using GitHub application flow.",
+      "required": false
+    },
+    "GITHUB_PRIVATE_KEY": {
+      "description": "Private key used if authenticating using GitHub application flow.",
+      "required": false
+    },
+    "GITLAB_TOKEN": {
+      "description": "Access token used if authenticating with GitLab account.",
+      "required": false
+    }
+  }
 }
