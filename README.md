@@ -18,16 +18,20 @@ You can download and run the Staticman API on your own infrastructure. The easie
 
 - Node.js 14.15.1+
 - npm
-- A [personal access token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) for the GitHub and/or GitLab account you want to run Staticman with
+- Static site with repo hosted on GitHub or GitLab
 - An RSA key in PEM format
 
-## Setting up the server on your own infrastructure
+## Getting Started
 
-NOTE: The below steps are not required if deploying to Heroku. To deploy to Heroku, click the above deploy button and enter your configuration variables in the Heroku Dashboard.
+For instructions on setting up your own Staticman instance and integrating with your static site, please refer to [the official documentation website](https://staticman.net/).
+
+## Development
+
+Check [this guide](docs/docker.md) if you're using Docker. Otherwise follow the below steps
 
 - Clone the repository and install the dependencies via npm.
 
-  ```
+  ```bash
   git clone git@github.com:eduardoboucas/staticman.git
   cd staticman
   npm install
@@ -35,41 +39,21 @@ NOTE: The below steps are not required if deploying to Heroku. To deploy to Hero
 
 - Create a development config file from the sample file.
 
-  ```
+  ```bash
   cp config/sample.json config/development.json
   ```
 
-- Edit the newly-created config file with your GitHub and/or GitLab access token, SSH private key and the port to run the server. Click [here](https://staticman.net/docs/api) for the list of available configuration parameters.
+  **Note:** Each environment, determined by the `NODE_ENV` environment variable, requires its own configuration file. When you're ready to push your Staticman API to production, use `config.production.json`.
+
+- Edit the new development config file with your GitHub and/or GitLab credentials, RSA private key and the port to run the server. Click [here](https://staticman.net/docs/api) for the list of available configuration parameters.
 
 - Start the server.
 
-  ```
+  ```bash
   npm start
   ```
 
-Each environment, determined by the `NODE_ENV` environment variable, requires its own configuration file. When you're ready to push your Staticman API live, create a `config.production.json` file before deploying.
-
-Check [this guide](docs/docker.md) if you're using Docker.
-
-## Setting up a repository
-
-Staticman runs as a bot using a GitHub and/or GitLab account, as opposed to accessing your account using the traditional OAuth flow. This means that you can give it access to just the repositories you're planning on using it on, instead of exposing all your repositories.
-
-To add Staticman to a repository, you need to add the bot as a collaborator with write access to the repository and ask the bot to accept the invite by firing a `GET` request to this URL:
-
-```
-http://your-staticman-url/v3/connect/GITHUB-USERNAME/GITHUB-REPOSITORY
-```
-
-The full Staticman API documentation [can be found here](https://api.staticman.net/api-docs).
-
-## Site configuration
-
-Staticman will look for a config file. For the deprecated `v1` endpoints, this is a `_config.yml` with a `staticman` property inside; for `v2` endpoints, Staticman looks for a `staticman.yml` file at the root of the repository.
-
-For a list of available configuration parameters, please refer to the [documentation page](https://staticman.net/docs/configuration).
-
-## Development
+## Contributing
 
 Would you like to contribute to Staticman? That's great! Here's how:
 
