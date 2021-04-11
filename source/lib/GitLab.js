@@ -1,9 +1,9 @@
+import { Gitlab } from '@gitbeaker/node'; 
 import config from '../config';
 import errorHandler from './ErrorHandler';
 import GitService from './GitService';
 import Review from './models/Review';
 import User from './models/User';
-import { Gitlab } from '@gitbeaker/node'; 
 
 export default class GitLab extends GitService {
   constructor(options = {}) {
@@ -27,7 +27,7 @@ export default class GitLab extends GitService {
 
   async repositoryId() {
     if (this.pojectId[this.repository] === undefined) {
-      let projects = await this.api.Projects.search(this.repository)
+      const projects = await this.api.Projects.search(this.repository)
       if (projects.length >= 1) {
         this.pojectId[this.repository] = projects[0].id;
       }
@@ -44,7 +44,7 @@ export default class GitLab extends GitService {
 
   async _commitFile(filePath, content, commitMessage, branch) {
     await this.repositoryId()
-    let action = [{
+    const action = [{
       "action": "create",
       "file_path": filePath,
       "content": content,
