@@ -30,6 +30,7 @@
   "homepage": "https://github.com/eduardoboucas/staticman#readme",
   "dependencies": {
     "@dadi/logger": "^1.4.1",
+    "@gitbeaker/node": "^28.3.0",
     "@octokit/app": "^4.1.0",
     "@octokit/request": "^5.3.1",
     "@octokit/rest": "^16.35.0",
@@ -42,7 +43,6 @@
     "express-github-webhook": "^1.0.5",
     "express-jsdoc-swagger": "^1.2.0",
     "express-recaptcha": "^2.1.0",
-    "gitlab": "^3.5.1",
     "js-yaml": "^3.10.0",
     "jsonwebtoken": "^8.4.0",
     "mailgun-js": "^0.22.0",

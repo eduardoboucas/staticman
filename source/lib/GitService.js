@@ -51,7 +51,6 @@ export default class GitService {
 
   async readFile(path, getFullResponse) {
     const extension = path.split('.').pop();
-
     const res = await this._pullFile(path, this.branch);
 
     let content;
@@ -109,8 +108,10 @@ export default class GitService {
     reviewBody = ''
   ) {
     return this.getBranchHeadCommit(this.branch)
-      .then((sha) => this.createBranch(branch, sha))
-      .then(() => this.writeFile(filePath, data, branch, commitTitle))
-      .then(() => this.createReview(commitTitle, branch, reviewBody));
+      .then(async (sha) => {
+        await this.createBranch(branch, sha)
+        await this.writeFile(filePath, data, branch, commitTitle)
+        return await this.createReview(commitTitle, branch, reviewBody)
+      })
   }
 }

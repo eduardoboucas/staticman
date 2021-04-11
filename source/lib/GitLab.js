@@ -3,24 +3,21 @@ import errorHandler from './ErrorHandler';
 import GitService from './GitService';
 import Review from './models/Review';
 import User from './models/User';
-
-// TODO: Replace this. Import is ugly and dependency is deprecated.
-const GitLabApi = require('gitlab/dist/es5').default;
+import { Gitlab } from '@gitbeaker/node'; 
 
 export default class GitLab extends GitService {
   constructor(options = {}) {
     super(options.username, options.repository, options.branch);
-
+    this.pojectId = [];
     const token = config.get('gitlabToken');
-
     if (options.oauthToken) {
-      this.api = new GitLabApi({
-        url: config.get('gitlabBaseUrl'),
+      this.api = new Gitlab({
+        host: config.get('gitlabBaseUrl'),
         oauthToken: options.oauthToken,
       });
     } else if (token) {
-      this.api = new GitLabApi({
-        url: config.get('gitlabBaseUrl'),
+      this.api = new Gitlab({
+        host: config.get('gitlabBaseUrl'),
         token,
       });
     } else {
@@ -28,45 +25,64 @@ export default class GitLab extends GitService {
     }
   }
 
-  get repositoryId() {
-    return this.username && this.repository ? `${this.username}/${this.repository}` : '';
+  async repositoryId() {
+    if (this.pojectId[this.repository] === undefined) {
+      let projects = await this.api.Projects.search(this.repository)
+      if (projects.length >= 1) {
+        this.pojectId[this.repository] = projects[0].id;
+      }
+    }  
+    return this.pojectId[this.repository];
   }
 
-  _pullFile(path, branch) {
-    return this.api.RepositoryFiles.show(this.repositoryId, path, branch).catch((err) =>
+  async _pullFile(path, branch) {
+    await this.repositoryId()
+    return this.api.RepositoryFiles.show(this.pojectId[this.repository], path, branch).catch((err) =>
       Promise.reject(errorHandler('GITLAB_READING_FILE', { err }))
     );
   }
 
-  _commitFile(filePath, content, commitMessage, branch) {
-    return this.api.RepositoryFiles.create(this.repositoryId, filePath, branch, {
-      content,
-      commit_message: commitMessage,
-      encoding: 'base64',
-    });
+  async _commitFile(filePath, content, commitMessage, branch) {
+    await this.repositoryId()
+    let action = [{
+      "action": "create",
+      "file_path": filePath,
+      "content": content,
+      "encoding": "base64"
+    }];
+
+    return this.api.Commits.create(this.pojectId[this.repository], branch, commitMessage, action)
   }
 
-  getBranchHeadCommit(branch) {
-    return this.api.Branches.show(this.repositoryId, branch).then((res) => res.commit.id);
+  async getBranchHeadCommit(branch) {
+    await this.repositoryId()
+    return this.api.Branches.show(this.pojectId[this.repository], branch).then((res) => res.commit.id);
   }
 
-  createBranch(branch, sha) {
-    return this.api.Branches.create(this.repositoryId, branch, sha);
+  async createBranch(branch, sha) {
+    await this.repositoryId()
+
+    return this.api.Branches.create(this.pojectId[this.repository], branch, sha);
   }
 
-  deleteBranch(branch) {
-    return this.api.Branches.remove(this.repositoryId, branch);
+  async deleteBranch(branch) {
+    await this.repositoryId()
+
+    return this.api.Branches.remove(this.pojectId[this.repository], branch);
   }
 
-  createReview(reviewTitle, branch, reviewBody) {
-    return this.api.MergeRequests.create(this.repositoryId, branch, this.branch, reviewTitle, {
+  async createReview(reviewTitle, branch, reviewBody) {
+    await this.repositoryId()
+    return this.api.MergeRequests.create(this.pojectId[this.repository], branch, this.branch, reviewTitle, {
       description: reviewBody,
       remove_source_branch: true,
     });
   }
 
-  getReview(reviewId) {
-    return this.api.MergeRequests.show(this.repositoryId, reviewId).then(
+  async getReview(reviewId) {
+    await this.repositoryId()
+
+    return this.api.MergeRequests.show(this.pojectId[this.repository], reviewId).then(
       ({
         description: body,
         source_branch: sourceBranch,
@@ -77,13 +93,17 @@ export default class GitLab extends GitService {
     );
   }
 
-  readFile(filePath, getFullResponse) {
+  async readFile(filePath, getFullResponse) {
+    await this.repositoryId()
+
     return super
       .readFile(filePath, getFullResponse)
       .catch((err) => Promise.reject(errorHandler('GITLAB_READING_FILE', { err })));
   }
 
-  writeFile(filePath, data, targetBranch, commitTitle) {
+  async writeFile(filePath, data, targetBranch, commitTitle) {
+    await this.repositoryId()
+
     return super.writeFile(filePath, data, targetBranch, commitTitle).catch((err) => {
       if (err?.error?.message === 'A file with this name already exists') {
         return Promise.reject(errorHandler('GITLAB_FILE_ALREADY_EXISTS', { err }));
@@ -93,13 +113,17 @@ export default class GitLab extends GitService {
     });
   }
 
-  writeFileAndSendReview(filePath, data, branch, commitTitle, reviewBody) {
+  async writeFileAndSendReview(filePath, data, branch, commitTitle, reviewBody) {
+    await this.repositoryId()
+
     return super
       .writeFileAndSendReview(filePath, data, branch, commitTitle, reviewBody)
       .catch((err) => Promise.reject(errorHandler('GITLAB_CREATING_PR', { err })));
   }
 
-  getCurrentUser() {
+  async getCurrentUser() {
+    await this.repositoryId()
+
     return this.api.Users.current()
       .then(
         ({
