@@ -111,7 +111,7 @@ export default class GitService {
       .then(async (sha) => {
         await this.createBranch(branch, sha)
         await this.writeFile(filePath, data, branch, commitTitle)
-        await this.createReview(commitTitle, branch, reviewBody)
+        return this.createReview(commitTitle, branch, reviewBody)
         
       })
   }

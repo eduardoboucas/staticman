@@ -28,7 +28,6 @@ export default async (req, res) => {
           siteConfig.get('githubAuth.redirectUri')
         );
   }
-
   return staticman
     .getSiteConfig()
     .then(requestAccessToken)
@@ -43,12 +42,11 @@ export default async (req, res) => {
         req.params.version === '2' && req.params.service === 'github'
           ? git.api.users.getAuthenticated({}).then(({ data }) => data)
           : git.getCurrentUser();
-
-      return getUser.then((user) => {
-        res.send({
-          accessToken: RSA.encrypt(accessToken),
-          user,
-        });
+      
+      const user = await getUser;
+      return res.send({
+        accessToken: RSA.encrypt(accessToken),
+        user,
       });
     })
     .catch((err) => {

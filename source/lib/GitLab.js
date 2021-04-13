@@ -122,20 +122,11 @@ export default class GitLab extends GitService {
   }
 
   async getCurrentUser() {
-    await this.repositoryId()
-
-    return this.api.Users.current()
-      .then(
-        ({
-          username,
-          email,
-          name,
-          avatar_url: avatarUrl,
-          bio,
-          website_url: websiteUrl,
-          organisation,
-        }) => new User('gitlab', username, email, name, avatarUrl, bio, websiteUrl, organisation)
-      )
-      .catch((err) => Promise.reject(errorHandler('GITLAB_GET_USER', { err })));
+    try {
+      const user = await this.api.Users.current()
+      return  new User('gitlab', user.username, user.email, user.name, user.avatar_url, user.bio, user.website_url, user.organisation)
+    } catch (err) {
+      throw errorHandler('GITLAB_GET_USER', { err })
+    }
   }
 }
