@@ -10,3 +10,5 @@ build/
 coverage/
 node_modules/
 staticman_key
+
+.DS_Store

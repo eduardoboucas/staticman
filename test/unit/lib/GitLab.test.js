@@ -29,9 +29,9 @@ describe('GitLab interface', () => {
 
   test('authenticates with the GitLab API using a personal access token', () => {
     const mockConstructor = jest.fn();
-    jest.mock('gitlab/dist/es5', () => {
+    jest.mock('@gitbeaker/node', () => {
       return {
-        default: class {
+        Gitlab: class {
           constructor(params) {
             mockConstructor(params);
           }
@@ -39,20 +39,20 @@ describe('GitLab interface', () => {
       };
     });
 
-    const GitLab = require('../../../source/lib/GitLab').default;
-    const gitlab = new GitLab(req.params); // eslint-disable-line no-unused-vars
+    const GitLabTest = require('../../../source/lib/GitLab').default;
+    const gitlab = new GitLabTest(req.params); // eslint-disable-line no-unused-vars
 
     expect(mockConstructor.mock.calls[0][0]).toEqual({
-      url: 'https://gitlab.com',
+      host: 'http://gitlab.com',
       token: 'r4e3w2q1',
     });
   });
 
   test('authenticates with the GitLab API using an OAuth token', () => {
     const mockConstructor = jest.fn();
-    jest.mock('gitlab/dist/es5', () => {
+    jest.mock('@gitbeaker/node', () => {
       return {
-        default: class {
+        Gitlab: class {
           constructor(params) {
             mockConstructor(params);
           }
@@ -67,7 +67,7 @@ describe('GitLab interface', () => {
     const gitlab = new GitLab({ ...req.params, oauthToken });
 
     expect(mockConstructor.mock.calls[0][0]).toEqual({
-      url: 'https://gitlab.com',
+      host: 'http://gitlab.com',
       oauthToken,
     });
   });
@@ -87,16 +87,28 @@ describe('GitLab interface', () => {
           content: btoa(fileContents),
         })
       );
+      const mockSearch = jest.fn(async () => [{ id: 1 }]);
 
-      jest.mock('gitlab/dist/es5', () => {
+      const mockConstructor = jest.fn();
+      jest.mock('@gitbeaker/node', () => {
         return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
-                show: mockRepoShowFile,
-              },
-            };
-          },
+          Gitlab: class {
+            constructor(params) {
+              mockConstructor(params);
+            }
+
+            get Projects() { // eslint-disable-line class-methods-use-this
+              return {
+                search: mockSearch
+              }
+            }
+
+            get RepositoryFiles() { // eslint-disable-line class-methods-use-this
+              return {
+                show: mockRepoShowFile
+              }
+            }
+          }
         };
       });
 
@@ -104,9 +116,7 @@ describe('GitLab interface', () => {
       const gitlab = new GitLab(req.params);
 
       return gitlab.readFile(filePath).then((contents) => {
-        expect(mockRepoShowFile.mock.calls[0][0]).toBe(
-          `${req.params.username}/${req.params.repository}`
-        );
+        expect(mockRepoShowFile.mock.calls[0][0]).toBe(1);
         expect(mockRepoShowFile.mock.calls[0][1]).toBe(filePath);
         expect(mockRepoShowFile.mock.calls[0][2]).toBe(req.params.branch);
       });
@@ -116,15 +126,29 @@ describe('GitLab interface', () => {
       const filePath = 'path/to/file.yml';
       const mockShowRepoFile = jest.fn(() => Promise.reject()); // eslint-disable-line prefer-promise-reject-errors
 
-      jest.mock('gitlab/dist/es5', () => {
+
+      const mockSearch = jest.fn(async () => [{ id: 1 }]);
+
+      const mockConstructor = jest.fn();
+      jest.mock('@gitbeaker/node', () => {
         return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
-                show: mockShowRepoFile,
-              },
-            };
-          },
+          Gitlab: class {
+            constructor(params) {
+              mockConstructor(params);
+            }
+
+            get Projects() { // eslint-disable-line class-methods-use-this
+              return {
+                search: mockSearch
+              }
+            }
+
+            get RepositoryFiles() { // eslint-disable-line class-methods-use-this
+              return {
+                show: mockShowRepoFile
+              }
+            }
+          }
         };
       });
 
@@ -132,9 +156,7 @@ describe('GitLab interface', () => {
       const gitlab = new GitLab(req.params);
 
       return gitlab.readFile(filePath).catch((err) => {
-        expect(mockShowRepoFile.mock.calls[0][0]).toBe(
-          `${req.params.username}/${req.params.repository}`
-        );
+        expect(mockShowRepoFile.mock.calls[0][0]).toBe(1);
         expect(mockShowRepoFile.mock.calls[0][1]).toBe(filePath);
         expect(mockShowRepoFile.mock.calls[0][2]).toBe(req.params.branch);
 
@@ -156,25 +178,37 @@ describe('GitLab interface', () => {
         })
       );
 
-      jest.mock('gitlab/dist/es5', () => {
+      const mockSearch = jest.fn(async () => [{ id: 1 }]);
+
+      const mockConstructor = jest.fn();
+      jest.mock('@gitbeaker/node', () => {
         return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
-                show: mockShowRepoFile,
-              },
-            };
-          },
+          Gitlab: class {
+            constructor(params) {
+              mockConstructor(params);
+            }
+
+            get Projects() { // eslint-disable-line class-methods-use-this
+              return {
+                search: mockSearch
+              }
+            }
+
+            get RepositoryFiles() { // eslint-disable-line class-methods-use-this
+              return {
+                show: mockShowRepoFile
+              }
+            }
+          }
         };
       });
+
 
       const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
 
       return gitlab.readFile(filePath).catch((err) => {
-        expect(mockShowRepoFile.mock.calls[0][0]).toBe(
-          `${req.params.username}/${req.params.repository}`
-        );
+        expect(mockShowRepoFile.mock.calls[0][0]).toBe(1);
         expect(mockShowRepoFile.mock.calls[0][1]).toBe(filePath);
         expect(mockShowRepoFile.mock.calls[0][2]).toBe(req.params.branch);
         expect(err._smErrorCode).toBe('PARSING_ERROR');
@@ -191,15 +225,28 @@ describe('GitLab interface', () => {
         })
       );
 
-      jest.mock('gitlab/dist/es5', () => {
+      const mockSearch = jest.fn(async () => [{ id: 1 }]);
+
+      const mockConstructor = jest.fn();
+      jest.mock('@gitbeaker/node', () => {
         return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
-                show: mockShowRepoFile,
-              },
-            };
-          },
+          Gitlab: class {
+            constructor(params) {
+              mockConstructor(params);
+            }
+
+            get Projects() { // eslint-disable-line class-methods-use-this
+              return {
+                search: mockSearch
+              }
+            }
+
+            get RepositoryFiles() { // eslint-disable-line class-methods-use-this
+              return {
+                show: mockShowRepoFile
+              }
+            }
+          }
         };
       });
 
@@ -208,7 +255,7 @@ describe('GitLab interface', () => {
 
       return gitlab.readFile(filePath).then((contents) => {
         expect(mockShowRepoFile.mock.calls[0][0]).toBe(
-          `${req.params.username}/${req.params.repository}`
+          1
         );
         expect(mockShowRepoFile.mock.calls[0][1]).toBe(filePath);
         expect(mockShowRepoFile.mock.calls[0][2]).toBe(req.params.branch);
@@ -224,15 +271,28 @@ describe('GitLab interface', () => {
       const filePath = 'path/to/file.yml';
       const mockShowRepoFile = jest.fn(() => Promise.resolve(fileContents));
 
-      jest.mock('gitlab/dist/es5', () => {
+      const mockSearch = jest.fn(async () => [{ id: 1 }]);
+
+      const mockConstructor = jest.fn();
+      jest.mock('@gitbeaker/node', () => {
         return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
-                show: mockShowRepoFile,
-              },
-            };
-          },
+          Gitlab: class {
+            constructor(params) {
+              mockConstructor(params);
+            }
+
+            get Projects() { // eslint-disable-line class-methods-use-this
+              return {
+                search: mockSearch
+              }
+            }
+
+            get RepositoryFiles() { // eslint-disable-line class-methods-use-this
+              return {
+                show: mockShowRepoFile
+              }
+            }
+          }
         };
       });
 
@@ -254,15 +314,28 @@ describe('GitLab interface', () => {
         })
       );
 
-      jest.mock('gitlab/dist/es5', () => {
+      const mockSearch = jest.fn(async () => [{ id: 1 }]);
+
+      const mockConstructor = jest.fn();
+      jest.mock('@gitbeaker/node', () => {
         return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
-                show: mockShowRepoFile,
-              },
-            };
-          },
+          Gitlab: class {
+            constructor(params) {
+              mockConstructor(params);
+            }
+
+            get Projects() { // eslint-disable-line class-methods-use-this
+              return {
+                search: mockSearch
+              }
+            }
+
+            get RepositoryFiles() { // eslint-disable-line class-methods-use-this
+              return {
+                show: mockShowRepoFile
+              }
+            }
+          }
         };
       });
 
@@ -282,15 +355,28 @@ describe('GitLab interface', () => {
       const parsedConfig = yaml.safeLoad(sampleData.config2, 'utf8');
       const mockShowRepoFile = jest.fn(() => Promise.resolve(fileContents));
 
-      jest.mock('gitlab/dist/es5', () => {
+      const mockSearch = jest.fn(async () => [{ id: 1 }]);
+
+      const mockConstructor = jest.fn();
+      jest.mock('@gitbeaker/node', () => {
         return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
-                show: mockShowRepoFile,
-              },
-            };
-          },
+          Gitlab: class {
+            constructor(params) {
+              mockConstructor(params);
+            }
+
+            get Projects() { // eslint-disable-line class-methods-use-this
+              return {
+                search: mockSearch
+              }
+            }
+
+            get RepositoryFiles() { // eslint-disable-line class-methods-use-this
+              return {
+                show: mockShowRepoFile
+              }
+            }
+          }
         };
       });
 
@@ -314,15 +400,29 @@ describe('GitLab interface', () => {
       };
       const mockCreateRepoFile = jest.fn(() => Promise.resolve(null));
 
-      jest.mock('gitlab/dist/es5', () => {
+
+      const mockSearch = jest.fn(async () => [{ id: 1 }]);
+
+      const mockConstructor = jest.fn();
+      jest.mock('@gitbeaker/node', () => {
         return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
-                create: mockCreateRepoFile,
-              },
-            };
-          },
+          Gitlab: class {
+            constructor(params) {
+              mockConstructor(params);
+            }
+
+            get Projects() { // eslint-disable-line class-methods-use-this
+              return {
+                search: mockSearch
+              }
+            }
+
+            get Commits() { // eslint-disable-line class-methods-use-this
+              return {
+                create: mockCreateRepoFile
+              }
+            }
+          }
         };
       });
 
@@ -333,31 +433,44 @@ describe('GitLab interface', () => {
         .writeFile(options.path, options.content, options.branch, options.commitTitle)
         .then((response) => {
           expect(mockCreateRepoFile).toHaveBeenCalledTimes(1);
-          expect(mockCreateRepoFile.mock.calls[0][0]).toBe(
-            `${req.params.username}/${req.params.repository}`
-          );
-          expect(mockCreateRepoFile.mock.calls[0][1]).toBe(options.path);
-          expect(mockCreateRepoFile.mock.calls[0][2]).toBe(options.branch);
-          expect(mockCreateRepoFile.mock.calls[0][3]).toEqual({
-            content: btoa(options.content),
-            commit_message: options.commitTitle,
-            encoding: 'base64',
-          });
+
+          expect(mockCreateRepoFile.mock.calls[0][0]).toBe(1);
+          expect(mockCreateRepoFile.mock.calls[0][1]).toBe(req.params.branch);
+          expect(mockCreateRepoFile.mock.calls[0][2]).toBe(options.commitTitle);
+          expect(mockCreateRepoFile.mock.calls[0][3]).toEqual([{
+            "action": "create",
+            "file_path": options.path,
+            "content": btoa(options.content),
+            "encoding": "base64"
+          }]);
         });
     });
 
     test('creates a file using the branch present in the request, if one is not provided to the method, and the default commit title', () => {
       const mockCreateRepoFile = jest.fn(() => Promise.resolve(null));
 
-      jest.mock('gitlab/dist/es5', () => {
+      const mockSearch = jest.fn(async () => [{ id: 1 }]);
+
+      const mockConstructor = jest.fn();
+      jest.mock('@gitbeaker/node', () => {
         return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
-                create: mockCreateRepoFile,
-              },
-            };
-          },
+          Gitlab: class {
+            constructor(params) {
+              mockConstructor(params);
+            }
+
+            get Projects() { // eslint-disable-line class-methods-use-this
+              return {
+                search: mockSearch
+              }
+            }
+
+            get Commits() { // eslint-disable-line class-methods-use-this
+              return {
+                create: mockCreateRepoFile
+              }
+            }
+          }
         };
       });
 
@@ -370,31 +483,44 @@ describe('GitLab interface', () => {
       };
 
       return gitlab.writeFile(options.path, options.content).then((response) => {
-        expect(mockCreateRepoFile.mock.calls[0][0]).toBe(
-          `${req.params.username}/${req.params.repository}`
-        );
-        expect(mockCreateRepoFile.mock.calls[0][1]).toBe(options.path);
-        expect(mockCreateRepoFile.mock.calls[0][2]).toBe(req.params.branch);
-        expect(mockCreateRepoFile.mock.calls[0][3]).toEqual({
-          content: btoa(options.content),
-          commit_message: options.commitTitle,
-          encoding: 'base64',
-        });
+        expect(mockCreateRepoFile.mock.calls[0][0]).toBe(1);
+        expect(mockCreateRepoFile.mock.calls[0][1]).toBe(req.params.branch);
+        expect(mockCreateRepoFile.mock.calls[0][2]).toBe(options.commitTitle);
+        expect(mockCreateRepoFile.mock.calls[0][3]).toEqual([{
+          "action": "create",
+          "file_path": options.path,
+          "content": btoa(options.content),
+          "encoding": "base64"
+        }]);
       });
     });
 
     test('returns an error object if the save operation fails', () => {
-      jest.mock('gitlab/dist/es5', () => {
+      const mockSearch = jest.fn(async () => [{ id: 1 }]);
+
+      const mockConstructor = jest.fn();
+      jest.mock('@gitbeaker/node', () => {
         return {
-          default: function mockGitlab() {
-            return {
-              RepositoryFiles: {
+          Gitlab: class {
+            constructor(params) {
+              mockConstructor(params);
+            }
+
+            get Projects() { // eslint-disable-line class-methods-use-this
+              return {
+                search: mockSearch
+              }
+            }
+
+            get Commits() { // eslint-disable-line class-methods-use-this
+              return {
                 create: () => Promise.reject(new Error()),
-              },
-            };
-          },
+              }
+            }
+          }
         };
       });
+
 
       const GitLab = require('../../../source/lib/GitLab').default;
       const gitlab = new GitLab(req.params);
@@ -442,22 +568,42 @@ describe('GitLab interface', () => {
         })
       );
 
-      jest.mock('gitlab/dist/es5', () => {
+
+      const mockSearch = jest.fn(async () => [{ id: 1 }]);
+
+      const mockConstructor = jest.fn();
+      jest.mock('@gitbeaker/node', () => {
         return {
-          default: function mockGitlab() {
-            return {
-              Branches: {
+          Gitlab: class {
+            constructor(params) {
+              mockConstructor(params);
+            }
+
+            get Projects() { // eslint-disable-line class-methods-use-this
+              return {
+                search: mockSearch
+              }
+            }
+
+            get Branches() { // eslint-disable-line class-methods-use-this
+              return {
                 create: mockCreateBranch,
                 show: mockShowBranch,
-              },
-              MergeRequests: {
+              }
+            }
+
+            get MergeRequests() { // eslint-disable-line class-methods-use-this
+              return {
                 create: mockCreateMergeRequest,
-              },
-              RepositoryFiles: {
+              }
+            }
+
+            get Commits() { // eslint-disable-line class-methods-use-this
+              return {
                 create: () => Promise.resolve(null),
-              },
-            };
-          },
+              }
+            }
+          }
         };
       });
 
@@ -474,7 +620,7 @@ describe('GitLab interface', () => {
         )
         .then((response) => {
           expect(mockCreateMergeRequest.mock.calls[0][0]).toBe(
-            `${req.params.username}/${req.params.repository}`
+            1
           );
           expect(mockCreateMergeRequest.mock.calls[0][1]).toBe(options.newBranch);
           expect(mockCreateMergeRequest.mock.calls[0][2]).toBe(req.params.branch);
@@ -485,32 +631,50 @@ describe('GitLab interface', () => {
           });
 
           expect(mockCreateBranch.mock.calls[0][0]).toBe(
-            `${req.params.username}/${req.params.repository}`
+            1
           );
           expect(mockCreateBranch.mock.calls[0][1]).toBe(options.newBranch);
           expect(mockCreateBranch.mock.calls[0][2]).toBe(options.sha);
 
           expect(mockShowBranch.mock.calls[0][0]).toBe(
-            `${req.params.username}/${req.params.repository}`
+            1
           );
           expect(mockShowBranch.mock.calls[0][1]).toBe(req.params.branch);
         });
     });
 
     test('returns an error if any of the API calls fail', () => {
-      jest.mock('gitlab/dist/es5', () => {
+
+      const mockSearch = jest.fn(async () => [{ id: 1 }]);
+
+      const mockConstructor = jest.fn();
+      jest.mock('@gitbeaker/node', () => {
         return {
-          default: function mockGitlab() {
-            return {
-              Branches: {
+          Gitlab: class {
+            constructor(params) {
+              mockConstructor(params);
+            }
+
+            get Projects() { // eslint-disable-line class-methods-use-this
+              return {
+                search: mockSearch
+              }
+            }
+
+            get Branches() { // eslint-disable-line class-methods-use-this
+              return {
                 create: () => Promise.resolve(),
                 show: () => Promise.reject(new Error()),
-              },
-              RepositoryFiles: {
-                create: () => Promise.reject(new Error()),
-              },
-            };
-          },
+              }
+            }
+
+
+            get RepositoryFiles() { // eslint-disable-line class-methods-use-this
+              return {
+                create: () => Promise.resolve(null),
+              }
+            }
+          }
         };
       });
 
@@ -548,15 +712,29 @@ describe('GitLab interface', () => {
         name: 'John Doe',
       };
 
-      jest.mock('gitlab/dist/es5', () => {
+      const mockSearch = jest.fn(async () => [{ id: 1 }]);
+
+      const mockConstructor = jest.fn();
+
+      jest.mock('@gitbeaker/node', () => {
         return {
-          default: function mockGitlab() {
-            return {
-              Users: {
+          Gitlab: class {
+            constructor(params) {
+              mockConstructor(params);
+            }
+
+            get Projects() { // eslint-disable-line class-methods-use-this
+              return {
+                search: mockSearch
+              }
+            }
+
+            get Users() { // eslint-disable-line class-methods-use-this
+              return {
                 current: () => Promise.resolve(mockUser),
-              },
-            };
-          },
+              }
+            }
+          }
         };
       });
 
@@ -569,15 +747,30 @@ describe('GitLab interface', () => {
     });
 
     test('throws an error if unable to retrieve the current unauthenticated user', () => {
-      jest.mock('gitlab/dist/es5', () => {
+
+      const mockSearch = jest.fn(async () => [{ id: 1 }]);
+
+      const mockConstructor = jest.fn();
+
+      jest.mock('@gitbeaker/node', () => {
         return {
-          default: function mockGitlab() {
-            return {
-              Users: {
+          Gitlab: class {
+            constructor(params) {
+              mockConstructor(params);
+            }
+
+            get Projects() { // eslint-disable-line class-methods-use-this
+              return {
+                search: mockSearch
+              }
+            }
+
+            get Users() { // eslint-disable-line class-methods-use-this
+              return {
                 current: () => Promise.reject(new Error()),
-              },
-            };
-          },
+              }
+            }
+          }
         };
       });
 

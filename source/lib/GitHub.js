@@ -183,7 +183,7 @@ export default class GitHub extends GitService {
     }
   }
 
-  writeFileAndSendReview(filePath, data, branch, commitTitle, reviewBody) {
+  async writeFileAndSendReview(filePath, data, branch, commitTitle, reviewBody) {
     return super
       .writeFileAndSendReview(filePath, data, branch, commitTitle, reviewBody)
       .catch((err) => Promise.reject(errorHandler('GITHUB_CREATING_PR', { err })));

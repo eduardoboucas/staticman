@@ -49,11 +49,10 @@ class ErrorHandler {
   }
 
   static log(err, instance) {
-    let parameters = {};
     let prefix = '';
 
     if (instance) {
-      parameters = instance.getParameters();
+      const parameters = instance.getParameters();
 
       prefix += `${parameters.username}/${parameters.repository}`;
     }
