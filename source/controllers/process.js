@@ -1,48 +1,18 @@
-import reCaptcha from 'express-recaptcha';
 import universalAnalytics from 'universal-analytics';
-
 import config from '../config';
-import errorHandler, { getInstance } from '../lib/ErrorHandler';
+import CaptchaFactory from '../lib/CaptchaFactory';
+import { getInstance } from '../lib/ErrorHandler';
 import Staticman from '../lib/Staticman';
 
-export function checkRecaptcha(staticman, req) {
-  return new Promise((resolve, reject) => {
-    staticman
-      .getSiteConfig()
-      .then((siteConfig) => {
-        if (!siteConfig.get('reCaptcha.enabled')) {
-          return resolve(false);
-        }
-
-        const reCaptchaOptions = req?.body?.options?.reCaptcha;
-
-        if (!reCaptchaOptions || !reCaptchaOptions.siteKey || !reCaptchaOptions.secret) {
-          return reject(errorHandler('RECAPTCHA_MISSING_CREDENTIALS'));
-        }
-
-        let decryptedSecret;
-
-        try {
-          decryptedSecret = staticman.decrypt(reCaptchaOptions.secret);
-        } catch (err) {
-          return reject(errorHandler('RECAPTCHA_CONFIG_MISMATCH'));
-        }
-
-        if (
-          reCaptchaOptions.siteKey !== siteConfig.get('reCaptcha.siteKey') ||
-          decryptedSecret !== siteConfig.get('reCaptcha.secret')
-        ) {
-          return reject(errorHandler('RECAPTCHA_CONFIG_MISMATCH'));
-        }
-
-        reCaptcha.init(reCaptchaOptions.siteKey, decryptedSecret);
-        reCaptcha.verify(req, () =>
-          req?.recaptcha?.error ? reject(errorHandler(req.reCaptcha.error)) : resolve(true)
-        );
-        return resolve(true);
-      })
-      .catch((err) => reject(err));
-  });
+export const checkRecaptcha = async (staticman, req) => {
+  const siteConfig = await staticman.getSiteConfig();
+  // console.log(siteConfig)
+  if (!siteConfig.get('captcha.enabled')) {
+    return false;
+  }
+  const captcha = CaptchaFactory(siteConfig.get('captcha.service'), siteConfig)
+  const result = await captcha.verify(req?.body[captcha.getKeyForToken()])
+  return result 
 }
 
 export function createConfigObject(apiVersion, property) {

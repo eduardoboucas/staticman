@@ -15,9 +15,9 @@ beforeEach(() => {
 });
 
 describe('Process controller', () => {
-  describe('checkRecaptcha', () => {
-    test('does nothing if reCaptcha is not enabled in config', () => {
-      mockSiteConfig.set('reCaptcha.enabled', false);
+  describe('checkCaptcha', () => {
+    test('does nothing if Captcha is not enabled in config', () => {
+      mockSiteConfig.set('captcha.enabled', false);
 
       jest.mock('../../../source/lib/Staticman', () => {
         return jest.fn((parameters) => ({
@@ -34,7 +34,7 @@ describe('Process controller', () => {
       });
     });
 
-    test('throws an error if reCaptcha block is not in the request body', () => {
+    test('throws an error if captcha service not in config', () => {
       jest.mock('../../../source/lib/Staticman', () => {
         return jest.fn((parameters) => ({
           getSiteConfig: () => Promise.resolve(mockSiteConfig),
@@ -45,18 +45,40 @@ describe('Process controller', () => {
       const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
 
-      mockSiteConfig.set('reCaptcha.enabled', true);
-
-      req.body = {
-        options: {},
-      };
+      mockSiteConfig.set('captcha.enabled', true);
+      mockSiteConfig.set('captcha.service', "");
 
       return checkRecaptcha(staticman, req).catch((err) => {
-        expect(err._smErrorCode).toBe('RECAPTCHA_MISSING_CREDENTIALS');
+        console.log("---", err)
+        expect(err._smErrorCode).toBe('CAPTCHA_SERVICE_MISSING');
       });
     });
 
-    test('throws an error if reCaptcha site key is not in the request body', () => {
+    test('throws an error if reCaptcha Token not send', () => {
+      jest.mock('../../../source/lib/Staticman', () => {
+        return jest.fn((parameters) => ({
+          getSiteConfig: () => Promise.resolve(mockSiteConfig),
+        }));
+      });
+
+      const { checkRecaptcha } = require('../../../source/controllers/process');
+      const Staticman = require('../../../source/lib/Staticman');
+      const staticman = new Staticman(req.params);
+
+      mockSiteConfig.set('captcha.enabled', true);
+      mockSiteConfig.set('captcha.service', 'ReCaptcha');
+      mockSiteConfig.set('captcha.ReCaptcha.secret', mockHelpers.encrypt('some other secret'));
+
+      req.body = {
+      };
+
+      return checkRecaptcha(staticman, req).catch((err) => {
+        console.log(err)
+        expect(err._smErrorCode).toBe('RECAPTCHA_TOKEN_MISSING');
+      });
+    });
+
+    test('throws an error if reCaptcha token set but bad', () => {
       jest.mock('../../../source/lib/Staticman', () => {
         return jest.fn((parameters) => ({
           getSiteConfig: () => Promise.resolve(mockSiteConfig),
@@ -68,19 +90,16 @@ describe('Process controller', () => {
       const staticman = new Staticman(req.params);
 
       req.body = {
-        options: {
-          reCaptcha: {
-            secret: '1q2w3e4r',
-          },
-        },
+        'g-recaptcha-response': 'invalid-input-secret',
       };
 
       return checkRecaptcha(staticman, req).catch((err) => {
-        expect(err._smErrorCode).toBe('RECAPTCHA_MISSING_CREDENTIALS');
+        expect(err._smErrorCode).toBe("invalid-input-secret");
       });
     });
 
     test('throws an error if reCaptcha secret is not in the request body', () => {
+      mockSiteConfig.set('captcha.ReCaptcha.secret', "")
       jest.mock('../../../source/lib/Staticman', () => {
         return jest.fn((parameters) => ({
           getSiteConfig: () => Promise.resolve(mockSiteConfig),
@@ -92,15 +111,10 @@ describe('Process controller', () => {
       const staticman = new Staticman(req.params);
 
       req.body = {
-        options: {
-          reCaptcha: {
-            siteKey: '123456789',
-          },
-        },
       };
 
       return checkRecaptcha(staticman, req).catch((err) => {
-        expect(err._smErrorCode).toBe('RECAPTCHA_MISSING_CREDENTIALS');
+        expect(err._smErrorCode).toBe('RECAPTCHA_CONFIG_MISSING');
       });
     });
 
@@ -128,7 +142,7 @@ describe('Process controller', () => {
       };
 
       return checkRecaptcha(staticman, req).catch((err) => {
-        expect(err._smErrorCode).toBe('RECAPTCHA_CONFIG_MISMATCH');
+        expect(err._smErrorCode).toBe('RECAPTCHA_TOKEN_MISSING');
       });
     });
 
@@ -153,7 +167,7 @@ describe('Process controller', () => {
       };
 
       return checkRecaptcha(staticman, req).catch((err) => {
-        expect(err._smErrorCode).toBe('RECAPTCHA_CONFIG_MISMATCH');
+        expect(err._smErrorCode).toBe('RECAPTCHA_TOKEN_MISSING');
       });
     });
 
@@ -169,30 +183,34 @@ describe('Process controller', () => {
       const staticman = new Staticman(req.params);
 
       req.body = {
-        options: {
-          reCaptcha: {
-            siteKey: mockSiteConfig.get('reCaptcha.siteKey'),
-            secret: mockHelpers.encrypt('some other secret'),
-          },
-        },
       };
 
       return checkRecaptcha(staticman, req).catch((err) => {
-        expect(err._smErrorCode).toBe('RECAPTCHA_CONFIG_MISMATCH');
+        expect(err._smErrorCode).toBe('RECAPTCHA_TOKEN_MISSING');
       });
     });
 
     test('initialises and triggers a verification from the reCaptcha module', () => {
-      const mockInitFn = jest.fn();
-      const mockVerifyFn = jest.fn((mockReq, reCaptchaCallback) => {
-        reCaptchaCallback(false);
+      // const mockInitFn = jest.fn();
+      const mockVerifyFn = jest.fn((token) => {
+        return true
       });
 
-      jest.mock('express-recaptcha', () => {
-        return {
-          init: mockInitFn,
-          verify: mockVerifyFn,
-        };
+      req.body = {
+        hello: 'token'
+      };
+
+      mockSiteConfig.set('captcha.enabled', true);
+      mockSiteConfig.set('captcha.service', 'ReCaptcha');
+      mockSiteConfig.set('captcha.ReCaptcha.secret', mockHelpers.encrypt('some other secret'));
+
+      jest.mock('../../../source/lib/CaptchaFactory', () => {
+        return jest.fn().mockImplementation(() => {
+          return {
+            verify: mockVerifyFn,
+            getKeyForToken: () => 'hello'
+          }
+        })
       });
 
       jest.mock('../../../source/lib/Staticman', () => {
@@ -205,39 +223,32 @@ describe('Process controller', () => {
       const { checkRecaptcha } = require('../../../source/controllers/process');
       const Staticman = require('../../../source/lib/Staticman');
       const staticman = new Staticman(req.params);
-
-      req.body = {
-        options: {
-          reCaptcha: {
-            siteKey: mockSiteConfig.get('reCaptcha.siteKey'),
-            secret: mockSiteConfig.getRaw('reCaptcha.secret'),
-          },
-        },
-      };
 
       return checkRecaptcha(staticman, req).then((response) => {
         expect(response).toBe(true);
-        expect(mockInitFn.mock.calls).toHaveLength(1);
-        expect(mockInitFn.mock.calls[0][0]).toBe(mockSiteConfig.get('reCaptcha.siteKey'));
-        expect(mockInitFn.mock.calls[0][1]).toBe(mockSiteConfig.get('reCaptcha.secret'));
-        expect(mockVerifyFn.mock.calls[0][0]).toBe(req);
+        // expect(mockInitFn.mock.calls).toHaveLength(1);
+        // expect(mockInitFn.mock.calls[0][0]).toBe(mockSiteConfig.get('reCaptcha.siteKey'));
+        // expect(mockInitFn.mock.calls[0][1]).toBe(mockSiteConfig.get('reCaptcha.secret'));
+        expect(mockVerifyFn.mock.calls[0][0]).toBe('token');
       });
     });
 
-    test('displays an error if the reCaptcha verification fails', () => {
+    test('displays an error if the reCaptcha verification fails', async (done) => {
       const reCaptchaError = new Error('someError');
-      const mockInitFn = jest.fn();
-      const mockVerifyFn = jest.fn((verifyReq, reCaptchaCallback) => {
-        reCaptchaCallback(reCaptchaError);
+      // const mockInitFn = jest.fn();
+      const mockVerifyFn = jest.fn((token) => {
+        throw reCaptchaError
       });
 
-      jest.mock('express-recaptcha', () => {
-        return {
-          init: mockInitFn,
-          verify: mockVerifyFn,
-        };
-      });
-
+      jest.mock('../../../source/lib/CaptchaFactory', () => ({
+        __esModule: true, // this property makes it work
+        default: () => {
+          return {
+            verify: mockVerifyFn,
+            getKeyForToken : () => {return ""}
+          }
+        },
+      }));
       jest.mock('../../../source/lib/Staticman', () => {
         return jest.fn((parameters) => ({
           decrypt: mockHelpers.decrypt,
@@ -250,19 +261,16 @@ describe('Process controller', () => {
       const staticman = new Staticman(req.params);
 
       req.body = {
-        options: {
-          reCaptcha: {
-            siteKey: mockSiteConfig.get('reCaptcha.siteKey'),
-            secret: mockSiteConfig.getRaw('reCaptcha.secret'),
-          },
-        },
       };
 
-      return checkRecaptcha(staticman, req).catch((err) => {
-        expect(err).toEqual({
-          _smErrorCode: reCaptchaError,
-        });
-      });
+      try {
+        await checkRecaptcha(staticman, req)
+        done.fail("need error")
+      } catch (e) {
+        console.log(e)
+        expect(e).toEqual(reCaptchaError);
+        done()
+      }
     });
   });
 
@@ -333,10 +341,6 @@ describe('Process controller', () => {
           email: 'mail@eduardoboucas.com',
         },
         options: {
-          reCaptcha: {
-            siteKey: mockSiteConfig.get('reCaptcha.siteKey'),
-            secret: mockSiteConfig.getRaw('reCaptcha.secret'),
-          },
           redirect: redirectUrl,
         },
       };
@@ -372,12 +376,6 @@ describe('Process controller', () => {
 
       req.body = {
         fields,
-        options: {
-          reCaptcha: {
-            siteKey: mockSiteConfig.get('reCaptcha.siteKey'),
-            secret: mockSiteConfig.getRaw('reCaptcha.secret'),
-          },
-        },
       };
       req.query = {};
 
@@ -411,13 +409,7 @@ describe('Process controller', () => {
         fields: {
           name: 'Eduardo Boucas',
           email: 'mail@eduardoboucas.com',
-        },
-        options: {
-          reCaptcha: {
-            siteKey: mockSiteConfig.get('reCaptcha.siteKey'),
-            secret: mockSiteConfig.getRaw('reCaptcha.secret'),
-          },
-        },
+        }
       };
       req.query = {};
 
