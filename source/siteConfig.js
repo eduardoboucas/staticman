@@ -185,23 +185,55 @@ export const schema = {
     format: Object,
     default: {},
   },
-  reCaptcha: {
-    enabled: {
-      doc:
-        'Set to `true` to force reCAPTCHA validation, set to `false` to accept comments without reCAPTCHA.',
-      format: Boolean,
-      default: false,
-    },
-    siteKey: {
-      doc: 'Site Key for your reCAPTCHA site registration',
+  captcha: {
+    service: {
+      doc: 'Select captcha service ReCaptcha or HCaptcha',
+      docExample: 'allowedFields: ["ReCaptcha", "HCaptcha"]',
       format: String,
       default: '',
     },
-    secret: {
-      doc: 'Encrypted Secret for your reCAPTCHA site registration',
-      format: 'EncryptedString',
-      default: '',
+    enabled: {
+      doc:
+        'Set to `true` to force captcha validation, set to `false` to accept comments without reCAPTCHA.',
+      format: Boolean,
+      default: false,
     },
+    ReCaptcha: {
+      domainURL: {
+        doc: 'domain URL for your reCAPTCHA',
+        format: String,
+        default: 'https://www.google.com',
+      },
+      secret: {
+        doc: 'Encrypted Secret for your reCAPTCHA site registration',
+        format: 'EncryptedString',
+        default: '',
+      },
+      version: {
+        doc: 'Version for your reCAPTCHA site registration V2 or V3',
+        docExample: 'allowedFields: ["V2", "V3"]',
+        format: String,
+        default: 'V2',
+      },
+      score: {
+        doc: 'Score maximum for your reCAPTCHA V3 (0.0 - 1.0)',
+        format: Number,
+        default: 0.5,
+      },
+    },
+    HCaptcha: {
+      domainURL: {
+        doc: 'domain URL for your HCaptcha',
+        format: String,
+        default: 'https://hcaptcha.com',
+      },
+      secret: {
+        doc: 'Encrypted Secret for your HCaptcha site registration',
+        format: 'EncryptedString',
+        default: '',
+      }
+    }
+
   },
 };
 

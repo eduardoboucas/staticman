@@ -66,10 +66,11 @@ comments:
   transforms:
     email: md5
 
-  reCaptcha:
+  captcha:
     enabled: true
-    siteKey: "123456789"
-    secret: "DTK5WxH6117ez/piZpmkvyAtieYWlu60+SApt9hFRMfNs4WBC0mvRtsW9Jmhz4fJYDcIX18wKHV6KYh3PXYN3d/pozCskwwkuJq0qHJQHrTycjgrGS5mti4QgrMYP0rq2p5hMTgPL/UK0lwkxuRRcxnvxqRlkZHMv6o/CUkZOVnkJ8lGqWa8uJAEIv/9rd6Bm12+F1ezLJZ+LogebHEDpyJWz9kwum9bFBQqZbun+43rxzJBQmAGQEWZ4hshY2aLSAyBpr/pjSDUwRGtwoBh8Ee1qKNuMzY0XVUOn+dcHrkpQotmKL4TMFQN4slo/lVKmfXW5N6t9vdP/lGmIiVXdw=="
+    service: "ReCaptcha"
+    ReCaptcha: 
+      secret: "DTK5WxH6117ez/piZpmkvyAtieYWlu60+SApt9hFRMfNs4WBC0mvRtsW9Jmhz4fJYDcIX18wKHV6KYh3PXYN3d/pozCskwwkuJq0qHJQHrTycjgrGS5mti4QgrMYP0rq2p5hMTgPL/UK0lwkxuRRcxnvxqRlkZHMv6o/CUkZOVnkJ8lGqWa8uJAEIv/9rd6Bm12+F1ezLJZ+LogebHEDpyJWz9kwum9bFBQqZbun+43rxzJBQmAGQEWZ4hshY2aLSAyBpr/pjSDUwRGtwoBh8Ee1qKNuMzY0XVUOn+dcHrkpQotmKL4TMFQN4slo/lVKmfXW5N6t9vdP/lGmIiVXdw=="
 
   githubAuth:
     clientId: "L4M3LIshioHbe3j+vMxEbGlCGDhyIcQF2jhmVOUp8DqC+RqNgvZSQp7qYYmjPPoyjFCVOsu5aHwcD1FkMlEaxLTqYOYUeq49Wb6uxePTBycmW14JI6fiM/PYTm6nqKH5fB/7wnohVgK+/1IVAF6DA7UAs0Ju+srlnqEbn30f84sySOeR+V6t9aF7OiF9DsGedsTfVrfj8opptwQe7nycsxQaTxvmwgQgP9FrDYH+PGy/3ThpQsPj+/Mnvbnn7PMJEJlZFtGZsMWWcE2anJlJ7fbHKNPNNg6l2qosh6/kMTrloCU6wA67ouai0OFiNR+gyQaqUiL3NMgN4k39nZuwOg=="
@@ -118,10 +119,12 @@ export const config2 = `{
     "transforms": {
       "email": "md5"
     },
-    "reCaptcha": {
+    "captcha": {
       "enabled": true,
       "siteKey": "123456789",
-      "secret": "ZguqL+tEc+XPFmWZdaFxWqqB1xtwe79o5SLWrjuAIA/45N5hPQk3HcKKfLBl0ZyqVff+JEY76xLBVFn+jn4Wc8egnKtA7HJfjMpbR4WdSFVm/Hcca3L3id9JNYmGPFRJmzOlG2qjSr2Z8y3Y1i02EjQrzUcfqCuCfeEbZxmCNp0="
+      "ReCaptcha": {
+        "secret": "ZguqL+tEc+XPFmWZdaFxWqqB1xtwe79o5SLWrjuAIA/45N5hPQk3HcKKfLBl0ZyqVff+JEY76xLBVFn+jn4Wc8egnKtA7HJfjMpbR4WdSFVm/Hcca3L3id9JNYmGPFRJmzOlG2qjSr2Z8y3Y1i02EjQrzUcfqCuCfeEbZxmCNp0="
+      }
     }
   }
 }`;
@@ -145,10 +148,11 @@ export const config3 = `comments:
   requiredFields: ["name", "email", "message"]
   transforms:
     email: md5
-  reCaptcha:
+  captcha:
     enabled: true
-    siteKey: "123456789"
-    secret: "@reCaptchaSecret@"`;
+    service: "ReCaptcha"
+    ReCaptcha: 
+      secret: "@reCaptchaSecret@"`
 
 export const configInvalidYML = `invalid:
 - x
