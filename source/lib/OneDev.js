@@ -18,27 +18,30 @@ export default class OneDev extends GitService {
   }
 
   _pullFile(path, branch) {
-    return this.api.get(`git-projects/${this.repository}/contents/${branch}/${path}`).then((res) => res.body);
+    return this.api.get(`repositories/${this.repository}/files/${branch}/${path}`)
+      .then((res) => ({content: res.body.base64Content}));
   }
 
   _commitFile(path, content, commitMessage, branch) {
-    return this.api.put(
-      `git-projects/${this.repository}/contents/${branch}/${path}`, {
+    return this.api.post(
+      `repositories/${this.repository}/files/${branch}/${path}`, {
         json: {
-          message: commitMessage,
-          content: content
+          '@type': 'FileCreateOrUpdateRequest',
+          commitMessage: commitMessage,
+          base64Content: content
         }
       }
     );
   }
 
   getBranchHeadCommit(branch) {
-    return this.api.get(`git-projects/${this.repository}/branches/${branch}`).then((res) => res.body.revision);
+    return this.api.get(`repositories/${this.repository}/branches/${branch}`)
+      .then((res) => res.body.commitHash);
   }
 
   createBranch(branch, sha) {
     return this.api.post(
-      `git-projects/${this.repository}/branches`, {
+      `repositories/${this.repository}/branches`, {
         json: {
           branchName: branch,
           revision: sha
@@ -48,7 +51,7 @@ export default class OneDev extends GitService {
   }
 
   deleteBranch(branch) {
-    return this.api.delete(`git-projects/${this.repository}/branches/${branch}`);
+    return this.api.delete(`repositories/${this.repository}/branches/${branch}`);
   }
 
   createReview(reviewTitle, branch, reviewBody) {
