@@ -149,6 +149,11 @@ export const schema = {
       format: Boolean,
       default: false,
     },
+    apiHost: {
+      doc: 'Mailgun API host. Note that if you are using the EU region the host should be set to `api.eu.mailgun.net`.',
+      format: String,
+      default: 'api.mailgun.net'
+    },
     apiKey: {
       doc: 'Mailgun API key',
       format: 'EncryptedString',

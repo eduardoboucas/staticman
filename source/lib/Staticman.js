@@ -357,7 +357,9 @@ export default class Staticman {
     if (!this.siteConfig.get('notifications.enabled')) return null;
 
     // Initialise Mailgun
+    const mailgunHost = this.siteConfig.get('notifications.apiHost') || config.get('email.apiHost')
     const mailgun = Mailgun({
+      ...(mailgunHost && { host: mailgunHost }),
       apiKey: this.siteConfig.get('notifications.apiKey') || config.get('email.apiKey'),
       domain: this.siteConfig.get('notifications.domain') || config.get('email.domain'),
     });
