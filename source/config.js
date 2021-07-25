@@ -27,6 +27,12 @@ export const schema = {
     },
   },
   email: {
+    apiHost: {
+      doc: 'The Mailgun host to use. Note that if you are using the EU region the host should be set to `api.eu.mailgun.net`. Will be overridden by a `notifications.apiHost` parameter in the site config, if one is set.',
+      format: String,
+      default: 'api.mailgun.net',
+      env: 'EMAIL_API_HOST'
+    },
     apiKey: {
       doc:
         'Mailgun API key to be used for email notifications. Will be overridden by a `notifications.apiKey` parameter in the site config, if one is set.',
