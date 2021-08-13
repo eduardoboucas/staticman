@@ -23,7 +23,7 @@ describe('OneDev interface', () => {
   });
 
   describe('readFile', () => {
-    test('reads a file and returns its contents', () => {
+    test('reads a file and returns its contents', async () => {
       const fileContents = 'This is a text file!';
       const filePath = 'path/to/file.txt';
       const mockGet = jest.fn(() =>
@@ -46,17 +46,16 @@ describe('OneDev interface', () => {
 
       const OneDev = require('../../../source/lib/OneDev').default;
       const sut = new OneDev(req.params);
-
-      return sut.readFile(filePath).then((contents) => {
-        expect(mockGet.mock.calls[0][0]).toBe(
-          `repositories/${req.params.repository}/files/${req.params.branch}/${filePath}`
-        );
-      });
+	  expect.assertions(1);
+      await sut.readFile(filePath);
+      expect(mockGet.mock.calls[0][0]).toBe(
+        `repositories/${req.params.repository}/files/${req.params.branch}/${filePath}`
+      );
     });
   });
 
   describe('writeFile', () => {
-    test('creates a file on the given branch using the commit title provided', () => {
+    test('creates a file on the given branch using the commit title provided', async () => {
       const options = {
         branch: 'master',
         commitTitle: 'Adds a new file',
@@ -79,27 +78,24 @@ describe('OneDev interface', () => {
 
       const OneDev = require('../../../source/lib/OneDev').default;
       const sut = new OneDev(req.params);
-
-      return sut
-        .writeFile(options.path, options.content, options.branch, options.commitTitle)
-        .then((response) => {
-          expect(mockPost).toHaveBeenCalledTimes(1);
-          expect(mockPost.mock.calls[0][0]).toBe(
-            `repositories/${req.params.repository}/files/${options.branch}/${options.path}`
-          );
-          expect(mockPost.mock.calls[0][1]).toEqual({
-            json: {
-              '@type': 'FileCreateOrUpdateRequest',
-              commitMessage: options.commitTitle,
-              base64Content: btoa(options.content)
-            }
-          });
-        });
+	  expect.assertions(3);
+      await sut.writeFile(options.path, options.content, options.branch, options.commitTitle);
+      expect(mockPost).toHaveBeenCalledTimes(1);
+      expect(mockPost.mock.calls[0][0]).toBe(
+        `repositories/${req.params.repository}/files/${options.branch}/${options.path}`
+      );
+      expect(mockPost.mock.calls[0][1]).toEqual({
+        json: {
+          '@type': 'FileCreateOrUpdateRequest',
+          commitMessage: options.commitTitle,
+          base64Content: btoa(options.content)
+        }
+      });
     });
   });
 
   describe('writeFileAndSendReview', () => {
-    test('writes a file to a new branch and sends a PR to the base branch provided, using the given title and body for the commit/PR', () => {
+    test('writes a file to a new branch and sends a PR to the base branch provided, using the given title and body for the commit/PR', async () => {
       const options = {
         commitBody: 'This is a very cool file indeed...',
         commitTitle: 'Adds a new file',
@@ -134,62 +130,59 @@ describe('OneDev interface', () => {
 
       const OneDev = require('../../../source/lib/OneDev').default;
       const sut = new OneDev(req.params);
+	  expect.assertions(9);
+      await sut.writeFileAndSendReview(
+        options.path,
+        options.content,
+        options.newBranch,
+        options.commitTitle,
+        options.commitBody
+      );
+      expect(mockGet).toHaveBeenCalledTimes(1);
+      expect(mockGet.mock.calls[0][0]).toBe(
+        `repositories/${req.params.repository}/branches/${req.params.branch}`
+      );
 
-      return sut
-        .writeFileAndSendReview(
-          options.path,
-          options.content,
-          options.newBranch,
-          options.commitTitle,
-          options.commitBody
-        )
-        .then((response) => {
-          expect(mockGet).toHaveBeenCalledTimes(1);
-          expect(mockGet.mock.calls[0][0]).toBe(
-            `repositories/${req.params.repository}/branches/${req.params.branch}`
-          );
+      expect(mockPost).toHaveBeenCalledTimes(3);
+      expect(mockPost.mock.calls[0][0]).toBe(
+        `repositories/${req.params.repository}/branches`
+      );
+      expect(mockPost.mock.calls[0][1]).toEqual({
+        json: {
+          branchName: options.newBranch,
+          revision: options.sha
+        }
+      });
 
-          expect(mockPost).toHaveBeenCalledTimes(3);
-          expect(mockPost.mock.calls[0][0]).toBe(
-            `repositories/${req.params.repository}/branches`
-          );
-          expect(mockPost.mock.calls[0][1]).toEqual({
-            json: {
-              branchName: options.newBranch,
-              revision: options.sha
-            }
-          });
+      expect(mockPost.mock.calls[1][0]).toBe(
+        `repositories/${req.params.repository}/files/${options.newBranch}/${options.path}`
+      );
+      expect(mockPost.mock.calls[1][1]).toEqual({
+        json: {
+          '@type': 'FileCreateOrUpdateRequest',
+          commitMessage: options.commitTitle,
+          base64Content: btoa(options.content)
+        }
+      });
 
-          expect(mockPost.mock.calls[1][0]).toBe(
-            `repositories/${req.params.repository}/files/${options.newBranch}/${options.path}`
-          );
-          expect(mockPost.mock.calls[1][1]).toEqual({
-            json: {
-              '@type': 'FileCreateOrUpdateRequest',
-              commitMessage: options.commitTitle,
-              base64Content: btoa(options.content)
-            }
-          });
-
-          expect(mockPost.mock.calls[2][0]).toBe(
-            `pull-requests`
-          );
-          expect(mockPost.mock.calls[2][1]).toEqual({
-            json: {
-              targetProjectId: req.params.repository,
-              sourceProjectId: req.params.repository,
-              targetBranch: req.params.branch,
-              sourceBranch: options.newBranch,
-              title: options.commitTitle,
-              description: options.commitBody
-            }
-          });
-        });
+      expect(mockPost.mock.calls[2][0]).toBe(
+        `pull-requests`
+      );
+      expect(mockPost.mock.calls[2][1]).toEqual({
+        json: {
+          targetProjectId: req.params.repository,
+          sourceProjectId: req.params.repository,
+          targetBranch: req.params.branch,
+          sourceBranch: options.newBranch,
+          title: options.commitTitle,
+          description: options.commitBody
+        }
+      });
     });
   });
 
   describe('getCurrentUser', () => {
-    test('returns the current authenticated user', () => {
+    test('returns the current authenticated user', async () => {
       const mockGet = jest.fn(() =>
         Promise.resolve({
           body: {
@@ -213,13 +206,12 @@ describe('OneDev interface', () => {
       const OneDev = require('../../../source/lib/OneDev').default;
       const sut = new OneDev(req.params);
 
-      return sut.getCurrentUser().then((user) => {
-        expect(mockGet).toHaveBeenCalledTimes(1);
-        expect(mockGet.mock.calls[0][0]).toBe(
-          `users/me`
-        );
-        expect(user).toEqual(new User('onedev', 'johndoe', 'johndoe@test.com', 'John Doe'));
-      });
+      const user = await sut.getCurrentUser();
+      expect(mockGet).toHaveBeenCalledTimes(1);
+      expect(mockGet.mock.calls[0][0]).toBe(
+        `users/me`
+      );
+      expect(user).toEqual(new User('onedev', 'johndoe', 'johndoe@test.com', 'John Doe'));
     });
   });
 });

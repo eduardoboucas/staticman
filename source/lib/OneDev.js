@@ -1,9 +1,8 @@
+import got from 'got';
 import config from '../config';
 import GitService from './GitService';
 import Review from './models/Review';
 import User from './models/User';
-
-import got from 'got';
 
 export default class OneDev extends GitService {
   constructor(options = {}) {
@@ -17,30 +16,30 @@ export default class OneDev extends GitService {
     });
   }
 
-  _pullFile(path, branch) {
-    return this.api.get(`repositories/${this.repository}/files/${branch}/${path}`)
-      .then((res) => ({content: res.body.base64Content}));
+  async _pullFile(path, branch) {
+    const res = await this.api.get(`repositories/${this.repository}/files/${branch}/${path}`);
+    return {content: res.body.base64Content};
   }
 
-  _commitFile(path, content, commitMessage, branch) {
-    return this.api.post(
+  async _commitFile(path, content, commitMessage, branch) {
+    await this.api.post(
       `repositories/${this.repository}/files/${branch}/${path}`, {
         json: {
           '@type': 'FileCreateOrUpdateRequest',
-          commitMessage: commitMessage,
+          commitMessage,
           base64Content: content
         }
       }
     );
   }
 
-  getBranchHeadCommit(branch) {
-    return this.api.get(`repositories/${this.repository}/branches/${branch}`)
-      .then((res) => res.body.commitHash);
+  async getBranchHeadCommit(branch) {
+    const res = await this.api.get(`repositories/${this.repository}/branches/${branch}`);
+    return res.body.commitHash;
   }
 
-  createBranch(branch, sha) {
-    return this.api.post(
+  async createBranch(branch, sha) {
+    await this.api.post(
       `repositories/${this.repository}/branches`, {
         json: {
           branchName: branch,
@@ -50,12 +49,12 @@ export default class OneDev extends GitService {
     );
   }
 
-  deleteBranch(branch) {
-    return this.api.delete(`repositories/${this.repository}/branches/${branch}`);
+  async deleteBranch(branch) {
+    await this.api.delete(`repositories/${this.repository}/branches/${branch}`);
   }
 
-  createReview(reviewTitle, branch, reviewBody) {
-    return this.api.post(
+  async createReview(reviewTitle, branch, reviewBody) {
+    await this.api.post(
       `pull-requests`, {
         json: {
           targetProjectId: this.repository,
@@ -69,13 +68,13 @@ export default class OneDev extends GitService {
     );
   }
 
-  getReview(reviewId) {
-    return this.api.get(`pull-requests/${reviewId}`)
-      .then(res => new Review(res.body.title, res.body.description, '', res.body.sourceBranch, res.body.targetBranch));
+  async getReview(reviewId) {
+    const res = await this.api.get(`pull-requests/${reviewId}`);
+    return new Review(res.body.title, res.body.description, '', res.body.sourceBranch, res.body.targetBranch);
   }
 
-  getCurrentUser() {
-    return this.api.get(`users/me`)
-      .then(res => new User('onedev', res.body.name || '', res.body.email || '', res.body.fullName || '', '', '', '', ''));
+  async getCurrentUser() {
+    const res = await this.api.get(`users/me`);
+    return new User('onedev', res.body.name ?? '', res.body.email ?? '', res.body.fullName ?? '', '', '', '', '');
   }
 }

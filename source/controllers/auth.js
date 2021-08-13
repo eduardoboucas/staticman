@@ -20,7 +20,7 @@ export default async (req, res) => {
         );
       break;
     case 'onedev':
-      requestAccessToken = (siteConfig) => null;
+      requestAccessToken = () => null;
       break;
     default:
       requestAccessToken = (siteConfig) =>
