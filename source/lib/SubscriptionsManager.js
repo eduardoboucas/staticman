@@ -2,87 +2,52 @@ import md5 from 'md5';
 import Notification from './Notification';
 
 export default class SubscriptionsManager {
-  constructor(parameters, dataStore, mailAgent) {
+  constructor(parameters, dataStore, domain, mailAgent) {
     this.parameters = parameters;
     this.dataStore = dataStore;
+    this.domain = domain;
     this.mailAgent = mailAgent;
   }
 
   _getListAddress(entryId) {
     const compoundId = md5(`${this.parameters.username}-${this.parameters.repository}-${entryId}`);
 
-    return `${compoundId}@${this.mailAgent.domain}`;
+    return `${compoundId}@${this.domain}`;
   }
 
-  _get(entryId) {
+  async _get(entryId) {
     const listAddress = this._getListAddress(entryId);
 
-    return new Promise((resolve, reject) => {
-      this.mailAgent.lists(listAddress).info((err, value) => {
-        if (err && err.statusCode !== 404) {
-          return reject(err);
-        }
+    await this.mailAgent.lists.get(listAddress);
 
-        if (err || !value?.list) {
-          return reject(Error('Mailing list not found'));
-        }
+    return listAddress;
+  }
 
-        return resolve(listAddress);
-      });
+  async send(entryId, fields, options, siteConfig) {
+    const list = await this._get(entryId);
+    const notifications = new Notification(this.domain, this.mailAgent);
+    await notifications.send(list, fields, options, {
+      siteName: siteConfig.get('name'),
     });
   }
 
-  send(entryId, fields, options, siteConfig) {
-    return this._get(entryId).then((list) => {
-      const notifications = new Notification(this.mailAgent);
-
-      return notifications.send(list, fields, options, {
-        siteName: siteConfig.get('name'),
-      });
-    });
-  }
-
-  set(entryId, email) {
+  async set(entryId, email) {
     const listAddress = this._getListAddress(entryId);
 
-    return new Promise((resolve, reject) => {
-      const queue = [];
-
-      return this._get(entryId).then((list) => {
-        if (!list) {
-          queue.push(
-            new Promise((resolveList, rejectList) => {
-              this.mailAgent.lists().create(
-                {
-                  address: listAddress,
-                },
-                (err, result) => {
-                  if (err) return rejectList(err);
-
-                  return resolveList(result);
-                }
-              );
-            })
-          );
-        }
-
-        return Promise.all(queue).then(() => {
-          this.mailAgent
-            .lists(listAddress)
-            .members()
-            .create(
-              {
-                address: email,
-              },
-              (err, result) => {
-                // A 400 is fine-ish, means the address already exists
-                if (err && err.statusCode !== 400) return reject(err);
-
-                return resolve(result);
-              }
-            );
-        });
+    try {
+      await this.mailAgent.lists.create({
+        address: listAddress,
       });
-    });
+    } catch {
+      // ignore
+    }
+
+    try {
+      await this.mailAgent.lists.members.createMember(listAddress, {
+        address: email,
+      });
+    } catch {
+      // ignore
+    }
   }
 }

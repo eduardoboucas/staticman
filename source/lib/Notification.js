@@ -1,7 +1,8 @@
 import config from '../config';
 
 export default class Notification {
-  constructor(mailAgent) {
+  constructor(domain, mailAgent) {
+    this.domain = domain;
     this.mailAgent = mailAgent;
   }
 
@@ -26,25 +27,14 @@ export default class Notification {
     `;
   }
 
-  send(to, fields, options, data) {
+  async send(to, fields, options, data) {
     const subject = data.siteName ? `New reply on "${data.siteName}"` : 'New reply';
 
-    return new Promise((resolve, reject) => {
-      this.mailAgent.messages().send(
-        {
-          from: `${config.get('email.fromName')} <${config.get('email.fromAddress')}>`,
-          to,
-          subject,
-          html: Notification._buildMessage(fields, options, data),
-        },
-        (err, res) => {
-          if (err) {
-            return reject(err);
-          }
-
-          return resolve(res);
-        }
-      );
+    await this.mailAgent.messages.create(this.domain, {
+      from: `${config.get('email.fromName')} <${config.get('email.fromAddress')}>`,
+      to,
+      subject,
+      html: Notification._buildMessage(fields, options, data)
     });
   }
 }

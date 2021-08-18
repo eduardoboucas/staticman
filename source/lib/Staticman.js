@@ -1,5 +1,5 @@
 import akismetApi from 'akismet';
-import Mailgun from 'mailgun-js';
+import Mailgun from 'mailgun.js';
 import markdownTable from 'markdown-table';
 import moment from 'moment';
 import NodeRSA from 'node-rsa';
@@ -15,6 +15,8 @@ import * as RSA from './RSA';
 import SiteConfig from '../siteConfig';
 import SubscriptionsManager from './SubscriptionsManager';
 import * as Transforms from './Transforms';
+
+const formData = require('form-data');
 
 export default class Staticman {
   constructor(parameters) {
@@ -357,13 +359,14 @@ export default class Staticman {
     if (!this.siteConfig.get('notifications.enabled')) return null;
 
     // Initialise Mailgun
-    const mailgun = Mailgun({
-      apiKey: this.siteConfig.get('notifications.apiKey') || config.get('email.apiKey'),
-      domain: this.siteConfig.get('notifications.domain') || config.get('email.domain'),
+    const mailgun = new Mailgun(formData);
+    const mg = mailgun.client({
+      username: 'api',
+      key: this.siteConfig.get('notifications.apiKey') || config.get('email.apiKey')
     });
 
     // Initialise SubscriptionsManager
-    const subscriptions = new SubscriptionsManager(this.parameters, this.git, mailgun);
+    const subscriptions = new SubscriptionsManager(this.parameters, this.git, this.siteConfig.get('notifications.domain') || config.get('email.domain'), mg);
 
     return subscriptions;
   }
@@ -537,7 +540,7 @@ export default class Staticman {
         // Create file
         return this._createFile(extendedFields);
       })
-      .then((data) => {
+      .then(async (data) => {
         const filePath = this._getNewFilePath(fields);
         const subscriptions = this._initialiseSubscriptions();
         const commitMessage = this._resolvePlaceholders(this.siteConfig.get('commitMessage'), {
@@ -552,7 +555,7 @@ export default class Staticman {
           options.subscribe &&
           this.fields[options.subscribe]
         ) {
-          subscriptions.set(options.parent, this.fields[options.subscribe]).catch((err) => {
+          await subscriptions.set(options.parent, this.fields[options.subscribe]).catch((err) => {
             console.log(err.stack || err);
           });
         }
@@ -569,10 +572,10 @@ export default class Staticman {
           );
         }
         if (subscriptions && options.parent) {
-          subscriptions.send(options.parent, fields, options, this.siteConfig);
+          await subscriptions.send(options.parent, fields, options, this.siteConfig);
         }
 
-        return this.git.writeFile(filePath, data, this.parameters.branch, commitMessage);
+        await this.git.writeFile(filePath, data, this.parameters.branch, commitMessage);
       })
       .then(() => {
         return {
