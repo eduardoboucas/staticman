@@ -1,0 +1,5 @@
+{
+  "gitlabToken": process.env.GITLAB_TOKEN,
+  "githubToken": process.env.GITHUB_TOKEN,
+  "rsaPrivateKey": JSON.stringify(process.env.RSA_PRIVATE_KEY)
+}
