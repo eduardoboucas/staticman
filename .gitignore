@@ -9,3 +9,4 @@ config.*.json
 coverage/
 node_modules/
 staticman_key
+!config.production.json
