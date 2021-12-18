@@ -1,13 +1,5 @@
 {
   "version": 2,
-   "env": {
-    "NODE_ENV": "",
-    "GITHUB_TOKEN": "",
-    "RSA_PRIVATE_KEY": "",
-    "GITHUB_APP_ID": "",
-    "GITHUB_PRIVATE_KEY": "",
-    "PORT": "" 
-  },
   "builds": [
       {
           "src": "./index.js",
