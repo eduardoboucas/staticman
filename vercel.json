@@ -2,8 +2,8 @@
   "version": 2,
    "env": {
     "NODE_ENV": "development",
-    "GITHUB_TOKEN": "@staticman-github-token",
-    "RSA_PRIVATE_KEY": "@staticman-rsa-private-key"
+    "GITHUB_TOKEN": "",
+    "RSA_PRIVATE_KEY": ""
   },
   "builds": [
       {
