@@ -6,7 +6,7 @@ name: Create and publish a Docker image
 on:
   push:
     branches: ['dev','master']
-    tags: ['v*','testing']
+    tags: ['v*']
 
 jobs:
   build-and-push-image:
