@@ -1,0 +1,52 @@
+# Based on example from GitHub Docs
+# https://docs.github.com/en/actions/publishing-packages/publishing-docker-images#publishing-images-to-github-packages
+
+name: Create and publish a Docker image
+
+on:
+  push:
+    branches: ['dev','master']
+    tags: ['v*','testing']
+
+jobs:
+  build-and-push-image:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Log in to Docker Hub
+      #   uses: docker/login-action@v2
+      #   with:
+      #     username: ${{ secrets.DOCKER_USERNAME }}
+      #     password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          # GCR:        gcr.io/bryankaraffa/staticman
+          # Docker Hub: bryankaraffa/staticman 
+          #             https://hub.docker.com/r/bryankaraffa/staticman
+          images: |
+            ghcr.io/${{ github.repository }}
+          # ${{ github.repository }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
