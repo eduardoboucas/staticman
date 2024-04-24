@@ -203,14 +203,10 @@ module.exports = (data, rsa) => {
 
   const config = convict(schema)
 
-  try {
-    config.load(data)
-    config.validate()
+  config.load(data)
+  config.validate()
 
-    return config
-  } catch (e) {
-    throw e
-  }
+  return config
 }
 
 module.exports.schema = schema

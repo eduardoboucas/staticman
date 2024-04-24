@@ -1,6 +1,7 @@
 const auth = require('../../../controllers/auth')
 const helpers = require('./../../helpers')
 const nock = require('nock')
+const fetchMock = require('fetch-mock')
 const Staticman = require('./../../../lib/Staticman')
 const User = require('../../../lib/models/User')
 
@@ -14,6 +15,7 @@ let res
 beforeEach(() => {
   req = helpers.getMockRequest()
   res = helpers.getMockResponse()
+  fetchMock.reset()
 })
 
 describe('Auth controller', () => {
@@ -41,13 +43,16 @@ describe('Auth controller', () => {
           access_token: mockAccessToken
         })
 
-      nock((/github\.com/), {
-        reqheaders: {
+      fetchMock.get({
+        url: /github\.com\/user/, 
+        headers: {
           authorization: `token ${mockAccessToken}`
         }
+      },
+      {
+        body: mockUser,
+        status: 200
       })
-        .get('/user')
-        .reply(200, mockUser)
 
       const reqWithQuery = Object.assign({}, req, {
         query: {
@@ -82,14 +87,17 @@ describe('Auth controller', () => {
           access_token: mockAccessToken
         })
 
-        nock((/github\.com/), {
-          reqheaders: {
-            authorization: `token ${mockAccessToken}`
-          }
-        })
-          .get('/user')
-          .reply(200, mockUser)
-
+      fetchMock.get({
+        url: /github\.com\/user/, 
+        headers: {
+          authorization: `token ${mockAccessToken}`
+        }
+      },
+      {
+        body: mockUser,
+        status: 200
+      })
+  
       const reqWithQuery = Object.assign({}, req, {
         params: {
           service: 'github',
@@ -156,15 +164,18 @@ describe('Auth controller', () => {
           access_token: mockAccessToken
         })
 
-        nock((/github\.com/), {
-          reqheaders: {
-            authorization: `token ${mockAccessToken}`
-          }
-        })
-          .get('/user')
-          .reply(401, {
-            message: 'Unauthorized'
-          })
+      fetchMock.get({
+        url: /github\.com\/user/, 
+        headers: {
+          authorization: `token ${mockAccessToken}`
+        }
+      },
+      {
+        body: {
+          message: 'Unauthorized'
+        },
+        status: 401
+      })
 
       const reqWithQuery = Object.assign({}, req, {
         params: {
@@ -292,7 +303,7 @@ describe('Auth controller', () => {
       })
         .get('/api/v4/user')
         .reply(401, {
-          message: '401 Unauthorized'
+          message: 'Unauthorized'
         })
 
       const reqWithQuery = Object.assign({}, req, {
@@ -307,7 +318,7 @@ describe('Auth controller', () => {
       return auth(reqWithQuery, res).then(result => {
         expect(res.status.mock.calls[0][0]).toBe(401)
         expect(res.send.mock.calls[0][0].statusCode).toBe(401)
-        expect(res.send.mock.calls[0][0].message).toContain('401 Unauthorized')
+        expect(res.send.mock.calls[0][0].message).toContain('Unauthorized')
       })
     })
   })

@@ -635,7 +635,7 @@ describe('Staticman interface', () => {
     })
   })
 
-  describe('authentication v2', async () => {
+  describe('authentication v2', () => {
     beforeEach(() => {
       mockConfig.set('githubAuth.required', true)
     })
@@ -826,8 +826,8 @@ describe('Staticman interface', () => {
 
       return staticman1._createFile(fields).then(file1 => {
         return staticman2._createFile(fields).then(file2 => {
-          expect(file1).toBe(yaml.safeDump(fields))
-          expect(file2).toBe(yaml.safeDump(fields))
+          expect(file1).toBe(yaml.dump(fields))
+          expect(file2).toBe(yaml.dump(fields))
         })
       })
     })

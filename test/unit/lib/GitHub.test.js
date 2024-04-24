@@ -3,7 +3,7 @@ const sampleData = require('./../../helpers/sampleData')
 const User = require('../../../lib/models/User')
 const yaml = require('js-yaml')
 const GitHub = require('./../../../lib/GitHub')
-const nock = require('nock')
+const fetchMock = require('fetch-mock')
 const config = require('../../../config')
 
 let req
@@ -13,6 +13,7 @@ const btoa = contents => Buffer.from(contents).toString('base64')
 beforeEach(() => {
   jest.resetModules()
   jest.restoreAllMocks()
+  fetchMock.reset()
 
   req = mockHelpers.getMockRequest()
 })
@@ -24,34 +25,38 @@ describe('GitHub interface', () => {
   })
 
   test('authenticates with the GitHub API using a personal access token', async () => {
-    const scope = nock((/api\.github\.com/), {
-      reqheaders: {
+    fetchMock.get({
+      url: /api\.github\.com\/user\/repository_invitations/, 
+      headers: {
         authorization: 'token '.concat('1q2w3e4r')
       }
+    },
+    {
+      status: 200
     })
-      .get('/user/repository_invitations')
-      .reply(200)
 
     const githubInstance = await new GitHub(req.params)
     await githubInstance.api.repos.listInvitationsForAuthenticatedUser();
-    expect(scope.isDone()).toBe(true)
+    expect(fetchMock.done()).toBe(true)
   })
 
   test('authenticates with the GitHub API using an OAuth token', async () => {
-    const scope = nock((/api\.github\.com/), {
-      reqheaders: {
+    fetchMock.get({
+      url: /api\.github\.com\/user\/repository_invitations/, 
+      headers: {
         authorization: 'token '.concat('test-oauth-token')
       }
+    },
+    {
+      status: 200
     })
-      .get('/user/repository_invitations')
-      .reply(200)
 
     const githubInstance = await new GitHub({
       ...req.params,
       oauthToken: 'test-oauth-token'
     })
     await githubInstance.api.repos.listInvitationsForAuthenticatedUser();
-    expect(scope.isDone()).toBe(true)
+    expect(fetchMock.done()).toBe(true)
   })
 
   test('throws error if no personal access token or OAuth token is provided', async () => {
@@ -67,36 +72,48 @@ describe('GitHub interface', () => {
   describe('readFile', () => {
     test('reads a file and returns its contents', async () => {
       const filePath = 'path/to/file.yml'
-      const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
+      const parsedConfig = yaml.load(sampleData.config1, 'utf8')
 
-      const scope = nock((/api\.github\.com/), {
-        reqheaders: {
+      fetchMock.get({
+        url: /api\.github\.com\/repos\/johndoe\/foobar\/contents\/path%2Fto%2Ffile\.yml/,
+        query: {
+          ref: 'master'
+        },
+        headers: {
           authorization: 'token '.concat('1q2w3e4r')
         }
-      })
-        .get('/repos/johndoe/foobar/contents/path/to/file.yml?ref=master')
-        .reply(200, {
+      },
+      {
+        body: {
           content: btoa(sampleData.config1)
-        })
+        },
+        status: 200
+      })
 
       const githubInstance = await new GitHub(req.params)
 
       const contents = await githubInstance.readFile(filePath)
       expect(contents).toEqual(parsedConfig)
-      expect(scope.isDone()).toBe(true)
+      expect(fetchMock.done()).toBe(true)
     })
 
     test('returns an error if GitHub API call errors', async () => {
       const filePath = 'path/to/file.yml'
-      const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
+      const parsedConfig = yaml.load(sampleData.config1, 'utf8')
 
-      const scope = nock((/api\.github\.com/), {
-        reqheaders: {
+      fetchMock.get({
+        url: /api\.github\.com\/repos\/johndoe\/foobar\/contents\/path%2Fto%2Ffile\.yml/,
+        query: {
+          ref: 'master'
+        },
+        headers: {
           authorization: 'token '.concat('1q2w3e4r')
         }
+      },
+      {
+        body: 'Error encountered oh no',
+        status: 500
       })
-        .get('/repos/johndoe/foobar/contents/path/to/file.yml?ref=master')
-        .replyWithError('Error encountered oh no')
 
       const githubInstance = await new GitHub(req.params)
 
@@ -108,7 +125,7 @@ describe('GitHub interface', () => {
         expect(err._smErrorCode).toEqual('GITHUB_READING_FILE')
       }
 
-      expect(scope.isDone()).toBe(true)
+      expect(fetchMock.done()).toBe(true)
     })
 
     test('returns an error if the config file cannot be read', async () => {
@@ -126,15 +143,21 @@ describe('GitHub interface', () => {
     })
 
     test('returns an error if the config file cannot be parsed', async () => {
-        const scope = nock((/api\.github\.com/), {
-          reqheaders: {
-            authorization: 'token '.concat('1q2w3e4r')
-          }
-        })
-          .get('/repos/johndoe/foobar/contents/path/to/file.yml?ref=master')
-          .reply(200, {
-            content: btoa(sampleData.configInvalidYML)
-          })
+      fetchMock.get({
+        url: /api\.github\.com\/repos\/johndoe\/foobar\/contents\/path%2Fto%2Ffile\.yml/,
+        query: {
+          ref: 'master'
+        },
+        headers: {
+          authorization: 'token '.concat('1q2w3e4r')
+        }
+      },
+      {
+        body: {
+          content: btoa(sampleData.configInvalidYML)
+        },
+        status: 200
+      })
 
         const filePath = 'path/to/file.yml'
         const githubInstance = await new GitHub(req.params)
@@ -148,72 +171,90 @@ describe('GitHub interface', () => {
           expect(err.message).toBeDefined()
         }
 
-        expect(scope.isDone()).toBe(true)
+        expect(fetchMock.done()).toBe(true)
       })
 
     test('reads a YAML file and returns its parsed contents', async () => {
       const filePath = 'path/to/file.yml'
-      const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
+      const parsedConfig = yaml.load(sampleData.config1, 'utf8')
 
-      const scope = nock((/api\.github\.com/), {
-        reqheaders: {
+      fetchMock.get({
+        url: /api\.github\.com\/repos\/johndoe\/foobar\/contents\/path%2Fto%2Ffile\.yml/,
+        query: {
+          ref: 'master'
+        },
+        headers: {
           authorization: 'token '.concat('1q2w3e4r')
         }
-      })
-        .get('/repos/johndoe/foobar/contents/path/to/file.yml?ref=master')
-        .reply(200, {
+      },
+      {
+        body: {
           content: btoa(sampleData.config1)
-        })
+        },
+        status: 200
+      })
 
       const githubInstance = await new GitHub(req.params)
 
       const contents = await githubInstance.readFile(filePath)
       expect(contents).toEqual(parsedConfig)
-      expect(scope.isDone()).toBe(true)
+      expect(fetchMock.done()).toBe(true)
     })
 
     test('reads a YAML file and returns its parsed and raw contents if `getFullResponse` is `true`', async () => {
-      const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
+      const parsedConfig = yaml.load(sampleData.config1, 'utf8')
       const filePath = 'path/to/file.yml'
 
-      const scope = nock((/api\.github\.com/), {
-        reqheaders: {
+      fetchMock.get({
+        url: /api\.github\.com\/repos\/johndoe\/foobar\/contents\/path%2Fto%2Ffile\.yml/,
+        query: {
+          ref: 'master'
+        },
+        headers: {
           authorization: 'token '.concat('1q2w3e4r')
         }
-      })
-        .get('/repos/johndoe/foobar/contents/path/to/file.yml?ref=master')
-        .reply(200, {
+      },
+      {
+        body: {
           content: btoa(sampleData.config1)
-        })
+        },
+        status: 200
+      })
 
       const githubInstance = await new GitHub(req.params)
 
       const response = await githubInstance.readFile(filePath, true)
 
       expect(response.content).toEqual(parsedConfig)
-      expect(scope.isDone()).toBe(true)
+      expect(fetchMock.done()).toBe(true)
     })
 
     test('reads a JSON file and returns its parsed contents', async () => {
       const filePath = 'path/to/file.json'
-      const parsedConfig = yaml.safeLoad(sampleData.config2, 'utf8')
+      const parsedConfig = yaml.load(sampleData.config2, 'utf8')
 
-      const scope = nock((/api\.github\.com/), {
-        reqheaders: {
+      fetchMock.get({
+        url: /api\.github\.com\/repos\/johndoe\/foobar\/contents\/path%2Fto%2Ffile\.json/,
+        query: {
+          ref: 'master'
+        },
+        headers: {
           authorization: 'token '.concat('1q2w3e4r')
         }
-      })
-        .get('/repos/johndoe/foobar/contents/path/to/file.json?ref=master')
-        .reply(200, {
+      },
+      {
+        body: {
           content: btoa(sampleData.config2)
-        })
+        },
+        status: 200
+      })
 
       const githubInstance = await new GitHub(req.params)
 
       const contents = await githubInstance.readFile(filePath)
 
       expect(contents).toEqual(parsedConfig)
-      expect(scope.isDone()).toBe(true)
+      expect(fetchMock.done()).toBe(true)
     })
 
     test('reads a JSON file and returns its parsed and raw contents if `getFullResponse` is `true`', async () => {
@@ -221,24 +262,30 @@ describe('GitHub interface', () => {
         content: btoa(sampleData.config2)
       }
       const filePath = 'path/to/file.json'
-      const parsedConfig = yaml.safeLoad(sampleData.config2, 'utf8')
+      const parsedConfig = yaml.load(sampleData.config2, 'utf8')
 
-      const scope = nock((/api\.github\.com/), {
-        reqheaders: {
+      fetchMock.get({
+        url: /api\.github\.com\/repos\/johndoe\/foobar\/contents\/path%2Fto%2Ffile\.json/,
+        query: {
+          ref: 'master'
+        },
+        headers: {
           authorization: 'token '.concat('1q2w3e4r')
         }
-      })
-        .get('/repos/johndoe/foobar/contents/path/to/file.json?ref=master')
-        .reply(200, {
+      },
+      {
+        body: {
           content: btoa(sampleData.config2)
-        })
+        },
+        status: 200
+      })
 
       const githubInstance = await new GitHub(req.params)
 
       const response = await githubInstance.readFile(filePath, true)
       expect(response.content).toEqual(parsedConfig)
       expect(response.file).toEqual(fileContents)
-      expect(scope.isDone()).toBe(true)
+      expect(fetchMock.done()).toBe(true)
     })
   })
 
@@ -251,15 +298,18 @@ describe('GitHub interface', () => {
         path: 'path/to/file.txt'
       }
 
-      const scope = nock((/api\.github\.com/), {
-        reqheaders: {
+      fetchMock.put({
+        url: /api\.github\.com\/repos\/johndoe\/foobar\/contents\/path%2Fto%2Ffile\.txt/,
+        headers: {
           authorization: 'token '.concat('1q2w3e4r')
         }
-      })
-        .put('/repos/johndoe/foobar/contents/path/to/file.txt')
-        .reply(200, {
+      },
+      {
+        body: {
           number: 123
-        })
+        },
+        status: 200
+      })
 
       const githubInstance = await new GitHub(req.params)
 
@@ -270,7 +320,7 @@ describe('GitHub interface', () => {
         options.commitTitle
       )
 
-      expect(scope.isDone()).toBe(true)
+      expect(fetchMock.done()).toBe(true)
     })
 
     test('creates a file using the branch present in the request, if one is not provided to the method, and the default commit title', async () => {
@@ -280,15 +330,18 @@ describe('GitHub interface', () => {
         path: 'path/to/file.txt'
       }
 
-      const scope = nock((/api\.github\.com/), {
-        reqheaders: {
+      fetchMock.put({
+        url: /api\.github\.com\/repos\/johndoe\/foobar\/contents\/path%2Fto%2Ffile\.txt/,
+        headers: {
           authorization: 'token '.concat('1q2w3e4r')
         }
-      })
-        .put('/repos/johndoe/foobar/contents/path/to/file.txt')
-        .reply(200, {
+      },
+      {
+        body: {
           number: 123
-        })
+        },
+        status: 200
+      })
 
       const githubInstance = await new GitHub(req.params)
 
@@ -297,7 +350,7 @@ describe('GitHub interface', () => {
         options.content
       )
 
-      expect(scope.isDone()).toBe(true)
+      expect(fetchMock.done()).toBe(true)
     })
 
     test('returns an error object if the save operation fails', async () => {
@@ -308,13 +361,16 @@ describe('GitHub interface', () => {
         path: 'path/to/file.txt'
       }
 
-      const scope = nock((/api\.github\.com/), {
-        reqheaders: {
+      fetchMock.put({
+        url: /api\.github\.com\/repos\/johndoe\/foobar\/contents\/path%2Fto%2Ffile\.txt/,
+        headers: {
           authorization: 'token '.concat('1q2w3e4r')
         }
+      },
+      {
+        body: 'An error',
+        status: 500
       })
-        .put('/repos/johndoe/foobar/contents/path/to/file.txt')
-        .replyWithError('An error')
 
       const githubInstance = await new GitHub(req.params)
 
@@ -333,7 +389,7 @@ describe('GitHub interface', () => {
         })
       }
 
-      expect(scope.isDone()).toBe(true)
+      expect(fetchMock.done()).toBe(true)
     })
   })
 
@@ -349,49 +405,58 @@ describe('GitHub interface', () => {
         sha: '7fd1a60b01f91b314f59955a4e4d4e80d8edf11d'
       }
 
-      const branchScope = nock((/api\.github\.com/), {
-        reqheaders: {
+      fetchMock.get({
+        url: /api\.github\.com\/repos\/johndoe\/foobar\/branches\/master/,
+        headers: {
           authorization: 'token '.concat('1q2w3e4r')
         }
-      })
-        .get('/repos/johndoe/foobar/branches/master')
-        .reply(200, {
+      },
+      {
+        body: {
           commit: {
             sha: options.sha
           }
-        })
-
-      const refsScope = nock((/api\.github\.com/), {
-        reqheaders: {
+        },
+        status: 200
+      })
+      .post({
+        url: /api\.github\.com\/repos\/johndoe\/foobar\/git\/refs/,
+        headers: {
           authorization: 'token '.concat('1q2w3e4r')
         }
-      })
-        .post('/repos/johndoe/foobar/git/refs')
-        .reply(200, {
+      },
+      {
+        body: {
           ref: `refs/heads/${options.newBranch}`
-        })
-
-      const fileScope = nock((/api\.github\.com/), {
-        reqheaders: {
+        },
+        status: 200
+      })
+      .put({
+        url: /api\.github\.com\/repos\/johndoe\/foobar\/contents\/path%2Fto%2Ffile\.txt/,
+        headers: {
           authorization: 'token '.concat('1q2w3e4r')
         }
-      })
-        .put('/repos/johndoe/foobar/contents/path/to/file.txt')
-        .reply(200, {
+      },
+      {
+        body: {
           number: 123
-        })
-
-      const pullScope = nock((/api\.github\.com/), {
-        reqheaders: {
+        },
+        status: 200
+      })
+      .post({
+        url: /api\.github\.com\/repos\/johndoe\/foobar\/pulls/,
+        headers: {
           authorization: 'token '.concat('1q2w3e4r')
         }
-      })
-        .post('/repos/johndoe/foobar/pulls')
-        .reply(200, {
+      },
+      {
+        body: {
           id: 1
-        })
+        },
+        status: 200
+      })
 
-      expect.assertions(5)
+      expect.assertions(2)
 
       const githubInstance = await new GitHub(req.params)
 
@@ -405,10 +470,7 @@ describe('GitHub interface', () => {
 
       expect(data).toEqual({"id": 1})
 
-      expect(branchScope.isDone()).toBe(true)
-      expect(refsScope.isDone()).toBe(true)
-      expect(fileScope.isDone()).toBe(true)
-      expect(pullScope.isDone()).toBe(true)
+      expect(fetchMock.done()).toBe(true)
     })
 
     // TODO: Figure out why this works with no mocks
@@ -423,13 +485,16 @@ describe('GitHub interface', () => {
         sha: '7fd1a60b01f91b314f59955a4e4d4e80d8edf11d'
       }
 
-      const scope = nock((/api\.github\.com/), {
-        reqheaders: {
+      fetchMock.get({
+        url: /api\.github\.com\/repos\/johndoe\/foobar\/branches\/master/,
+        headers: {
           authorization: 'token '.concat('1q2w3e4r')
         }
+      },
+      {
+        body: 'An error, oh no.',
+        status: 500
       })
-        .get('/repos/johndoe/foobar/branches/master')
-        .replyWithError('An error, oh no.')
 
       const githubInstance = await new GitHub(req.params)
 
@@ -446,39 +511,45 @@ describe('GitHub interface', () => {
       } catch (err) {
         expect(err._smErrorCode).toEqual('GITHUB_CREATING_PR')
       }
-      expect(scope.isDone()).toBe(true)
+      expect(fetchMock.done()).toBe(true)
     })
   })
 
   describe('getCurrentUser', () => {
     test('returns the current authenticated user', async () => {
-      const scope = nock((/api\.github\.com/), {
-        reqheaders: {
+      fetchMock.get({
+        url: /api\.github\.com\/user/,
+        headers: {
           authorization: 'token '.concat('1q2w3e4r')
         }
-      })
-        .get('/user')
-        .reply(200, {
+      },
+      {
+        body: {
           login: 'johndoe',
           email: 'johndoe@test.com',
           name: 'John Doe'
-        })
+        },
+        status: 200
+      })
 
       const githubInstance = await new GitHub(req.params)
 
       const user = await githubInstance.getCurrentUser()
       expect(user).toEqual(new User('github', 'johndoe', 'johndoe@test.com', 'John Doe'))
-      expect(scope.isDone()).toBe(true)
+      expect(fetchMock.done()).toBe(true)
     })
 
     test('throws an error if unable to retrieve the current unauthenticated user', async () => {
-      const scope = nock((/api\.github\.com/), {
-        reqheaders: {
+      fetchMock.get({
+        url: /api\.github\.com\/user/,
+        headers: {
           authorization: 'token '.concat('1q2w3e4r')
         }
+      },
+      {
+        body: 'Oops, an error',
+        status: 500
       })
-        .get('/user')
-        .replyWithError('Oops, an error')
 
       const githubInstance = await new GitHub(req.params)
 
@@ -489,7 +560,7 @@ describe('GitHub interface', () => {
       } catch (err) {
         expect(err._smErrorCode).toEqual('GITHUB_GET_USER')
       }
-      expect(scope.isDone()).toBe(true)
+      expect(fetchMock.done()).toBe(true)
     })
   })
 })

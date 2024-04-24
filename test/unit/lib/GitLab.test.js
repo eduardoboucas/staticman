@@ -26,9 +26,9 @@ describe('GitLab interface', () => {
 
   test('authenticates with the GitLab API using a personal access token', () => {
     const mockConstructor = jest.fn()
-    jest.mock('gitlab/dist/es5', () => {
+    jest.mock('@gitbeaker/rest', () => {
       return {
-        default: class {
+        Gitlab: class {
           constructor (params) {
             mockConstructor(params)
           }
@@ -40,16 +40,16 @@ describe('GitLab interface', () => {
     const gitlab = new GitLab(req.params) // eslint-disable-line no-unused-vars
 
     expect(mockConstructor.mock.calls[0][0]).toEqual({
-      url: 'https://gitlab.com',
+      host: 'https://gitlab.com',
       token: 'r4e3w2q1'
     })
   })
 
   test('authenticates with the GitLab API using an OAuth token', () => {
     const mockConstructor = jest.fn()
-    jest.mock('gitlab/dist/es5', () => {
+    jest.mock('@gitbeaker/rest', () => {
       return {
-        default: class {
+        Gitlab: class {
           constructor (params) {
             mockConstructor(params)
           }
@@ -63,7 +63,7 @@ describe('GitLab interface', () => {
     const gitlab = new GitLab(Object.assign({}, req.params, {oauthToken})) // eslint-disable-line no-unused-vars
 
     expect(mockConstructor.mock.calls[0][0]).toEqual({
-      url: 'https://gitlab.com',
+      host: 'https://gitlab.com',
       oauthToken: oauthToken
     })
   })
@@ -82,9 +82,9 @@ describe('GitLab interface', () => {
         content: btoa(fileContents)
       }))
 
-      jest.mock('gitlab/dist/es5', () => {
+      jest.mock('@gitbeaker/rest', () => {
         return {
-          default: function () {
+          Gitlab: function () {
             return {
               RepositoryFiles: {
                 show: mockRepoShowFile
@@ -108,9 +108,9 @@ describe('GitLab interface', () => {
       const filePath = 'path/to/file.yml'
       const mockShowRepoFile = jest.fn(() => Promise.reject()) // eslint-disable-line prefer-promise-reject-errors
 
-      jest.mock('gitlab/dist/es5', () => {
+      jest.mock('@gitbeaker/rest', () => {
         return {
-          default: function () {
+          Gitlab: function () {
             return {
               RepositoryFiles: {
                 show: mockShowRepoFile
@@ -144,9 +144,9 @@ describe('GitLab interface', () => {
         content: btoa(fileContents)
       }))
 
-      jest.mock('gitlab/dist/es5', () => {
+      jest.mock('@gitbeaker/rest', () => {
         return {
-          default: function () {
+          Gitlab: function () {
             return {
               RepositoryFiles: {
                 show: mockShowRepoFile
@@ -170,14 +170,14 @@ describe('GitLab interface', () => {
 
     test('reads a YAML file and returns its parsed contents', () => {
       const filePath = 'path/to/file.yml'
-      const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
+      const parsedConfig = yaml.load(sampleData.config1, 'utf8')
       const mockShowRepoFile = jest.fn(() => Promise.resolve({
         content: btoa(sampleData.config1)
       }))
 
-      jest.mock('gitlab/dist/es5', () => {
+      jest.mock('@gitbeaker/rest', () => {
         return {
-          default: function () {
+          Gitlab: function () {
             return {
               RepositoryFiles: {
                 show: mockShowRepoFile
@@ -199,16 +199,16 @@ describe('GitLab interface', () => {
     })
 
     test('reads a YAML file and returns its parsed and raw contents if `getFullResponse` is `true`', () => {
-      const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
+      const parsedConfig = yaml.load(sampleData.config1, 'utf8')
       const fileContents = {
         content: btoa(sampleData.config1)
       }
       const filePath = 'path/to/file.yml'
       const mockShowRepoFile = jest.fn(() => Promise.resolve(fileContents))
 
-      jest.mock('gitlab/dist/es5', () => {
+      jest.mock('@gitbeaker/rest', () => {
         return {
-          default: function () {
+          Gitlab: function () {
             return {
               RepositoryFiles: {
                 show: mockShowRepoFile
@@ -229,14 +229,14 @@ describe('GitLab interface', () => {
 
     test('reads a JSON file and returns its parsed contents', () => {
       const filePath = 'path/to/file.json'
-      const parsedConfig = yaml.safeLoad(sampleData.config2, 'utf8')
+      const parsedConfig = yaml.load(sampleData.config2, 'utf8')
       const mockShowRepoFile = jest.fn(() => Promise.resolve({
         content: btoa(sampleData.config2)
       }))
 
-      jest.mock('gitlab/dist/es5', () => {
+      jest.mock('@gitbeaker/rest', () => {
         return {
-          default: function () {
+          Gitlab: function () {
             return {
               RepositoryFiles: {
                 show: mockShowRepoFile
@@ -259,12 +259,12 @@ describe('GitLab interface', () => {
         content: btoa(sampleData.config2)
       }
       const filePath = 'path/to/file.json'
-      const parsedConfig = yaml.safeLoad(sampleData.config2, 'utf8')
+      const parsedConfig = yaml.load(sampleData.config2, 'utf8')
       const mockShowRepoFile = jest.fn(() => Promise.resolve(fileContents))
 
-      jest.mock('gitlab/dist/es5', () => {
+      jest.mock('@gitbeaker/rest', () => {
         return {
-          default: function () {
+          Gitlab: function () {
             return {
               RepositoryFiles: {
                 show: mockShowRepoFile
@@ -294,9 +294,9 @@ describe('GitLab interface', () => {
       }
       const mockCreateRepoFile = jest.fn(() => Promise.resolve(null))
 
-      jest.mock('gitlab/dist/es5', () => {
+      jest.mock('@gitbeaker/rest', () => {
         return {
-          default: function () {
+          Gitlab: function () {
             return {
               RepositoryFiles: {
                 create: mockCreateRepoFile
@@ -332,9 +332,9 @@ describe('GitLab interface', () => {
       () => {
         const mockCreateRepoFile = jest.fn(() => Promise.resolve(null))
 
-        jest.mock('gitlab/dist/es5', () => {
+        jest.mock('@gitbeaker/rest', () => {
           return {
-            default: function () {
+            Gitlab: function () {
               return {
                 RepositoryFiles: {
                   create: mockCreateRepoFile
@@ -369,9 +369,9 @@ describe('GitLab interface', () => {
     )
 
     test('returns an error object if the save operation fails', () => {
-      jest.mock('gitlab/dist/es5', () => {
+      jest.mock('@gitbeaker/rest', () => {
         return {
-          default: function () {
+          Gitlab: function () {
             return {
               RepositoryFiles: {
                 create: () => Promise.reject(new Error())
@@ -426,9 +426,9 @@ describe('GitLab interface', () => {
           }
         }))
 
-        jest.mock('gitlab/dist/es5', () => {
+        jest.mock('@gitbeaker/rest', () => {
           return {
-            default: function () {
+            Gitlab: function () {
               return {
                 Branches: {
                   create: mockCreateBranch,
@@ -475,9 +475,9 @@ describe('GitLab interface', () => {
     )
 
     test('returns an error if any of the API calls fail', () => {
-      jest.mock('gitlab/dist/es5', () => {
+      jest.mock('@gitbeaker/rest', () => {
         return {
-          default: function () {
+          Gitlab: function () {
             return {
               Branches: {
                 create: () => Promise.resolve(),
@@ -523,12 +523,12 @@ describe('GitLab interface', () => {
         name: 'John Doe'
       }
 
-      jest.mock('gitlab/dist/es5', () => {
+      jest.mock('@gitbeaker/rest', () => {
         return {
-          default: function () {
+          Gitlab: function () {
             return {
               Users: {
-                current: () => Promise.resolve(mockUser)
+                showCurrentUser: () => Promise.resolve(mockUser)
               }
             }
           }
@@ -544,12 +544,12 @@ describe('GitLab interface', () => {
     })
 
     test('throws an error if unable to retrieve the current unauthenticated user', () => {
-      jest.mock('gitlab/dist/es5', () => {
+      jest.mock('@gitbeaker/rest', () => {
         return {
-          default: function () {
+          Gitlab: function () {
             return {
               Users: {
-                current: () => Promise.reject(new Error())
+                showCurrentUser: () => Promise.reject(new Error())
               }
             }
           }

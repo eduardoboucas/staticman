@@ -184,17 +184,20 @@ describe('Process controller', () => {
     })
 
     test('initialises and triggers a verification from the reCaptcha module', () => {
-      const mockInitFn = jest.fn()
+      const mockConstructorFn = jest.fn()
       const mockVerifyFn = jest.fn((req, reCaptchaCallback) => {
         reCaptchaCallback(false)
       })
-
+    
       jest.mock('express-recaptcha', () => {
         return {
-          init: mockInitFn,
-          verify: mockVerifyFn
+          RecaptchaV2: mockConstructorFn.mockImplementation(() => { 
+            return {
+              verify: mockVerifyFn  
+            } 
+          })
         }
-      })
+      });
 
       jest.mock('./../../../lib/Staticman', () => {
         return jest.fn(parameters => ({
@@ -218,26 +221,29 @@ describe('Process controller', () => {
 
       return checkRecaptcha(staticman, req).then(response => {
         expect(response).toBe(true)
-        expect(mockInitFn.mock.calls.length).toBe(1)
-        expect(mockInitFn.mock.calls[0][0]).toBe(mockSiteConfig.get('reCaptcha.siteKey'))
-        expect(mockInitFn.mock.calls[0][1]).toBe(mockSiteConfig.get('reCaptcha.secret'))
+        expect(mockConstructorFn.mock.calls.length).toBe(1)
+        expect(mockConstructorFn.mock.calls[0][0]).toBe(mockSiteConfig.get('reCaptcha.siteKey'))
+        expect(mockConstructorFn.mock.calls[0][1]).toBe(mockSiteConfig.get('reCaptcha.secret'))
         expect(mockVerifyFn.mock.calls[0][0]).toBe(req)
       })
     })
 
     test('displays an error if the reCaptcha verification fails', () => {
       const reCaptchaError = new Error('someError')
-      const mockInitFn = jest.fn()
+      const mockConstructorFn = jest.fn()
       const mockVerifyFn = jest.fn((req, reCaptchaCallback) => {
         reCaptchaCallback(reCaptchaError)
       })
 
       jest.mock('express-recaptcha', () => {
         return {
-          init: mockInitFn,
-          verify: mockVerifyFn
+          RecaptchaV2: mockConstructorFn.mockImplementation(() => { 
+            return {
+              verify: mockVerifyFn  
+            } 
+          })
         }
-      })
+      });
 
       jest.mock('./../../../lib/Staticman', () => {
         return jest.fn(parameters => ({

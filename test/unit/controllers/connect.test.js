@@ -12,6 +12,7 @@ beforeEach(() => {
 
 describe('Connect controller', () => {
   test('accepts the invitation if one is found and replies with "OK!"', () => {
+    const mockConstructorFn = jest.fn()
     const invitationId = 123
     const mockAcceptRepoInvite = jest.fn(() => Promise.resolve())
     const mockGetRepoInvites = jest.fn(() => Promise.resolve({
@@ -25,15 +26,19 @@ describe('Connect controller', () => {
       ]
     }))
 
-    jest.mock('@octokit/rest', () =>
-      _ => ({
-        authenticate: jest.fn(),
-        repos: {
-          acceptInvitation: mockAcceptRepoInvite,
-          listInvitationsForAuthenticatedUser: mockGetRepoInvites
-        }
-      })
-    )
+    jest.mock('@octokit/rest', () => {
+      return {
+        Octokit: mockConstructorFn.mockImplementation(() => { 
+          return {
+            authenticate: jest.fn(),
+            repos: {
+              acceptInvitation: mockAcceptRepoInvite,
+              listInvitationsForAuthenticatedUser: mockGetRepoInvites
+            }  
+          } 
+        })
+      }
+    });
 
     const connect = require('./../../../controllers/connect')
 
@@ -45,6 +50,7 @@ describe('Connect controller', () => {
   })
 
   test('returns a 404 and an error message if a matching invitation is not found', () => {
+    const mockConstructorFn = jest.fn()
     const invitationId = 123
     const mockAcceptRepoInvite = jest.fn(() => Promise.resolve())
     const mockGetRepoInvites = jest.fn(() => Promise.resolve({
@@ -58,15 +64,19 @@ describe('Connect controller', () => {
       ]
     }))
 
-    jest.mock('@octokit/rest', () =>
-      _ => ({
-        authenticate: jest.fn(),
-        repos: {
-          acceptInvitation: mockAcceptRepoInvite,
-          listInvitationsForAuthenticatedUser: mockGetRepoInvites
-        }
-      })
-    )
+    jest.mock('@octokit/rest', () => {
+      return {
+        Octokit: mockConstructorFn.mockImplementation(() => { 
+          return {
+            authenticate: jest.fn(),
+            repos: {
+              acceptInvitation: mockAcceptRepoInvite,
+              listInvitationsForAuthenticatedUser: mockGetRepoInvites
+            }
+          } 
+        })
+      }
+    });
 
     const connect = require('./../../../controllers/connect')
 
@@ -79,6 +89,7 @@ describe('Connect controller', () => {
   })
 
   test('returns a 404 and an error message if the response from GitHub is invalid', () => {
+    const mockConstructorFn = jest.fn()
     const mockAcceptRepoInvite = jest.fn(() => Promise.resolve())
     const mockGetRepoInvites = jest.fn(() => Promise.resolve({
       data: {
@@ -86,15 +97,19 @@ describe('Connect controller', () => {
       }
     }))
 
-    jest.mock('@octokit/rest', () =>
-      _ => ({
-        authenticate: jest.fn(),
-        repos: {
-          acceptInvitation: mockAcceptRepoInvite,
-          listInvitationsForAuthenticatedUser: mockGetRepoInvites
-        }
-      })
-    )
+    jest.mock('@octokit/rest', () => {
+      return {
+        Octokit: mockConstructorFn.mockImplementation(() => { 
+          return {
+            authenticate: jest.fn(),
+            repos: {
+              acceptInvitation: mockAcceptRepoInvite,
+              listInvitationsForAuthenticatedUser: mockGetRepoInvites
+            }
+          } 
+        })
+      }
+    });
 
     const connect = require('./../../../controllers/connect')
 

@@ -3,7 +3,7 @@
 const path = require('path')
 const config = require(path.join(__dirname, '/../config'))
 const errorHandler = require('../lib/ErrorHandler')
-const reCaptcha = require('express-recaptcha')
+const Recaptcha = require('express-recaptcha').RecaptchaV2
 const Staticman = require('../lib/Staticman')
 const universalAnalytics = require('universal-analytics')
 
@@ -35,8 +35,9 @@ function checkRecaptcha (staticman, req) {
         return reject(errorHandler('RECAPTCHA_CONFIG_MISMATCH'))
       }
 
-      reCaptcha.init(reCaptchaOptions.siteKey, decryptedSecret)
-      reCaptcha.verify(req, err => {
+      let recaptcha = new Recaptcha(reCaptchaOptions.siteKey, decryptedSecret)
+
+      recaptcha.verify(req, err => {
         if (err) {
           return reject(errorHandler(err))
         }

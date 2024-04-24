@@ -34,7 +34,7 @@ const parameters = {
   version: '2'
 }
 
-const parsedConfig = yaml.safeLoad(sampleData.config1, 'utf8')
+const parsedConfig = yaml.load(sampleData.config1, 'utf8')
 const siteConfig = SiteConfig(parsedConfig.comments, rsa)
 
 module.exports.baseUrl = ''
@@ -107,7 +107,7 @@ module.exports.getMockResponse = () => {
 module.exports.getParameters = () => Object.assign({}, parameters)
 
 module.exports.getParsedConfig = () => {
-  return yaml.safeLoad(sampleData.config1, 'utf8')
+  return yaml.load(sampleData.config1, 'utf8')
 }
 
 module.exports.getUserAgent = () => {

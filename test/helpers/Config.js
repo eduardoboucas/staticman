@@ -2,7 +2,7 @@ const objectPath = require('object-path')
 const yaml = require('js-yaml')
 
 const Config = function (rawContent) {
-  this.data = yaml.safeLoad(rawContent, 'utf8')
+  this.data = yaml.load(rawContent, 'utf8')
 }
 
 Config.prototype.get = function (key) {
