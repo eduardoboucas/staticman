@@ -13,7 +13,7 @@ comments:
   #
   # Name of the branch being used. Must match the one sent in the URL of the
   # request.
-  branch: "master"
+  branch: "main"
 
   # Text to use as the commit message or pull request title. Accepts placeholders.
   commitMessage: "Add Staticman data"
@@ -43,7 +43,7 @@ comments:
   moderation: true
 
   # Name of the site. Used in notification emails.
-  name: "eduardoboucas.com"
+  name: "fondurat-it.github.io"
 
   # Notification settings. When enabled, users can choose to receive notifications
   # via email when someone adds a reply or a new comment. This requires an account
