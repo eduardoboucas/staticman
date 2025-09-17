@@ -10,9 +10,11 @@ Staticman is a Node.js application that receives user-generated content and uplo
 
 It consists of a small web service that handles the `POST` requests from your forms, runs various forms of validation and manipulation defined by you and finally pushes them to your repository as data files. You can choose to enable moderation, which means files will be pushed to a separate branch and a pull request will be created for your approval, or disable it completely, meaning that files will be pushed to the main branch automatically.
 
-You can download and run the Staticman API on your own infrastructure. The easiest way to get a personal Staticman API instance up and running is to use the free tier of Heroku. If deploying to Heroku you can simply click the button below and enter your config variables directly into Heroku as environment variables.
+You can download and run the Staticman API on your own infrastructure. The easiest way to get a personal Staticman API instance up and running is to use the free tier of Heroku. If deploying to Heroku you can simply click the button below and enter your config variables directly into Heroku as environment variables. If you are looking for more architectural flexibility and distributing computing, while mentaining high-performance and low latency, you can try to deploy on StateMesh. In order to do so, click the button below.
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
+[![Deploy](https://console.cloud.statemesh.net/assets/layout/images/deployStateMesh_green.svg)](https://console.cloud.statemesh.net/deploy?appname=staticman&repository=https://github.com/eduardoboucas/staticman.git)
 
 ## Requirements
 
