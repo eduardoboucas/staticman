@@ -1,0 +1,4 @@
+# config.yml
+site:
+  name: "Historias para Ler"
+  url: "https://historiasparaler.netlify.app"
